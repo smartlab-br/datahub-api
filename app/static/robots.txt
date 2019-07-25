@@ -1,0 +1,3 @@
+# SORRY! JUST FOR HUMAN-ASSISTED MACHINES!
+User-agent: *
+Disallow: /

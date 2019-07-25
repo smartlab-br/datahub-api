@@ -1,0 +1,6 @@
+## From app directory
+#  With coverage
+nose2 --config test/nose2.cfg --with-cov --coverage-report xml --coverage-config test/coverage/.coveragerc
+
+#  Just tests
+nose2

@@ -1,0 +1,37 @@
+[coverage]
+always-on = True
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Imports
+    ^import
+    ^from
+
+    # Constants on Repositories
+    ^[ \t]NAMED_QUERIES
+    ^[ \t]TABLE_NAMES
+    ^[ \t]ON_JOIN
+    ^[ \t]JOIN_SUFFIXES
+    ^[ \t]VAL_FIELD
+    ^[ \t]DEFAULT_GROUPING
+    ^[ \t]DEFAULT_PARTITIONING
+    ^[ \t]CALCS_DICT
+
+    # Constants on Models
+    ^[ \t]METADATA
+
+    # Constants and methods on Resources
+    ^[ \t]DEFAULT_SWAGGER_PARAMS
+    ^[ \t]CUSTOM_SWAGGER_PARAMS
+    def get(self):
+
+[run]
+omit = test/**/*, */**/__init__.py, **/__pycache__/**, **/config/**
+data_file = app/test/coverage/.coverage
+
+[xml]
+output = app/test/coverage/coverage.xml

@@ -1,0 +1,16 @@
+*.pyc
+**/*/nosetests.xml
+reports/*.xml
+**/__pycache__/**
+.idea
+.vscode
+.scannerwork
+.app/test/coverage/.coverage
+.app/test/coverage/coverage.xml
+app/test/report.xml
+app/.scannerwork
+requirements.txt
+start.sh
+Dockerfile
+**/__pycache__
+setenv.sh

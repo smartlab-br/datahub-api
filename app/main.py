@@ -76,6 +76,7 @@ from resources.v1.healthchecks import HCAlive
 config = {
     "dev": "config.dev.DevelopmentConfig",
     "prod": "config.prod.ProductionConfig",
+    "staging": "config.staging.StagingConfig",
 }
 
 application = Flask(__name__, static_folder='static', static_url_path='') #pylint: disable=C0103

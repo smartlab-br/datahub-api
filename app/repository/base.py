@@ -307,6 +307,10 @@ class BaseRepository(object):
                     options['agregacao']
                 )
 
+        str_res_partition = res_partition
+        if isinstance(res_partition, list):
+            str_res_partition = ",".join(res_partition)
+        
         # Constrói a query
         arr_calcs = []
         for calc in options['calcs']:
@@ -315,14 +319,14 @@ class BaseRepository(object):
                 arr_calcs.append(
                     self.replace_partition('min_part').format(
                         val_field=val_field,
-                        partition=res_partition,
+                        partition=str_res_partition,
                         calc='min_part'
                     )
                 )
                 arr_calcs.append(
                     self.replace_partition('max_part').format(
                         val_field=val_field,
-                        partition=res_partition,
+                        partition=str_res_partition,
                         calc='max_part'
                     )
                 )
@@ -330,7 +334,7 @@ class BaseRepository(object):
             arr_calcs.append(
                 self.replace_partition(calc).format(
                     val_field=val_field,
-                    partition=res_partition,
+                    partition=str_res_partition,
                     calc=calc
                 )
             )

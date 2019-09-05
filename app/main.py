@@ -67,6 +67,8 @@ from resources.v1.ti.prova_brasil import ProvaBrasilInfantilResource
 from resources.v1.ti.censo_agro import CensoAgroMunicipiosResource
 from resources.v1.ti.censo_agro_uf import CensoAgroEstadosResource
 from resources.v1.ti.censo_agro_br import CensoAgroBrasilResource
+# Endpoints das organizações assistência social
+from resources.v1.orgs.orgs_assistencia_social import OrgsAssistenciaSocialResource
 
 # Endpoint para obter a estrutura de dados de um template de card
 from resources.v1.card_template import CardTemplateResource
@@ -156,6 +158,9 @@ api.add_resource(IndicadoresTIMptUnidadesResource, '/ti/indicadoresunidadempt')
 api.add_resource(CensoAgroMunicipiosResource, '/ti/censoagromunicipal')
 api.add_resource(CensoAgroEstadosResource, '/ti/censoagroestadual')
 api.add_resource(CensoAgroBrasilResource, '/ti/censoagronacional')
+
+# Organizações de Assistência social
+api.add_resource(OrgsAssistenciaSocialResource, '/orgs/assistenciasocial')
 
 # Endpoint para obter a estrutura de dados de um template de card
 api.add_resource(CardTemplateResource, '/cardtemplate/<string:cd_template>')

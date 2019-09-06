@@ -6,7 +6,7 @@ from repository.orgs.orgs_assistencia_social import OrgsAssistenciaSocialReposit
 class OrgsAssistenciaSocial(BaseModel):
     ''' Definição do repo '''
     METADATA = {
-        'fonte': '', 'link': ''
+        'fonte': 'Censo SUAS(Sistema Único de Assistência social)', 'link': ''
     }
 
     def __init__(self):

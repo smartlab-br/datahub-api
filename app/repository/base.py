@@ -543,6 +543,8 @@ class HadoopRepository(BaseRepository):
         str_offset = ''
         if options['offset'] is not None:
             str_offset = f'OFFSET {options["offset"]}'
+        if 'theme' not in options:
+            options['theme'] = 'MAIN'
         query = self.get_named_query('QRY_FIND_DATASET').format(
             str_categorias,
             self.get_table_name(options['theme']),
@@ -571,6 +573,8 @@ class HadoopRepository(BaseRepository):
                 options['agregacao'],
                 options['joined']
             )
+        if 'theme' not in options:
+            options['theme'] = 'MAIN'
         str_categorias = self.build_joined_categorias(options['categorias'], options['valor'],
                                                       options['agregacao'], options['joined'])
         query = self.get_named_query('QRY_FIND_JOINED_DATASET').format(

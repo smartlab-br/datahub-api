@@ -231,7 +231,9 @@ class BaseRepository(object):
     def get_table_name(self, table_name):
         ''' Obtém o nome de uma tabela do cloudera '''
         tbl_dict = self.TABLE_NAMES
-        return tbl_dict[table_name]
+        if table_name in tbl_dict:
+            return tbl_dict[table_name]
+        return table_name
 
     def get_join_condition(self, table_name, join_clauses=None):
         ''' Obtém a condição do join das tabelas '''

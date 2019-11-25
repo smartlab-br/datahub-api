@@ -54,7 +54,8 @@ class BaseResourceBuildOptionsTest(unittest.TestCase):
             "limit": None,
             "offset": None,
             "calcs": None,
-            "partition": None
+            "partition": None,
+            "theme": 'MAIN',
         }
         built = BaseResource.build_options(qry_params)
         self.assertEqual(built, expected)
@@ -87,7 +88,8 @@ class BaseResourceBuildOptionsTest(unittest.TestCase):
             "limit": None,
             "offset": None,
             "calcs": None,
-            "partition": None
+            "partition": None,
+            "theme": 'MAIN',
         }
         built = BaseResource.build_options(qry_params)
         self.assertEqual(built, expected)

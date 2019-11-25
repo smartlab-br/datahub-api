@@ -24,6 +24,9 @@ from resources.v1.indicadores.indicadores_nacionais \
 from resources.v1.indicadores.indicadores_mpt_unidades \
     import IndicadoresMptUnidadesResource
 
+# Endpoints genéricos de temáticos
+from resources.v1.thematic import ThematicResource
+
 # Endpoints temáticos de Saúde e Segurança
 from resources.v1.sst.beneficio import BeneficiosResource
 from resources.v1.sst.cat import CatsResource, CatsOpResource
@@ -120,6 +123,9 @@ api.add_resource(EstadicMunicUfResource, '/estadicuf')
 api.add_resource(EstadicMunicMptUnidadesResource, '/estadicunidadempt')
 
 ## Endpoints temáticos
+# Endpoint temático genérico
+api.add_resource(ThematicResource, '/thematic/<string:theme>')
+
 # Saúde e Segurança no Trabalho
 api.add_resource(CatsResource, '/sst/cats')
 api.add_resource(CatsOpResource, '/sst/cats/<string:operation>')

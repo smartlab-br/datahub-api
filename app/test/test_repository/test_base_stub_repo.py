@@ -37,11 +37,6 @@ class BaseRepositoryTableNameTest(unittest.TestCase):
         tbl_name = repo.get_table_name('MAIN')
         self.assertEqual(tbl_name, 'indicadores')
 
-    def test_validate_negative(self):
-        ''' Verifica comportamento de obtenção de tabela não mapeada '''
-        repo = StubRepository()
-        self.assertRaises(KeyError, repo.get_table_name, 'cats')
-
 class BaseRepositoryNamedQueryTest(unittest.TestCase):
     ''' Validates recovery of named query '''
     def test_validate_positive(self):

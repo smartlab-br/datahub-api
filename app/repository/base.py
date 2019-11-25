@@ -231,7 +231,9 @@ class BaseRepository(object):
     def get_table_name(self, table_name):
         ''' Obtém o nome de uma tabela do cloudera '''
         tbl_dict = self.TABLE_NAMES
-        return tbl_dict[table_name]
+        if table_name in tbl_dict:
+            return tbl_dict[table_name]
+        return table_name
 
     def get_join_condition(self, table_name, join_clauses=None):
         ''' Obtém a condição do join das tabelas '''
@@ -543,7 +545,7 @@ class HadoopRepository(BaseRepository):
             str_offset = f'OFFSET {options["offset"]}'
         query = self.get_named_query('QRY_FIND_DATASET').format(
             str_categorias,
-            self.get_table_name('MAIN'),
+            self.get_table_name(options['theme']),
             str_where,
             str_group,
             self.build_order_string(options['ordenacao']),
@@ -573,7 +575,7 @@ class HadoopRepository(BaseRepository):
                                                       options['agregacao'], options['joined'])
         query = self.get_named_query('QRY_FIND_JOINED_DATASET').format(
             str_categorias,
-            self.get_table_name('MAIN'), # FROM
+            self.get_table_name(options['theme']), # FROM
             self.get_table_name(options['joined']), # JOIN
             self.get_join_condition(options['joined'], options['where']), # ON
             str_where, # WHERE

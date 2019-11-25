@@ -14,6 +14,10 @@ class QueryOptionsBuilder():
             filtros = filtros.split(',')
             filtros = [f.replace('|', ',') for f in filtros]
 
+        theme = cls.extract_qry_param(r_args, 'theme')
+        if theme is None:
+            theme = 'MAIN'
+
         return {
             "categorias": categorias,
             "valor": cls.extract_qry_param(r_args, 'valor'),
@@ -24,7 +28,8 @@ class QueryOptionsBuilder():
             "limit": r_args.get('limit'),
             "offset": r_args.get('offset'),
             "calcs": cls.extract_qry_param(r_args, 'calcs'),
-            "partition": cls.extract_qry_param(r_args, 'partition')
+            "partition": cls.extract_qry_param(r_args, 'partition'),
+            "theme": theme
         }
 
     @staticmethod

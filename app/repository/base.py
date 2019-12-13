@@ -233,7 +233,7 @@ class BaseRepository(object):
         tbl_dict = self.TABLE_NAMES
         if table_name in tbl_dict:
             return tbl_dict[table_name]
-        return table_name
+        raise KeyError, "Invalid theme"
 
     def get_join_condition(self, table_name, join_clauses=None):
         ''' Obtém a condição do join das tabelas '''

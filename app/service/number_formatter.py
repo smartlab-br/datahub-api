@@ -35,12 +35,7 @@ class NumberFormatter():
             if 'uiTags' in collapse:
                 ui_tags = collapse['uiTags']
 
-        if (n_format == 'inteiro' or
-                (n_format in ['real', 'porcentagem', 'monetario'] and
-                 (((valor - floor(valor))*(10 ** precision) == 0.0 and not collapse) or
-                  ((valor_c - floor(valor_c))*(10 ** precision) == 0.0 and collapse))
-                )
-           ):
+        if cls.is_integer_after_collapse(n_format, valor, valor_c, precision, collapse):
             # Se o número for efetivamente um inteiro e não tiver
             # collapse, retira a casa decimal
             precision = 0
@@ -49,6 +44,17 @@ class NumberFormatter():
         vlr_fmt = cls.format_with_locale(n_format, valor_c, str_locale)
 
         return cls.get_unit_prefix(n_format, ui_tags) + vlr_fmt + suffix
+
+    @staticmethod
+    def is_integer_after_collapse(n_format, valor, valor_c, precision, collapse):
+        if n_format == 'inteiro':
+            return True
+        if n_format in ['real', 'porcentagem', 'monetario']:
+            if (valor - floor(valor))*(10 ** precision) == 0.0 and not collapse:
+                return True
+            if (valor_c - floor(valor_c))*(10 ** precision) == 0.0 and collapse:
+                return True
+        return False
 
     @staticmethod
     def load_defaults(options):

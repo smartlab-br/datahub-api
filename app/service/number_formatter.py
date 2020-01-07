@@ -9,7 +9,7 @@ class NumberFormatter():
         ''' Method that formats a number into a HTML snippet '''
         # Escapes with default, when there's no value
         if valor is None:
-            if options['default'] is not None:
+            if 'default' in options and options['default'] is not None:
                 return options['default']
             return '-'
 
@@ -20,7 +20,7 @@ class NumberFormatter():
         (precision, multiplier, collapse, str_locale, n_format, ui_tags) = cls.load_defaults(options)
 
         # Applies multiplier and sets precision
-        valor = cls.apply_mulitplier(valor, multiplier)
+        valor = cls.apply_multiplier(valor, multiplier)
         precision = cls.precision_override(n_format, collapse, precision)
 
         # Adjusts collapsed value
@@ -35,12 +35,7 @@ class NumberFormatter():
             if 'uiTags' in collapse:
                 ui_tags = collapse['uiTags']
 
-        if (n_format == 'inteiro' or
-                (n_format in ['real', 'porcentagem', 'monetario'] and
-                 (((valor - floor(valor))*(10 ** precision) == 0.0 and not collapse) or
-                  ((valor_c - floor(valor_c))*(10 ** precision) == 0.0 and collapse))
-                )
-           ):
+        if cls.is_integer_after_collapse(n_format, valor, valor_c, precision, collapse):
             # Se o número for efetivamente um inteiro e não tiver
             # collapse, retira a casa decimal
             precision = 0
@@ -49,6 +44,17 @@ class NumberFormatter():
         vlr_fmt = cls.format_with_locale(n_format, valor_c, str_locale)
 
         return cls.get_unit_prefix(n_format, ui_tags) + vlr_fmt + suffix
+
+    @staticmethod
+    def is_integer_after_collapse(n_format, valor, valor_c, precision, collapse):
+        if n_format == 'inteiro':
+            return True
+        if n_format in ['real', 'porcentagem', 'monetario']:
+            if (valor - floor(valor))*(10 ** precision) == 0.0 and not collapse:
+                return True
+            if (valor_c - floor(valor_c))*(10 ** precision) == 0.0 and collapse:
+                return True
+        return False
 
     @staticmethod
     def load_defaults(options):
@@ -118,7 +124,7 @@ class NumberFormatter():
         return (valor, '', None)
 
     @staticmethod
-    def apply_mulitplier(valor, multiplier):
+    def apply_multiplier(valor, multiplier):
         ''' Applies multiplier to value '''
         if isinstance(valor, int):
             return valor * multiplier

@@ -9,7 +9,7 @@ class NumberFormatter():
         ''' Method that formats a number into a HTML snippet '''
         # Escapes with default, when there's no value
         if valor is None:
-            if options['default'] is not None:
+            if 'default' in options and options['default'] is not None:
                 return options['default']
             return '-'
 
@@ -20,7 +20,7 @@ class NumberFormatter():
         (precision, multiplier, collapse, str_locale, n_format, ui_tags) = cls.load_defaults(options)
 
         # Applies multiplier and sets precision
-        valor = cls.apply_mulitplier(valor, multiplier)
+        valor = cls.apply_multiplier(valor, multiplier)
         precision = cls.precision_override(n_format, collapse, precision)
 
         # Adjusts collapsed value
@@ -118,7 +118,7 @@ class NumberFormatter():
         return (valor, '', None)
 
     @staticmethod
-    def apply_mulitplier(valor, multiplier):
+    def apply_multiplier(valor, multiplier):
         ''' Applies multiplier to value '''
         if isinstance(valor, int):
             return valor * multiplier

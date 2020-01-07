@@ -293,20 +293,7 @@ class BaseModel(object):
         any_nodata = False
         for each_inst in each_obj_struct['instances']:
             try:
-                if each_inst['type'] == 'from_id':
-                    data_collection[each_inst['name']] = each_obj['dataset'].loc[each_obj['dataset'][each_inst['named_prop']] == int(options['cd_analysis_unit'])].iloc[0]
-                elif each_inst['type'] == 'first_occurence':
-                    data_collection[each_inst['name']] = each_obj['dataset'].reset_index().loc[0]
-                elif each_inst['type'] == 'min':
-                    if each_obj['dataset'][each_inst['named_prop']].dtype == 'object':
-                        data_collection[each_inst['name']] = each_obj['dataset'].loc[each_obj['dataset'][each_inst['named_prop']] == each_obj['dataset'][each_inst['named_prop']].min()].iloc[0]
-                    else:
-                        data_collection[each_inst['name']] = each_obj['dataset'].loc[each_obj['dataset'][each_inst['named_prop']].idxmin()]
-                elif each_inst['type'] == 'max':
-                    if each_obj['dataset'][each_inst['named_prop']].dtype == 'object':
-                        data_collection[each_inst['name']] = each_obj['dataset'].loc[each_obj['dataset'][each_inst['named_prop']] == each_obj['dataset'][each_inst['named_prop']].max()].iloc[0]
-                    else:
-                        data_collection[each_inst['name']] = each_obj['dataset'].loc[each_obj['dataset'][each_inst['named_prop']].idxmax()]
+                data_collection[each_inst['name']] = get_collection_from_type(each_inst['type'], each_inst['named_prop'], each_obj['dataset'], options['cd_analysis_unit'])
             except:
                 data_collection[each_inst['name']] = None
                 any_nodata = True
@@ -314,6 +301,25 @@ class BaseModel(object):
                 data_collection[each_inst['name']] = None
                 any_nodata = True
         return (data_collection, any_nodata)
+
+    @staticmethod
+    def get_collection_from_type(inst_type, named_prop, dataset, id_au):
+        ''' Use pandas filter to set a collection '''
+        if inst_type == 'from_id':
+            return dataset.loc[dataset[named_prop] == int(id_au)].iloc[0]
+        elif inst_type == 'first_occurence':
+            return dataset.reset_index().loc[0]
+        elif inst_type == 'min':
+            if dataset[named_prop].dtype == 'object':
+                return dataset.loc[dataset[named_prop] == dataset[named_prop].min()].iloc[0]
+            else:
+                return dataset.loc[dataset[named_prop].idxmin()]
+        elif inst_type == 'max':
+            if dataset[named_prop].dtype == 'object':
+                return dataset.loc[dataset[named_prop] == dataset[named_prop].max()].iloc[0]
+            else:
+                return dataset.loc[dataset[named_prop].idxmax()]
+        return None
 
     def replace_named_prop(self, struct, data_collection):
         ''' Replaces the named_prop according to confs '''

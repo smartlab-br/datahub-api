@@ -298,3 +298,33 @@ class BaseRepositoryValidateClauseTest(unittest.TestCase):
             join e tem um sufixo '''
         result = BaseRepository.validate_clause(['eq', 'any_mun'], 'municipio', False, '_mun')
         self.assertEqual(result, False)
+
+class BaseRepositoryGetSimpleAgrStringTest(unittest.TestCase):
+    ''' Classe que verifica a montagem de um campo simples de agregação '''
+    def test_invalid(self):
+        ''' Retorna exceção quando a agregação é inválida '''
+        vlr = 'vl_indicador'
+        agr = 'CSTM'
+        self.assertRaises(
+            ValueError,
+            BaseRepository.get_simple_agr_string,
+            agr,
+            vlr
+        )
+
+    def test_bypass(self):
+        ''' Verifica se retorna None quando a agregação está na
+            lista de ignore '''
+        vlr = 'vl_indicador'
+        agr = 'DISTINCT'
+        result = BaseRepository.get_simple_agr_string(agr, vlr)
+        self.assertEqual(result, None)
+
+    def test_as_is(self):
+        ''' Verifica se retorna corretamente uma agregação que
+            está na lista as_is '''
+        vlr = 'vl_indicador'
+        agr = 'sum'
+        expected = 'sum(vl_indicador)'
+        result = BaseRepository.get_simple_agr_string(agr, vlr)
+        self.assertEqual(result, expected)

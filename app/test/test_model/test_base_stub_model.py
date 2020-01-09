@@ -72,3 +72,49 @@ class BaseModelWrapResultTest(unittest.TestCase):
         result = "".join(model.wrap_result(dataset).split())
         expected = "".join(str_expected.split())
         self.assertEqual(result, expected)
+
+class BaseModelTemplateTest(unittest.TestCase):
+    ''' Test behaviours linked to first-tier template interpolation '''
+    def test_replace_template_arg(self):
+        ''' Test first-tier interpolation '''
+        model = StubModel()
+        data_collection = {
+            "stub": { "col_1": "prop_arg" }
+        }
+        rules = {
+            "template": "One {} {}, two {}, three {}",
+            "args": [
+                { "as_is": True, "fixed": "asisarg1" },
+                { "as_is": True, "fixed": "asisarg2" },
+                { "fixed": "fixedarg" },
+                { "named_prop": "col_1", "base_object": "stub" }
+            ]
+        }
+        self.assertEqual(
+            model.replace_template_arg(rules, data_collection),
+            {'fixed': 'One {0} {1}, two fixedarg, three prop_arg'}
+        ) 
+
+    def test_replace_template_arg_keep_template(self):
+        ''' Test first-tier interpolation '''
+        model = StubModel()
+        data_collection = {
+            "stub": { "col_1": "prop_arg" }
+        }
+        rules = {
+            "template": "One {} {}, two {}, three {}",
+            "keep_template": True,
+            "args": [
+                { "as_is": True, "fixed": "asisarg1" },
+                { "as_is": True, "fixed": "asisarg2" },
+                { "fixed": "fixedarg" },
+                { "named_prop": "col_1", "base_object": "stub" }
+            ]
+        }
+        self.assertEqual(
+            model.replace_template_arg(rules, data_collection),
+            {
+                "template": 'One {0} {1}, two fixedarg, three prop_arg',
+                "args": [ { "fixed": "asisarg1" }, { "fixed": "asisarg2" } ]
+            }
+        ) 

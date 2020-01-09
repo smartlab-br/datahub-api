@@ -65,6 +65,15 @@ class BaseModelTemplateTest(unittest.TestCase):
             'col_3': [3, 2, 1, None]
         }
     )
+    SAMPLE_DATAFRAME_REAL = pd.DataFrame.from_dict(
+        {
+            'col_1': ['d', 'b', 'a', 'c'],
+            'col_2': [3000.3, 2000.2, 1000.1, 0.0],
+            'col_3': [3000.3, 2000.2, 1000.1, 0.0],
+            'col_4': [3000.3, 2000.2, 1000.1, 0.0],
+            'col_5': [3000.3, 2000.2, 1000.1, None]
+        }
+    )
 
     def test_del_keywords(self):
         ''' Tests removal of keywords from configuration after usage '''
@@ -199,4 +208,84 @@ class BaseModelTemplateTest(unittest.TestCase):
                 'col_2': { 0: 3 },
                 'col_3': { 0: 3 }
             }
+        )
+
+    def test_resort_dataset_no_rule(self):
+        ''' Test if dataset resturns as is if no order rule is sent '''
+        self.assertEqual(
+            BaseModel.resort_dataset(
+                self.SAMPLE_DATAFRAME,
+                ["col_1", "col_2"]
+            ).to_dict('split')['data'],
+            [['a', 1, 1], ['b', 2, 2], ['c', 0, 0], ['d', 3, 3]]
         ) 
+
+    def test_reform_filters_no_filter(self):
+        ''' Test if None is returned if no filter is sent to the method '''
+        self.assertEqual(
+            BaseModel.reform_filters_for_pandas(None),
+            (None,None)
+        )
+    
+    def test_reform_filters_full(self):
+        ''' Test if filters are classified correctly as pre and post '''
+        self.assertEqual(
+            BaseModel.reform_filters_for_pandas(
+                ['post-eq-a-1','and','in-b-2-3','and','post-nn-c','or','eq-d-4']
+            ),
+            (
+                ['in-b-2-3','and','eq-d-4'],
+                [['post','eq','a','1'],'and',['post','nn','c']]
+            )
+        )
+
+    def test_run_formatters(self):
+        ''' Test if formatters run correctly given the dataset and format options '''
+        self.assertEqual(
+            BaseModel.run_formatters(
+                [
+                    {
+                        "prop": "col_2",
+                        "named_prop": "col_2",
+                        "format": 'real',
+                        "precision": 1,
+                    },
+                    {
+                        "prop": "col_3",
+                        "named_prop": "col_3",
+                        "format": 'inteiro',
+                        "multiplier": 2
+                    },
+                    {
+                        "prop": "col_4",
+                        "named_prop": "col_4",
+                        "format": 'real',
+                        "collapse": { "format": "inteiro" }
+                    },
+                    {
+                        "prop": "col_5",
+                        "named_prop": "col_5",
+                        "format": 'real',
+                        "default": "N/A"
+                    }
+                ],
+                { "dataset": self.SAMPLE_DATAFRAME_REAL.copy() }
+            )['dataset'].to_dict(),
+            ({ 
+                'col_1': { 0: 'd', 1: 'b', 2: 'a', 3: 'c' },
+                'col_2': { 0: "3.000,3", 1: "2.000,2", 2: "1.000,1", 3: "0" },
+                'col_3': { 0: "6.001", 1: "4.000", 2: "2.000", 3: "0" },
+                'col_4': { 0: "3<span>mil</span>", 1: "2<span>mil</span>", 2: "1<span>mil</span>", 3: "0" },
+                'col_5': { 0: "3.000", 1: "2.000", 2: "1.000", 3: "N/A" }
+            })
+        )
+        
+    def test_run_formatters(self):
+        ''' Test if formatters run correctly given the an object in the first-tier interpolation '''
+        self.assertEqual(
+            BaseModel.get_formatted_value(
+                { "base_object": "obj1", "named_prop": "field1", "format": "monetario" },
+                { "obj1": { "field1": 1.0 } }
+            ),
+            "<span>R$</span>1"
+        )

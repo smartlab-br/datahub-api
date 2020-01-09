@@ -129,10 +129,10 @@ class NumberFormatterTest(unittest.TestCase):
     
     def test_suffix_percent_no_tags(self):
         ''' Verifica se retorna os sufixos corretamente - percentual sem tag '''
-        (valor, suffix_string, order_magnitude) = NumberFormatter.get_value_suffix(98.76, 'porcentagem', None, False)
+        (valor, suffix_string, order_magnitude) = NumberFormatter.get_value_suffix(98.76, 'porcentagem', {}, False)
         self.assertEqual(suffix_string, '%')
     
-    def test_suffix_percent_no_tags(self):
+    def test_suffix_collapse_no_tags(self):
         ''' Verifica se retorna os sufixos corretamente - collapsed with no tags'''
         (valor, suffix_string, order_magnitude) = NumberFormatter.get_value_suffix(
             10000,
@@ -141,3 +141,27 @@ class NumberFormatterTest(unittest.TestCase):
             True
         )
         self.assertEqual(suffix_string, 'mil')
+
+    def test_integer_after_collapse_with_collapse(self):
+        ''' Verifica se a avaliação de valor inteiro funciona após o collapse '''
+        self.assertTrue(
+            NumberFormatter.is_integer_after_collapse(
+                'real',
+                10000,
+                10.0,
+                1,
+                { "format": 'real', "precision": 1, "uiTags": False },
+            )
+        )
+
+    def test_pt_collapsed_no_tags(self):
+        ''' Verifica se a formatação de número colapsado em pt_br está correta '''
+        fmt = NumberFormatter.format(
+            53481,
+            {
+                "format": 'real',
+                "collapse": {"format": "real", "uiTags": False},
+                "str_locale": 'pt_br'
+            }
+        )
+        self.assertEqual(fmt, "53,5mil")

@@ -1,5 +1,5 @@
 ''' Module for formatting numbers '''
-from math import floor
+from math import floor, isnan
 from babel.numbers import format_number, format_decimal
 
 class NumberFormatter():
@@ -8,7 +8,12 @@ class NumberFormatter():
     def format(cls, valor, options):
         ''' Method that formats a number into a HTML snippet '''
         # Escapes with default, when there's no value
-        if valor is None:
+        try:
+            if valor is None or isnan(valor):
+                raise
+            elif isinstance(valor, str):
+                valor = float(valor)
+        except:
             if 'default' in options and options['default'] is not None:
                 return options['default']
             return '-'

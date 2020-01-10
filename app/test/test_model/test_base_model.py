@@ -280,8 +280,8 @@ class BaseModelTemplateTest(unittest.TestCase):
             })
         )
         
-    def test_run_formatters(self):
-        ''' Test if formatters run correctly given the an object in the first-tier interpolation '''
+    def test_get_formatted_value_from_object(self):
+        ''' Test if object attribute is correctly formatted. '''
         self.assertEqual(
             BaseModel.get_formatted_value(
                 { "base_object": "obj1", "named_prop": "field1", "format": "monetario" },
@@ -295,7 +295,7 @@ class BaseModelTemplateTest(unittest.TestCase):
         ''' Test if the method returns the item with the passed numeric id '''
         self.assertEqual(
             BaseModel.get_collection_from_type(
-                self.SAMPLE_DATAFRAME,
+                self.SAMPLE_DATAFRAME.copy(),
                 "from_id",
                 "col_2",
                 2
@@ -308,7 +308,7 @@ class BaseModelTemplateTest(unittest.TestCase):
         self.assertRaises(
             ValueError,
             BaseModel.get_collection_from_type,
-            self.SAMPLE_DATAFRAME,
+            self.SAMPLE_DATAFRAME.copy(),
             "from_id",
             "col_1",
             'a'
@@ -318,7 +318,7 @@ class BaseModelTemplateTest(unittest.TestCase):
         ''' Test if the method returns the item with minimum value in colum '''
         self.assertEqual(
             BaseModel.get_collection_from_type(
-                self.SAMPLE_DATAFRAME,
+                self.SAMPLE_DATAFRAME.copy(),
                 "min",
                 "col_2"
             ).to_dict(),
@@ -329,7 +329,7 @@ class BaseModelTemplateTest(unittest.TestCase):
         ''' Test if the method returns the item with maximum value in colum '''
         self.assertEqual(
             BaseModel.get_collection_from_type(
-                self.SAMPLE_DATAFRAME,
+                self.SAMPLE_DATAFRAME.copy(),
                 "max",
                 "col_2"
             ).to_dict(),
@@ -340,7 +340,7 @@ class BaseModelTemplateTest(unittest.TestCase):
         ''' Test if the method returns the first item '''
         self.assertEqual(
             BaseModel.get_collection_from_type(
-                self.SAMPLE_DATAFRAME,
+                self.SAMPLE_DATAFRAME.copy(),
                 "first_occurence"
             ).to_dict(),
             { "index": 0, "col_1": "d", "col_2": 3, "col_3": 3 }
@@ -350,7 +350,7 @@ class BaseModelTemplateTest(unittest.TestCase):
         ''' Test if the method returns None if no type is passed '''
         self.assertEqual(
             BaseModel.get_collection_from_type(
-                self.SAMPLE_DATAFRAME,
+                self.SAMPLE_DATAFRAME.copy(),
                 None
             ),
             None
@@ -360,8 +360,46 @@ class BaseModelTemplateTest(unittest.TestCase):
         ''' Test if the method returns None if an invalid type is passed '''
         self.assertEqual(
             BaseModel.get_collection_from_type(
-                self.SAMPLE_DATAFRAME,
+                self.SAMPLE_DATAFRAME.copy(),
                 'invalid'
             ),
             None
         )
+
+    def test_build_derivatives(self):
+        ''' Test if derivate object is added to the collection '''
+        options = { 'cd_analysis_unit': 2 }
+        rules = {
+            "instances": [ { "name": "inst_1", 'type': 'max', 'named_prop': 'col_2' } ]
+        }
+        sources = { "dataset": self.SAMPLE_DATAFRAME.copy() }
+        (der_data, der_anynodata) = BaseModel.build_derivatives(
+            rules,
+            options,
+            sources,
+            {}
+        )
+        self.assertEqual(
+            der_data["inst_1"].to_dict(),
+            { "col_1": "d", "col_2": 3, "col_3": 3 }
+        )
+        self.assertEqual(der_anynodata, False)
+
+    def test_build_derivatives_nodata(self):
+        ''' Test the derivate objects is added with no_data flag '''
+        options = { 'cd_analysis_unit': 99 }
+        rules = {
+            "instances": [ { "name": "inst_1", 'type': 'from_id', 'named_prop': 'col_2' } ]
+        }
+        sources = { "dataset": self.SAMPLE_DATAFRAME.copy() }
+        (der_data, der_anynodata) = BaseModel.build_derivatives(
+            rules,
+            options,
+            sources,
+            {}
+        )
+        self.assertEqual(
+            der_data["inst_1"],
+            None
+        )
+        self.assertEqual(der_anynodata, True)

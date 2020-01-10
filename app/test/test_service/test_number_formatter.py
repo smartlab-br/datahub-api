@@ -165,3 +165,42 @@ class NumberFormatterTest(unittest.TestCase):
             }
         )
         self.assertEqual(fmt, "53,5mil")
+
+    def test_validate_as_is(self):
+        ''' Verifica se retorna o mesmo valor se for algo válido '''
+        num = 12.34
+        self.assertEqual(NumberFormatter.validate(num), num)
+
+    def test_valid_float_value_as_string(self):
+        ''' Verifica se retorna o valor da string convertido para float '''
+        fmt = NumberFormatter.validate("53481.0")
+        self.assertEqual(fmt, 53481.0)
+    
+    def test_valid_int_value_as_string(self):
+        ''' Verifica se retorna o valor da string inteira convertido para float '''
+        fmt = NumberFormatter.validate("53481")
+        self.assertEqual(fmt, 53481.0)
+    
+    def test_invalid_string(self):
+        ''' Verifica se erro é lançado quando o valor for uma string não numérica '''
+        self.assertRaises(
+            ValueError,
+            NumberFormatter.validate,
+            "a"
+        )
+
+    def test_validate_no_value(self):
+        ''' Verifica se erro é lançado quando nenhum valor é enviado '''
+        self.assertRaises(
+            ValueError,
+            NumberFormatter.validate,
+            None
+        )
+    
+    def test_validate_nan_value(self):
+        ''' Verifica se erro é lançado quando um valor NaN é enviado '''
+        self.assertRaises(
+            ValueError,
+            NumberFormatter.validate,
+            float('nan')
+        )

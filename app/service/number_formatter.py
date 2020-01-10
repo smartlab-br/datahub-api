@@ -9,10 +9,7 @@ class NumberFormatter():
         ''' Method that formats a number into a HTML snippet '''
         # Escapes with default, when there's no value
         try:
-            if valor is None or isnan(valor):
-                raise
-            elif isinstance(valor, str):
-                valor = float(valor)
+            valor = cls.validate(valor)
         except:
             if 'default' in options and options['default'] is not None:
                 return options['default']
@@ -49,6 +46,14 @@ class NumberFormatter():
         vlr_fmt = cls.format_with_locale(n_format, valor_c, str_locale)
 
         return cls.get_unit_prefix(n_format, ui_tags) + vlr_fmt + suffix
+
+    @staticmethod
+    def validate(valor):
+        if isinstance(valor, str):
+            return float(valor)
+        elif valor is None or isnan(valor):
+            raise ValueError
+        return valor
 
     @staticmethod
     def is_integer_after_collapse(n_format, valor, valor_c, precision, collapse):

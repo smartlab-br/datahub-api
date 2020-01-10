@@ -705,3 +705,86 @@ class BaseRepositoryCombineValAggrTest(unittest.TestCase):
              'sum(vl_indicador) AS agr_sum_vl_indicador, count(vl_indicador) '
              'AS agr_count_vl_indicador')
         )
+
+class BaseRepositoryStdCalcsTest(unittest.TestCase):
+    ''' Classe de teste de geração de string para cálculos com partitioning '''
+    def test_std_calc_max(self):
+        ''' Testa um cálculo de min e max '''
+        options = {
+            "valor": "vl_indicador",
+            "calcs": ["min_part", "max_part"],
+            "categorias": ["cd_mun_ibge", "nu_ano"]
+        }
+        repo = StubRepository()
+        self.assertEqual(
+            repo.build_std_calcs(options),
+            'MIN(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_min_part, MAX(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_max_part'
+        )
+
+    def test_std_calc_avg(self):
+        ''' Testa um cálculo de soma, que deve gerar, adicionalmente, min e max '''
+        options = {
+            "valor": "vl_indicador",
+            "calcs": ["avg_part"],
+            "categorias": ["cd_mun_ibge", "nu_ano"]
+        }
+        repo = StubRepository()
+        self.assertEqual(
+            repo.build_std_calcs(options),
+            'MIN(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_min_part, MAX(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_max_part, AVG(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_avg_part'
+        )
+
+    def test_std_calc_default_partitioning_empty_string(self):
+        ''' Testa um cálculo com partitioning padrão vazia '''
+        options = {
+            "valor": "vl_indicador",
+            "calcs": ["min_part", "max_part"],
+            "categorias": ["cd_mun_ibge", "nu_ano"]
+        }
+        repo = StubRepositoryCustomPartition()
+        self.assertEqual(
+            repo.build_std_calcs(options),
+            'MIN(vl_indicador) OVER() AS api_calc_min_part, MAX(vl_indicador) OVER() AS api_calc_max_part'
+        )
+
+    def test_std_calc_default_partitioning(self):
+        ''' Testa um cálculo com partitioning padrão existente '''
+        options = {
+            "valor": "vl_indicador",
+            "calcs": ["min_part", "max_part"],
+            "categorias": ["cd_mun_ibge", "nu_ano"]
+        }
+        repo = StubRepositoryCustomPartitionMultipleValues()
+        self.assertEqual(
+            repo.build_std_calcs(options),
+            'MIN(vl_indicador) OVER(PARTITION BY a, b, c) AS api_calc_min_part, MAX(vl_indicador) OVER(PARTITION BY a, b, c) AS api_calc_max_part'
+        )
+
+    def test_std_calc_custom_partitioning(self):
+        ''' Testa um cálculo com sobrescrita do partitioning '''
+        options = {
+            "valor": "vl_indicador",
+            "calcs": ["min_part", "max_part"],
+            "categorias": ["cd_mun_ibge", "nu_ano"],
+            "partition": "nu_ano"
+        }
+        repo = StubRepository()
+        self.assertEqual(
+            repo.build_std_calcs(options),
+            'MIN(vl_indicador) OVER(PARTITION BY nu_ano) AS api_calc_min_part, MAX(vl_indicador) OVER(PARTITION BY nu_ano) AS api_calc_max_part'
+        )
+
+    def test_std_calc_invalid_calc(self):
+        ''' Testa se lança exceção quando envia um tipo de cálculo não previsto '''
+        options = {
+            "valor": "vl_indicador",
+            "calcs": ["sum"],
+            "categorias": ["cd_mun_ibge", "nu_ano"],
+            "partition": "nu_ano"
+        }
+        repo = StubRepository()
+        self.assertRaises(
+            KeyError,
+            repo.build_std_calcs,
+            options
+        )

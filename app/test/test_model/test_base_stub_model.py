@@ -118,3 +118,23 @@ class BaseModelTemplateTest(unittest.TestCase):
                 "args": [ { "fixed": "asisarg1" }, { "fixed": "asisarg2" } ]
             }
         ) 
+
+    def test_replace_named_prop(self):
+        ''' Test named_prop substitution '''
+        model = StubModel()
+        data_collection = {
+            "stub": { "col_1": 1.23 }
+        }
+        rules = { 
+            "named_prop": "col_1",
+            "base_object": "stub",
+            "format": "monetario",
+            "precision": 1, 
+            "multiplier": 2,
+            "uiTags": False,
+            "collapse": { "format": "inteiro" }
+        }
+        self.assertEqual(
+            model.replace_named_prop(rules, data_collection),
+            { "fixed": "R$2,5" }
+        ) 

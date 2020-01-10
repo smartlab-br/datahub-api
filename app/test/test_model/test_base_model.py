@@ -289,3 +289,79 @@ class BaseModelTemplateTest(unittest.TestCase):
             ),
             "<span>R$</span>1"
         )
+
+
+    def test_get_collection_from_type_from_id(self):
+        ''' Test if the method returns the item with the passed numeric id '''
+        self.assertEqual(
+            BaseModel.get_collection_from_type(
+                self.SAMPLE_DATAFRAME,
+                "from_id",
+                "col_2",
+                2
+            ).to_dict(),
+            { "col_1": "b", "col_2": 2, "col_3": 2 }
+        )
+    
+    def test_get_collection_from_type_from_invalid_id(self):
+        ''' Test if the method returns the item with the passed string id '''
+        self.assertRaises(
+            ValueError,
+            BaseModel.get_collection_from_type,
+            self.SAMPLE_DATAFRAME,
+            "from_id",
+            "col_1",
+            'a'
+        )
+    
+    def test_get_collection_from_type_min(self):
+        ''' Test if the method returns the item with minimum value in colum '''
+        self.assertEqual(
+            BaseModel.get_collection_from_type(
+                self.SAMPLE_DATAFRAME,
+                "min",
+                "col_2"
+            ).to_dict(),
+            { "col_1": "c", "col_2": 0, "col_3": 0 }
+        )
+
+    def test_get_collection_from_type_max(self):
+        ''' Test if the method returns the item with maximum value in colum '''
+        self.assertEqual(
+            BaseModel.get_collection_from_type(
+                self.SAMPLE_DATAFRAME,
+                "max",
+                "col_2"
+            ).to_dict(),
+            { "col_1": "d", "col_2": 3, "col_3": 3 }
+        )
+
+    def test_get_collection_from_type_first_occurence(self):
+        ''' Test if the method returns the first item '''
+        self.assertEqual(
+            BaseModel.get_collection_from_type(
+                self.SAMPLE_DATAFRAME,
+                "first_occurence"
+            ).to_dict(),
+            { "index": 0, "col_1": "d", "col_2": 3, "col_3": 3 }
+        )
+    
+    def test_get_collection_from_missing_type(self):
+        ''' Test if the method returns None if no type is passed '''
+        self.assertEqual(
+            BaseModel.get_collection_from_type(
+                self.SAMPLE_DATAFRAME,
+                None
+            ),
+            None
+        )
+
+    def test_get_collection_from_invalid_type(self):
+        ''' Test if the method returns None if an invalid type is passed '''
+        self.assertEqual(
+            BaseModel.get_collection_from_type(
+                self.SAMPLE_DATAFRAME,
+                'invalid'
+            ),
+            None
+        )

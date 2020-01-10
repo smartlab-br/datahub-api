@@ -287,13 +287,13 @@ class BaseModel(object):
             }
         return term_values
 
-    @staticmethod
-    def build_derivatives(each_obj_struct, options, each_obj, data_collection):
+    @classmethod
+    def build_derivatives(cls, each_obj_struct, options, each_obj, data_collection):
         ''' Gets derivetive attributes from configs '''
         any_nodata = False
         for each_inst in each_obj_struct['instances']:
             try:
-                data_collection[each_inst['name']] = get_collection_from_type(each_inst['type'], each_inst['named_prop'], each_obj['dataset'], options['cd_analysis_unit'])
+                data_collection[each_inst['name']] = cls.get_collection_from_type(each_obj['dataset'], each_inst['type'], each_inst['named_prop'], options['cd_analysis_unit'])
             except:
                 data_collection[each_inst['name']] = None
                 any_nodata = True
@@ -303,7 +303,7 @@ class BaseModel(object):
         return (data_collection, any_nodata)
 
     @staticmethod
-    def get_collection_from_type(inst_type, named_prop, dataset, id_au):
+    def get_collection_from_type(dataset, inst_type, named_prop=None, id_au=None):
         ''' Use pandas filter to set a collection '''
         if inst_type == 'from_id':
             return dataset.loc[dataset[named_prop] == int(id_au)].iloc[0]
@@ -335,6 +335,8 @@ class BaseModel(object):
             del struct['multiplier']
         if 'collapse' in struct:
             del struct['collapse']
+        if 'uiTags' in struct:
+            del struct['uiTags']
         # Returns the cleaned and formatted structure
         return struct
 
@@ -391,7 +393,7 @@ class BaseModel(object):
         if struct['function'] == 'slice':
             return base_object[fn_args[0]:fn_args[1]]
         else:
-            return base_object['function'](*tuple(fn_args))
+            return getattr(base_object, struct['function'])(*tuple(fn_args))
 
     def find_and_operate(self, operation, options=None):
         ''' Obtém um conjunto de dados e opera em cima deles '''

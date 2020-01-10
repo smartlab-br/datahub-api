@@ -351,7 +351,7 @@ class BaseRepository(object):
     def exclude_from_partition(self, categorias, agregacoes):
         ''' Remove do partition as categorias não geradas pela agregação '''
         partitions = self.DEFAULT_PARTITIONING.split(", ")
-        groups = self.build_grouping_string(categorias, agregacoes).split(", ")
+        groups = self.build_grouping_string(categorias, agregacoes).replace('GROUP BY ', '').split(", ")
         result = []
         for partition in partitions:
             if partition in groups:

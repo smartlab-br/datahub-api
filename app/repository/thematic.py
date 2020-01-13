@@ -29,19 +29,26 @@ class ThematicRepository(ImpalaRepository):
         'estadicuf': 'estadic_munic_uf',
         'estadicunidadempt': 'estadic_munic_mpt_unidade',
 
+        'mapear': 'mapear',
+        'provabrasil': 'ti_prova_brasil',
+        'tiindicadoresnacionais': 'ti_indicadores_br',
+        'tiindicadoresmunicipais': 'ti_indicadores_mun',
+        'tiindicadoresestaduais': 'ti_indicadores_uf',
+        'tiindicadoresunidadempt': 'ti_indicadores_mpt_unidade',
+        'censoagromunicipal': 'censo_agro',
+        'censoagroestadual': 'censo_agro_uf',
+        'censoagronacional': 'censo_agro_br',
+
         'incidenciaescravidao': 'incidencia_trabalho_escravo',
         'migracoesescravos': 'te_migracoes',
         'operacoesresgate': 'operacoes_trabalho_escravo'
     }
     DEFAULT_PARTITIONING = {
         'MAIN': 'cd_indicador',
-        'municipio': '',
-        'assistenciasocial': '',
-        'incidenciaescravidao': 'incidencia_trabalho_escravo',
-        'migracoesescravos': 'te_migracoes',
-        'operacoesresgate': 'operacoes_trabalho_escravo'
-        'sisben': '',
-        'catweb': '',
+        'NONE': [
+            'municipio', 'assistenciasocial', 'sisben', 'catweb',
+            'censoagronacional', 'censoagroestadual', 'censoagromunicipal'
+        ]
     }
     JOIN_SUFFIXES = {
         'municipio': '_mun'
@@ -51,6 +58,10 @@ class ThematicRepository(ImpalaRepository):
     }
 
     def get_default_partitioning(self, options):
-        if 'theme' not in options or options['theme'] not in self.DEFAULT_PARTITIONING:
+        if 'theme' not in options:
             return self.DEFAULT_PARTITIONING['MAIN']
-        return self.DEFAULT_PARTITIONING[options['theme']]
+        elif options['theme'] self.DEFAULT_PARTITIONING:
+            return self.DEFAULT_PARTITIONING[options['theme']]
+        elif options['theme'] self.DEFAULT_PARTITIONING['NONE']
+            return ''
+        return self.DEFAULT_PARTITIONING['MAIN']

@@ -2,7 +2,7 @@
 from flask import request
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
-from model.ti.censo_agro_br import CensoAgroBrasil
+from model.thematic import Thematic
 
 class CensoAgroBrasilResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -19,7 +19,7 @@ class CensoAgroBrasilResource(BaseResource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = CensoAgroBrasil()
+        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['censo_agro'],
@@ -33,10 +33,11 @@ class CensoAgroBrasilResource(BaseResource):
     def get(self):
         ''' Obtém os registros de Censo Rural, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'censoagronacional'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = CensoAgroBrasil()
+            self.domain = Thematic()
         return self.domain

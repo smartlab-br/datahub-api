@@ -2,7 +2,7 @@
 from flask import request
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
-from model.orgs.orgs_assistencia_social import OrgsAssistenciaSocial
+from model.thematic import Thematic
 
 class OrgsAssistenciaSocialResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -19,7 +19,7 @@ class OrgsAssistenciaSocialResource(BaseResource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = OrgsAssistenciaSocial()
+        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['orgs_assistencia_social'],
@@ -38,5 +38,5 @@ class OrgsAssistenciaSocialResource(BaseResource):
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = OrgsAssistenciaSocial()
+            self.domain = Thematic()
         return self.domain

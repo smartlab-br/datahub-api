@@ -334,7 +334,7 @@ class BaseRepository(object):
                 )
             # Resumes identification of calc
             arr_calcs.append(
-                self.replace_partition(calc).format(
+                self.replace_partition(calc, options).format(
                     val_field=val_field,
                     partition=str_res_partition,
                     calc=calc
@@ -342,13 +342,13 @@ class BaseRepository(object):
             )
         return ', '.join(arr_calcs)
 
-    def replace_partition(self, qry_part):
+    def replace_partition(self, qry_part, options={}):
         ''' Changes OVER clause when there's no partitioning '''
         if self.get_default_partitioning(options) == '':
             return self.CALCS_DICT[qry_part].replace("PARTITION BY {partition}", "")
         return self.CALCS_DICT[qry_part]
 
-    def exclude_from_partition(self, categorias, agregacoes):
+    def exclude_from_partition(self, categorias, agregacoes, options={}):
         ''' Remove do partition as categorias não geradas pela agregação '''
         partitions = self.get_default_partitioning(options).split(", ")
         groups = self.build_grouping_string(categorias, agregacoes).replace('GROUP BY ', '').split(", ")

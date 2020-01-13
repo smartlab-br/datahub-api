@@ -74,7 +74,7 @@ class BaseModel(object):
         ''' Método abstrato para carregamento do repositório '''
         raise NotImplementedError("Models precisam implementar get_repo")
 
-    def fetch_metadata(self, options):
+    def fetch_metadata(self, options={}):
         ''' Método abstrato para carregamento do dataset '''
         return self.METADATA
 

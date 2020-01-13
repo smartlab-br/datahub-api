@@ -68,8 +68,8 @@ class ThematicRepository(ImpalaRepository):
     def get_default_partitioning(self, options):
         if 'theme' not in options:
             return self.DEFAULT_PARTITIONING['MAIN']
-        elif options['theme'] self.DEFAULT_PARTITIONING:
+        elif options['theme'] in self.DEFAULT_PARTITIONING:
             return self.DEFAULT_PARTITIONING[options['theme']]
-        elif options['theme'] self.DEFAULT_PARTITIONING['NONE']
+        elif options['theme'] in self.DEFAULT_PARTITIONING['NONE']:
             return ''
         return self.DEFAULT_PARTITIONING['MAIN']

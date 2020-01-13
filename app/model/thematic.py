@@ -12,7 +12,7 @@ class Thematic(BaseModel):
             'sstindicadoresestaduais', 'sstindicadoresunidadempt',
             'tiindicadoresnacionais', 'tiindicadoresmunicipais', 
             'tiindicadoresestaduais', 'tiindicadoresunidadempt'
-        ]
+        ],
 
         'assistenciasocial': {'fonte': 'Censo SUAS(Sistema Único de Assistência social)', 'link': ''},
 
@@ -51,14 +51,10 @@ class Thematic(BaseModel):
         return self.repo
     
     def fetch_metadata(self, options):
-        if 'theme' not in options or options['theme'] not in self.DEFAULT_PARTITIONING:
-            return self.METADATA['MAIN']
-        return self.METADATA[options['theme']]
-
         if 'theme' not in options:
             return self.METADATA['MAIN']
-        elif options['theme'] self.METADATA:
+        elif options['theme'] in self.METADATA:
             return self.METADATA[options['theme']]
-        elif options['theme'] self.METADATA['SMARTLAB']
+        elif options['theme'] in self.METADATA['SMARTLAB']:
             return {'fonte': 'SMARTLAB', 'link': 'http://smartlab.mpt.mp.br/'}
         return self.METADATA['MAIN']

@@ -11,3 +11,4 @@ start.sh
 Dockerfile
 **/__pycache__
 setenv.sh
+app/.coverage

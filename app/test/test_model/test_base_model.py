@@ -65,6 +65,15 @@ class BaseModelTemplateTest(unittest.TestCase):
             'col_3': [3, 2, 1, None]
         }
     )
+    SAMPLE_DATAFRAME_REAL = pd.DataFrame.from_dict(
+        {
+            'col_1': ['d', 'b', 'a', 'c'],
+            'col_2': [3000.3, 2000.2, 1000.1, 0.0],
+            'col_3': [3000.3, 2000.2, 1000.1, 0.0],
+            'col_4': [3000.3, 2000.2, 1000.1, 0.0],
+            'col_5': [3000.3, 2000.2, 1000.1, None]
+        }
+    )
 
     def test_del_keywords(self):
         ''' Tests removal of keywords from configuration after usage '''
@@ -199,4 +208,198 @@ class BaseModelTemplateTest(unittest.TestCase):
                 'col_2': { 0: 3 },
                 'col_3': { 0: 3 }
             }
+        )
+
+    def test_resort_dataset_no_rule(self):
+        ''' Test if dataset resturns as is if no order rule is sent '''
+        self.assertEqual(
+            BaseModel.resort_dataset(
+                self.SAMPLE_DATAFRAME,
+                ["col_1", "col_2"]
+            ).to_dict('split')['data'],
+            [['a', 1, 1], ['b', 2, 2], ['c', 0, 0], ['d', 3, 3]]
         ) 
+
+    def test_reform_filters_no_filter(self):
+        ''' Test if None is returned if no filter is sent to the method '''
+        self.assertEqual(
+            BaseModel.reform_filters_for_pandas(None),
+            (None,None)
+        )
+    
+    def test_reform_filters_full(self):
+        ''' Test if filters are classified correctly as pre and post '''
+        self.assertEqual(
+            BaseModel.reform_filters_for_pandas(
+                ['post-eq-a-1','and','in-b-2-3','and','post-nn-c','or','eq-d-4']
+            ),
+            (
+                ['in-b-2-3','and','eq-d-4'],
+                [['post','eq','a','1'],'and',['post','nn','c']]
+            )
+        )
+
+    def test_run_formatters(self):
+        ''' Test if formatters run correctly given the dataset and format options '''
+        self.assertEqual(
+            BaseModel.run_formatters(
+                [
+                    {
+                        "prop": "col_2",
+                        "named_prop": "col_2",
+                        "format": 'real',
+                        "precision": 1,
+                    },
+                    {
+                        "prop": "col_3",
+                        "named_prop": "col_3",
+                        "format": 'inteiro',
+                        "multiplier": 2
+                    },
+                    {
+                        "prop": "col_4",
+                        "named_prop": "col_4",
+                        "format": 'real',
+                        "collapse": { "format": "inteiro" }
+                    },
+                    {
+                        "prop": "col_5",
+                        "named_prop": "col_5",
+                        "format": 'real',
+                        "default": "N/A"
+                    }
+                ],
+                { "dataset": self.SAMPLE_DATAFRAME_REAL.copy() }
+            )['dataset'].to_dict(),
+            ({ 
+                'col_1': { 0: 'd', 1: 'b', 2: 'a', 3: 'c' },
+                'col_2': { 0: "3.000,3", 1: "2.000,2", 2: "1.000,1", 3: "0" },
+                'col_3': { 0: "6.001", 1: "4.000", 2: "2.000", 3: "0" },
+                'col_4': { 0: "3<span>mil</span>", 1: "2<span>mil</span>", 2: "1<span>mil</span>", 3: "0" },
+                'col_5': { 0: "3.000", 1: "2.000", 2: "1.000", 3: "N/A" }
+            })
+        )
+        
+    def test_get_formatted_value_from_object(self):
+        ''' Test if object attribute is correctly formatted. '''
+        self.assertEqual(
+            BaseModel.get_formatted_value(
+                { "base_object": "obj1", "named_prop": "field1", "format": "monetario" },
+                { "obj1": { "field1": 1.0 } }
+            ),
+            "<span>R$</span>1"
+        )
+
+
+    def test_get_collection_from_type_from_id(self):
+        ''' Test if the method returns the item with the passed numeric id '''
+        self.assertEqual(
+            BaseModel.get_collection_from_type(
+                self.SAMPLE_DATAFRAME.copy(),
+                "from_id",
+                "col_2",
+                2
+            ).to_dict(),
+            { "col_1": "b", "col_2": 2, "col_3": 2 }
+        )
+    
+    def test_get_collection_from_type_from_invalid_id(self):
+        ''' Test if the method returns the item with the passed string id '''
+        self.assertRaises(
+            ValueError,
+            BaseModel.get_collection_from_type,
+            self.SAMPLE_DATAFRAME.copy(),
+            "from_id",
+            "col_1",
+            'a'
+        )
+    
+    def test_get_collection_from_type_min(self):
+        ''' Test if the method returns the item with minimum value in colum '''
+        self.assertEqual(
+            BaseModel.get_collection_from_type(
+                self.SAMPLE_DATAFRAME.copy(),
+                "min",
+                "col_2"
+            ).to_dict(),
+            { "col_1": "c", "col_2": 0, "col_3": 0 }
+        )
+
+    def test_get_collection_from_type_max(self):
+        ''' Test if the method returns the item with maximum value in colum '''
+        self.assertEqual(
+            BaseModel.get_collection_from_type(
+                self.SAMPLE_DATAFRAME.copy(),
+                "max",
+                "col_2"
+            ).to_dict(),
+            { "col_1": "d", "col_2": 3, "col_3": 3 }
+        )
+
+    def test_get_collection_from_type_first_occurence(self):
+        ''' Test if the method returns the first item '''
+        self.assertEqual(
+            BaseModel.get_collection_from_type(
+                self.SAMPLE_DATAFRAME.copy(),
+                "first_occurence"
+            ).to_dict(),
+            { "index": 0, "col_1": "d", "col_2": 3, "col_3": 3 }
+        )
+    
+    def test_get_collection_from_missing_type(self):
+        ''' Test if the method returns None if no type is passed '''
+        self.assertEqual(
+            BaseModel.get_collection_from_type(
+                self.SAMPLE_DATAFRAME.copy(),
+                None
+            ),
+            None
+        )
+
+    def test_get_collection_from_invalid_type(self):
+        ''' Test if the method returns None if an invalid type is passed '''
+        self.assertEqual(
+            BaseModel.get_collection_from_type(
+                self.SAMPLE_DATAFRAME.copy(),
+                'invalid'
+            ),
+            None
+        )
+
+    def test_build_derivatives(self):
+        ''' Test if derivate object is added to the collection '''
+        options = { 'cd_analysis_unit': 2 }
+        rules = {
+            "instances": [ { "name": "inst_1", 'type': 'max', 'named_prop': 'col_2' } ]
+        }
+        sources = { "dataset": self.SAMPLE_DATAFRAME.copy() }
+        (der_data, der_anynodata) = BaseModel.build_derivatives(
+            rules,
+            options,
+            sources,
+            {}
+        )
+        self.assertEqual(
+            der_data["inst_1"].to_dict(),
+            { "col_1": "d", "col_2": 3, "col_3": 3 }
+        )
+        self.assertEqual(der_anynodata, False)
+
+    def test_build_derivatives_nodata(self):
+        ''' Test the derivate objects is added with no_data flag '''
+        options = { 'cd_analysis_unit': 99 }
+        rules = {
+            "instances": [ { "name": "inst_1", 'type': 'from_id', 'named_prop': 'col_2' } ]
+        }
+        sources = { "dataset": self.SAMPLE_DATAFRAME.copy() }
+        (der_data, der_anynodata) = BaseModel.build_derivatives(
+            rules,
+            options,
+            sources,
+            {}
+        )
+        self.assertEqual(
+            der_data["inst_1"],
+            None
+        )
+        self.assertEqual(der_anynodata, True)

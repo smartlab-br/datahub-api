@@ -2,7 +2,7 @@
 from flask import request
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
-from model.te.indicadores_mpt_unidades import IndicadoresEscravoMptUnidades
+from model.thematic import Thematic
 
 class IndicadoresEscravoMptUnidadesResource(BaseResource):
     ''' Classe de múltiplos Indicadores de Unidades do MPT '''
@@ -26,7 +26,7 @@ class IndicadoresEscravoMptUnidadesResource(BaseResource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = IndicadoresEscravoMptUnidades()
+        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['indicadores_mpt_regionais'],
@@ -40,10 +40,11 @@ class IndicadoresEscravoMptUnidadesResource(BaseResource):
     def get(self):
         ''' Obtém os registros de indicadores regionais do MPT, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'teindicadoresunidadempt'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = IndicadoresEscravoMptUnidades()
+            self.domain = Thematic()
         return self.domain

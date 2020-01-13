@@ -2,7 +2,7 @@
 from flask import request
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
-from model.ti.prova_brasil import ProvaBrasilInfantil
+from model.thematic import Thematic
 
 class ProvaBrasilInfantilResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -20,7 +20,7 @@ class ProvaBrasilInfantilResource(BaseResource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = ProvaBrasilInfantil()
+        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['mapear'],
@@ -33,10 +33,11 @@ class ProvaBrasilInfantilResource(BaseResource):
     def get(self):
         ''' Obtém os registros do Mapear, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'provabrasil'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = ProvaBrasilInfantil()
+            self.domain = Thematic()
         return self.domain

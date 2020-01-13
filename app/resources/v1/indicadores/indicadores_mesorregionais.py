@@ -34,6 +34,7 @@ class IndicadoresMesorregionaisResource(BaseResource):
     def get(self):
         ''' Obtém os registros de indicadores mesorregionais, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'indicadoresmesorregionais'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):

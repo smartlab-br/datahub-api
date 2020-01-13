@@ -7,9 +7,7 @@ class ThematicRepository(ImpalaRepository):
     TABLE_NAMES = {
         'MAIN': 'indicadores',
         'municipio': 'municipio',
-        'incidenciaescravidao': 'incidencia_trabalho_escravo',
-        'migracoesescravos': 'te_migracoes',
-        'operacoesresgate': 'operacoes_trabalho_escravo'
+
         'indicadoresestaduais': 'indicadores_uf',
         'indicadoresmesorregionais': 'indicadores_mesorregiao',
         'indicadoresmicrorregionais': 'indicadores_microrregiao',
@@ -17,14 +15,23 @@ class ThematicRepository(ImpalaRepository):
         'indicadoresmunicipais': 'indicadores',
         'indicadoresnacionais': 'indicadores_br',
         'indicadoresregionais': 'indicadores_regiao',
+
         'assistenciasocial': 'orgs_assistencia_social',
+
         'sisben': 'sst_beneficio',
         'catweb': 'sst_cat',
         'sstindicadoresnacionais': 'sst_indicadores_br', 
         'sstindicadoresmunicipais': 'sst_indicadores_mun', 
         'sstindicadoresestaduais': 'sst_indicadores_mun', 
         'sstindicadoresunidadempt': 'sst_indicadores_mpt_unidade',
+        
+        'estadicmunic': 'estadic_munic',
+        'estadicuf': 'estadic_munic_uf',
+        'estadicunidadempt': 'estadic_munic_mpt_unidade',
 
+        'incidenciaescravidao': 'incidencia_trabalho_escravo',
+        'migracoesescravos': 'te_migracoes',
+        'operacoesresgate': 'operacoes_trabalho_escravo'
     }
     DEFAULT_PARTITIONING = {
         'MAIN': 'cd_indicador',

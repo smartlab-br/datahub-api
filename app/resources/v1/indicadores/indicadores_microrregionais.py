@@ -34,6 +34,7 @@ class IndicadoresMicrorregionaisResource(BaseResource):
     def get(self):
         ''' Obtém os registros de indicadores microrregionais, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'indicadoresmicrorregionais'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):

@@ -33,6 +33,7 @@ class IndicadoresRegionaisResource(BaseResource):
     def get(self):
         ''' Obtém os registros de indicadores regionais, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'indicadoresregionais'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):

@@ -42,6 +42,7 @@ class MunicipiosResource(BaseResource):
     def get(self):
         ''' Obtém os registros de Municípios, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'municipio'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):

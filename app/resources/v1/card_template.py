@@ -48,7 +48,7 @@ class CardTemplateResource(Resource):
     def get(self, cd_template):
         ''' Obtém um a estrutura de dados de um modelo de card '''
         if 'datasource' in request.args:
-            options = request.args
+            options = request.args.copy()
             options['theme'] = request.args.get('datasource')
             return Thematic().get_template(cd_template, options)
         else:

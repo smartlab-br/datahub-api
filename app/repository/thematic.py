@@ -56,7 +56,8 @@ class ThematicRepository(ImpalaRepository):
         'NONE': [
             'municipio', 'assistenciasocial', 'sisben', 'catweb',
             'censoagronacional', 'censoagroestadual', 'censoagromunicipal'
-        ]
+        ],
+        'provabrasil': 'cd_tr_fora'
     }
     JOIN_SUFFIXES = {
         'municipio': '_mun'

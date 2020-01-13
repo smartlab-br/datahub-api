@@ -146,6 +146,9 @@ class BaseModel(object):
             each_options = QueryOptionsBuilder.build_options(each_options)
             each_options["as_pandas"] = True
 
+            if 'theme' in options:
+                each_options['theme'] = options['theme']
+
             # Builds the options to query impala
             each_obj = self.find_dataset(each_options)
 

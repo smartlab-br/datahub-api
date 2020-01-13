@@ -9,8 +9,6 @@ from service.request_handler import FLPORequestHandler
 
 from resources.v1.municipio import MunicipiosResource, MunicipioResource
 
-from resources.v1.indicadores.indicadores_municipais \
-    import IndicadoresMunicipaisResource, IndicadoresMunicipaisChartResource
 from resources.v1.indicadores.indicadores_estaduais \
     import IndicadoresEstaduaisResource
 from resources.v1.indicadores.indicadores_microrregionais \
@@ -23,6 +21,8 @@ from resources.v1.indicadores.indicadores_nacionais \
     import IndicadoresNacionaisResource
 from resources.v1.indicadores.indicadores_mpt_unidades \
     import IndicadoresMptUnidadesResource
+from resources.v1.indicadores.indicadores_municipais \
+    import IndicadoresMunicipaisResource
 
 # Endpoints genéricos de temáticos
 from resources.v1.thematic import ThematicResource
@@ -170,9 +170,6 @@ api.add_resource(OrgsAssistenciaSocialResource, '/orgs/assistenciasocial')
 
 # Endpoint para obter a estrutura de dados de um template de card
 api.add_resource(CardTemplateResource, '/cardtemplate/<string:cd_template>')
-
-# Endpoint de obtenção de gráficos de indicadores
-api.add_resource(IndicadoresMunicipaisChartResource, '/charts/indicadoresmunicipais')
 
 if __name__ == '__main__':
     application.run(request_handler=FLPORequestHandler)

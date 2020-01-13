@@ -2,7 +2,7 @@
 from flask import request
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
-from model.te.indicadores_mun import IndicadoresEscravoMunicipios
+from model.thematic import Thematic
 
 class IndicadoresEscravoMunicipiosResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -28,7 +28,7 @@ class IndicadoresEscravoMunicipiosResource(BaseResource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = IndicadoresEscravoMunicipios()
+        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['beneficio'],
@@ -41,12 +41,13 @@ class IndicadoresEscravoMunicipiosResource(BaseResource):
     def get(self):
         ''' Obtém os registros de Benefícios, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'teindicadoresmunicipais'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = IndicadoresEscravoMunicipios()
+            self.domain = Thematic()
         return self.domain
 
 class IndicadoresEscravoMunicipiosOpResource(IndicadoresEscravoMunicipiosResource):
@@ -63,10 +64,11 @@ class IndicadoresEscravoMunicipiosOpResource(IndicadoresEscravoMunicipiosResourc
     def get(self, operation):
         ''' Obtém os registros de Benefícios, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'teindicadoresmunicipais'
         return self.__get_domain().find_and_operate(operation, options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = IndicadoresEscravoMunicipios()
+            self.domain = Thematic()
         return self.domain

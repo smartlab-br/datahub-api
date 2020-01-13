@@ -2,7 +2,7 @@
 from flask import request
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
-from model.indicadores.indicadores_nacionais import IndicadoresNacionais
+from model.thematic import Thematic
 
 class IndicadoresNacionaisResource(BaseResource):
     ''' Classe de múltiplos Indicadores Nacionais '''
@@ -23,7 +23,7 @@ class IndicadoresNacionaisResource(BaseResource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = IndicadoresNacionais()
+        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['indicadores_nacionais'],
@@ -37,10 +37,11 @@ class IndicadoresNacionaisResource(BaseResource):
     def get(self):
         ''' Obtém os registros de indicadores nacionais, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'indicadoresnacionais'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = IndicadoresNacionais()
+            self.domain = Thematic()
         return self.domain

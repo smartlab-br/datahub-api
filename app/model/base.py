@@ -57,16 +57,16 @@ class BaseModel(object):
         if options is not None:
             if 'as_pandas' in options and options['as_pandas']:
                 return {
-                    "metadata": self.fetch_metadata(),
+                    "metadata": self.fetch_metadata(options),
                     "dataset": dataset
                 }
             elif 'as_dict' in options and options['as_dict']:
                 return {
-                    "metadata": self.fetch_metadata(),
+                    "metadata": self.fetch_metadata(options),
                     "dataset": dataset.to_dict('records')
                 }
         return f'{{ \
-            "metadata": {json.dumps(self.fetch_metadata())}, \
+            "metadata": {json.dumps(self.fetch_metadata(options))}, \
             "dataset": {dataset.to_json(orient="records")} \
             }}'
 
@@ -74,7 +74,7 @@ class BaseModel(object):
         ''' Método abstrato para carregamento do repositório '''
         raise NotImplementedError("Models precisam implementar get_repo")
 
-    def fetch_metadata(self):
+    def fetch_metadata(self, options={}):
         ''' Método abstrato para carregamento do dataset '''
         return self.METADATA
 
@@ -145,6 +145,9 @@ class BaseModel(object):
             # Adds complimentary options
             each_options = QueryOptionsBuilder.build_options(each_options)
             each_options["as_pandas"] = True
+
+            if 'theme' in options:
+                each_options['theme'] = options['theme']
 
             # Builds the options to query impala
             each_obj = self.find_dataset(each_options)

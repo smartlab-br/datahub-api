@@ -2,8 +2,7 @@
 from flask import request
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
-from model.te.ml.exposicao_nat_feat_importance \
-    import MLExposicaoNaturalidadeFeatureImportance
+from model.thematic import Thematic
 
 class MLExposicaoNaturalidadeFeatureImportanceResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -19,7 +18,7 @@ class MLExposicaoNaturalidadeFeatureImportanceResource(BaseResource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = MLExposicaoNaturalidadeFeatureImportance()
+        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['beneficio'],
@@ -32,10 +31,11 @@ class MLExposicaoNaturalidadeFeatureImportanceResource(BaseResource):
     def get(self):
         ''' Obtém a classificação de todos os municípios '''
         options = self.build_options(request.args)
+        options['theme'] = 'temlexposicaonaturaisfeatures'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = MLExposicaoNaturalidadeFeatureImportance()
+            self.domain = Thematic()
         return self.domain

@@ -2,7 +2,7 @@
 from flask import request
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
-from model.te.incidencia import IncidenciaEscravo
+from model.thematic import Thematic
 
 class IncidenciaEscravoResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -18,7 +18,7 @@ class IncidenciaEscravoResource(BaseResource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = IncidenciaEscravo()
+        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['beneficio'],
@@ -31,10 +31,11 @@ class IncidenciaEscravoResource(BaseResource):
     def get(self):
         ''' Obtém os registros de Benefícios, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'incidenciaescravidao'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = IncidenciaEscravo()
+            self.domain = Thematic()
         return self.domain

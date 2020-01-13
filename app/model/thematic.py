@@ -7,29 +7,36 @@ class Thematic(BaseModel):
     ''' Definição do repo '''
     METADATA = {
         'MAIN': {'fonte': 'IBGE', 'link': 'http://ibge.gov.br/'},
+        'SMARTLAB': [
+            'sstindicadoresnacionais', 'sstindicadoresmunicipais',
+            'sstindicadoresestaduais', 'sstindicadoresunidadempt',
+            'tiindicadoresnacionais', 'tiindicadoresmunicipais', 
+            'tiindicadoresestaduais', 'tiindicadoresunidadempt'
+        ]
 
         'assistenciasocial': {'fonte': 'Censo SUAS(Sistema Único de Assistência social)', 'link': ''},
 
         'sisben': {'fonte': 'INSS - Instituto Nacional do Seguro Social', 'link': 'http://inss.gov.br/'},
         'catweb': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
-        'sstindicadoresnacionais': {'fonte': 'SMARTLAB', 'link': 'http://smartlab.mpt.mp.br/'}, 
-        'sstindicadoresmunicipais': {'fonte': 'SMARTLAB', 'link': 'http://smartlab.mpt.mp.br/'}, 
-        'sstindicadoresestaduais': {'fonte': 'SMARTLAB', 'link': 'http://smartlab.mpt.mp.br/'}, 
-        'sstindicadoresunidadempt': {'fonte': 'SMARTLAB', 'link': 'http://smartlab.mpt.mp.br/'},
         
         'mapear': {'fonte': 'PRF', 'link': 'https://www.prf.gov.br/'},
         'provabrasil': {'fonte': 'INEP, Prova Brasil', 'link': 'http://www.inep.gov.br/'},
-        'tiindicadoresnacionais': {'fonte': 'SMARTLAB', 'link': 'http://smartlab.mpt.mp.br/'},
-        'tiindicadoresmunicipais': {'fonte': 'SMARTLAB', 'link': 'http://smartlab.mpt.mp.br/'},
-        'tiindicadoresestaduais': {'fonte': 'SMARTLAB', 'link': 'http://smartlab.mpt.mp.br/'},
-        'tiindicadoresunidadempt': {'fonte': 'SMARTLAB', 'link': 'http://smartlab.mpt.mp.br/'},
+        
         'censoagromunicipal': {'fonte': 'IBGE - Censo Agropecuário, Florestal e Aquícola, 2017', 'link': 'http://ibge.gov.br/'},
         'censoagroestadual': {'fonte': 'IBGE - Censo Agropecuário, Florestal e Aquícola, 2017', 'link': 'http://ibge.gov.br/'},
         'censoagronacional': {'fonte': 'IBGE - Censo Agropecuário, Florestal e Aquícola, 2017', 'link': 'http://ibge.gov.br/'},
 
-        'incidenciaescravidao': 'incidencia_trabalho_escravo',
-        'migracoesescravos': 'te_migracoes',
-        'operacoesresgate': 'operacoes_trabalho_escravo'
+        'incidenciaescravidao': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
+        'migracoesescravos': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
+        'operacoesresgate': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
+        'teindicadoresnacionais': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
+        'teindicadoresmunicipais': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
+        'teindicadoresestaduais': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
+        'teindicadoresunidadempt': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
+        'temlexposicaoresgate': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
+        'temlexposicaoresgatefeatures': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
+        'temlexposicaonaturais': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
+        'temlexposicaonaturaisfeatures': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'}
         
     }
 
@@ -47,3 +54,11 @@ class Thematic(BaseModel):
         if 'theme' not in options or options['theme'] not in self.DEFAULT_PARTITIONING:
             return self.METADATA['MAIN']
         return self.METADATA[options['theme']]
+
+        if 'theme' not in options:
+            return self.METADATA['MAIN']
+        elif options['theme'] self.METADATA:
+            return self.METADATA[options['theme']]
+        elif options['theme'] self.METADATA['SMARTLAB']
+            return {'fonte': 'SMARTLAB', 'link': 'http://smartlab.mpt.mp.br/'}
+        return self.METADATA['MAIN']

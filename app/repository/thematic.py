@@ -41,7 +41,15 @@ class ThematicRepository(ImpalaRepository):
 
         'incidenciaescravidao': 'incidencia_trabalho_escravo',
         'migracoesescravos': 'te_migracoes',
-        'operacoesresgate': 'operacoes_trabalho_escravo'
+        'operacoesresgate': 'operacoes_trabalho_escravo',
+        'teindicadoresnacionais': 'te_indicadores_br',
+        'teindicadoresmunicipais': 'te_indicadores_mun',
+        'teindicadoresestaduais': 'te_indicadores_uf',
+        'teindicadoresunidadempt': 'te_indicadores_mpt_unidade',
+        'temlexposicaoresgate': 'te_exposicao_rgt_mun',
+        'temlexposicaoresgatefeatures': 'te_exposicao_rgt_feat_importance_mun',
+        'temlexposicaonaturais': 'te_exposicao_nat_mun',
+        'temlexposicaonaturaisfeatures': 'te_exposicao_nat_feat_importance_mun'
     }
     DEFAULT_PARTITIONING = {
         'MAIN': 'cd_indicador',

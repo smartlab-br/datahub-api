@@ -164,26 +164,6 @@ class HadoopRepositoryFindJoinedDatasetTest(unittest.TestCase):
             options
         )
 
-    def test_full_query(self):
-        ''' Verifica correta formação da query '''
-        repo = StubHadoopRepository()
-        options = {
-            "categorias": ['nm_indicador', 'nu_competencia', 'vl_indicador', 'lat_mun', 'long_mun'],
-            "valor": ['vl_indicador'],
-            "agregacao": ['sum'],
-            "ordenacao": ['-nm_indicador'],
-            "where": ['eq-nu_competencia-2010'],
-            "joined": 'municipio'
-        }
-        result = repo.find_joined_dataset(options)
-        expected = ('SELECT nm_indicador, nu_competencia, vl_indicador, lat, '
-                    'long, sum(vl_indicador) AS agr_sum_vl_indicador FROM '
-                    'indicadores LEFT JOIN municipio ON cd_mun_ibge = '
-                    'cd_municipio_ibge_dv  WHERE nu_competencia = 2010 GROUP '
-                    'BY nm_indicador, nu_competencia, vl_indicador, lat, long '
-                    'ORDER BY nm_indicador DESC')
-        self.assertEqual(result, expected)
-
     def test_full_query_limit_offset(self):
         ''' Verifica correta formação da query com limit e offset'''
         repo = StubHadoopRepository()

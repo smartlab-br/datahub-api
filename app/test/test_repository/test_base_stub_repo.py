@@ -216,31 +216,6 @@ class BaseRepositoryLoadAndPrepareTest(unittest.TestCase):
         repo = StubRepository()
         self.assertEqual(repo.get_dao(), 'Instanciei o DAO')
 
-class BaseRepositoryGetJoinConditionTest(unittest.TestCase):
-    ''' Classe de construção da cláusula do join '''
-    def test_undefined(self):
-        ''' Lança erro ao tentar carregar um join de tabela não definida. '''
-        repo = StubRepository()
-        self.assertRaises(
-            KeyError,
-            repo.get_join_condition,
-            'invalid_table'
-        )
-
-    def test_default(self):
-        ''' Verifica construção de cláusula padrão do JOIN. '''
-        repo = StubRepository()
-        result = repo.get_join_condition('municipio')
-        self.assertEqual(result, 'cd_mun_ibge = cd_municipio_ibge_dv')
-
-    # COMPOSIÇÃO DO JOIN DESATIVADO
-    # def test_added_condition(self):
-    #     ''' Verifica composição de cláusula padrão com adicional montado
-    #         no filtro. '''
-    #     repo = StubRepository()
-    #     result = repo.get_join_condition('municipio', 'minha_condicao')
-    #     self.assertEqual(result, 'cd_mun_ibge = cd_municipio_ibge_dv AND minha_condicao')
-
 class BaseRepositoryBuildJoinedGroupStringTest(unittest.TestCase):
     ''' Classe de construção da cláusula do join '''
     def test_invalid_cats(self):

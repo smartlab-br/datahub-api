@@ -12,7 +12,7 @@ class Thematic(BaseModel):
                 'sstindicadoresestaduais', 'sstindicadoresunidadempt',
                 'tiindicadoresnacionais', 'tiindicadoresmunicipais', 
                 'tiindicadoresestaduais', 'tiindicadoresunidadempt'
-            ]
+            ],
             'source': {
                 'fonte': 'SMARTLAB',
                 'link': 'http://smartlab.mpt.mp.br/'
@@ -87,4 +87,4 @@ class Thematic(BaseModel):
             for each_source in self.METADATA:
                 if options['theme'] in each_source['dataset']:
                     return each_source['source']
-         return self.METADATA['ibge']['source']
+        return self.METADATA['ibge']['source']

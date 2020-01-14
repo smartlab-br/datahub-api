@@ -6,38 +6,70 @@ from repository.thematic import ThematicRepository
 class Thematic(BaseModel):
     ''' Definição do repo '''
     METADATA = {
-        'MAIN': {'fonte': 'IBGE', 'link': 'http://ibge.gov.br/'},
-        'SMARTLAB': [
-            'sstindicadoresnacionais', 'sstindicadoresmunicipais',
-            'sstindicadoresestaduais', 'sstindicadoresunidadempt',
-            'tiindicadoresnacionais', 'tiindicadoresmunicipais', 
-            'tiindicadoresestaduais', 'tiindicadoresunidadempt'
-        ],
-
-        'assistenciasocial': {'fonte': 'Censo SUAS(Sistema Único de Assistência social)', 'link': ''},
-
-        'sisben': {'fonte': 'INSS - Instituto Nacional do Seguro Social', 'link': 'http://inss.gov.br/'},
-        'catweb': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
-        
-        'mapear': {'fonte': 'PRF', 'link': 'https://www.prf.gov.br/'},
-        'provabrasil': {'fonte': 'INEP, Prova Brasil', 'link': 'http://www.inep.gov.br/'},
-        
-        'censoagromunicipal': {'fonte': 'IBGE - Censo Agropecuário, Florestal e Aquícola, 2017', 'link': 'http://ibge.gov.br/'},
-        'censoagroestadual': {'fonte': 'IBGE - Censo Agropecuário, Florestal e Aquícola, 2017', 'link': 'http://ibge.gov.br/'},
-        'censoagronacional': {'fonte': 'IBGE - Censo Agropecuário, Florestal e Aquícola, 2017', 'link': 'http://ibge.gov.br/'},
-
-        'incidenciaescravidao': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
-        'migracoesescravos': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
-        'operacoesresgate': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
-        'teindicadoresnacionais': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
-        'teindicadoresmunicipais': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
-        'teindicadoresestaduais': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
-        'teindicadoresunidadempt': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
-        'temlexposicaoresgate': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
-        'temlexposicaoresgatefeatures': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
-        'temlexposicaonaturais': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'},
-        'temlexposicaonaturaisfeatures': {'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'}
-        
+        'SMARTLAB': {
+            'datasets': [
+                'sstindicadoresnacionais', 'sstindicadoresmunicipais',
+                'sstindicadoresestaduais', 'sstindicadoresunidadempt',
+                'tiindicadoresnacionais', 'tiindicadoresmunicipais', 
+                'tiindicadoresestaduais', 'tiindicadoresunidadempt'
+            ]
+            'source': {
+                'fonte': 'SMARTLAB',
+                'link': 'http://smartlab.mpt.mp.br/'
+            }
+        },
+        'ibge': {
+            'datasets': [],
+            'source': {'fonte': 'IBGE', 'link': 'http://ibge.gov.br/'}
+        },
+        'ibge_censoagro': {
+            'datasets': [
+                'censoagromunicipal', 'censoagroestadual', 'censoagronacional'
+            ],
+            'source': {
+                'fonte': 'IBGE - Censo Agropecuário, Florestal e Aquícola, 2017', 
+                'link': 'http://ibge.gov.br/'
+            }
+        },
+        'trabalho': {
+            'datasets': [
+                'catweb', 'incidenciaescravidao', 'migracoesescravos',
+                'operacoesresgate', 'teindicadoresnacionais',
+                'teindicadoresmunicipais', 'teindicadoresestaduais',
+                'teindicadoresunidadempt', 'temlexposicaoresgate',
+                'temlexposicaoresgatefeatures', 'temlexposicaonaturais',
+                'temlexposicaonaturaisfeatures'
+            ],
+            'source': {
+                'fonte': 'Ministério da Economia - Secretaria de Trabalho',
+                'link': 'http://trabalho.gov.br/'
+            }
+        },
+        'assistenciasocial': {
+            'datasets': ['assistenciasocial'],
+            'source': {
+                'fonte': 'Censo SUAS(Sistema Único de Assistência social)',
+                'link': ''
+            }
+        },
+        'seguridade': {
+            'datasets': ['sisben'],
+            'source': {
+                'fonte': 'INSS - Instituto Nacional do Seguro Social',
+                'link': 'http://inss.gov.br/'
+            }
+        },
+        'prf': {
+            'datasets': ['mapear'],
+            'source': {'fonte': 'PRF', 'link': 'https://www.prf.gov.br/'},
+        },
+        'inep': {
+            'datasets': ['provabrasil'],
+            'source': {
+                'fonte': 'INEP, Prova Brasil',
+                'link': 'http://www.inep.gov.br/'
+            }
+        }
     }
 
     def __init__(self):
@@ -51,10 +83,8 @@ class Thematic(BaseModel):
         return self.repo
     
     def fetch_metadata(self, options):
-        if 'theme' not in options:
-            return self.METADATA['MAIN']
-        elif options['theme'] in self.METADATA:
-            return self.METADATA[options['theme']]
-        elif options['theme'] in self.METADATA['SMARTLAB']:
-            return {'fonte': 'SMARTLAB', 'link': 'http://smartlab.mpt.mp.br/'}
-        return self.METADATA['MAIN']
+        if 'theme' in options:    
+            for each_source in self.METADATA:
+                if options['theme'] in each_source['dataset']:
+                    return each_source['source']
+         return self.METADATA['ibge']['source']

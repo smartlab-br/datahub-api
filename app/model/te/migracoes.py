@@ -2,7 +2,7 @@
 import json
 
 from model.base import BaseModel
-from repository.te.migracoes import MigracoesEscravoRepository
+from repository.thematic import ThematicRepository
 
 #pylint: disable=R0903
 class MigracoesEscravo(BaseModel):
@@ -13,17 +13,18 @@ class MigracoesEscravo(BaseModel):
 
     def __init__(self):
         ''' Construtor '''
-        self.repo = MigracoesEscravoRepository()
+        self.repo = ThematicRepository()
         self.sankey_ds = None
 
     def get_repo(self):
         ''' Garantia de que o repo estará carregado '''
         if self.repo is None:
-            self.repo = MigracoesEscravoRepository()
+            self.repo = ThematicRepository()
         return self.repo
 
     def find_dataset_sankey(self, options=None):
         options['no_wrap'] = True
+        options['theme'] = 'migracoesescravos'
         dataset = super().find_dataset(options)
         self.sankey_ds = dataset.to_dict('records')
 
@@ -115,7 +116,7 @@ class MigracoesEscravo(BaseModel):
             return True
         past_path.append(next_target)
         for link in links:
-            if link["source"] == next_target:
-                if self.is_circular_added_link(link["target"], past_path, links):
-                    return True
+            if (link["source"] == next_target and
+                self.is_circular_added_link(link["target"], past_path, links)):
+                return True
         return False

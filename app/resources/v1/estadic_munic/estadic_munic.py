@@ -2,7 +2,7 @@
 from flask import request
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
-from model.estadic_munic.estadic_munic import EstadicMunic
+from model.thematic import Thematic
 
 class EstadicMunicResource(BaseResource):
     ''' Classe de múltiplos Indicadores de Presença do Estado nos Municípios '''
@@ -22,7 +22,7 @@ class EstadicMunicResource(BaseResource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = EstadicMunic()
+        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['estadic_munic'],
@@ -36,10 +36,11 @@ class EstadicMunicResource(BaseResource):
     def get(self):
         ''' Obtém os registros de indicadores municipais, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'estadicmunic'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = EstadicMunic()
+            self.domain = Thematic()
         return self.domain

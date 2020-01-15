@@ -2,7 +2,7 @@
 from flask import request
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
-from model.sst.cat import Cat
+from model.thematic import Thematic
 
 class CatsResource(BaseResource):
     ''' Classe de múltiplos CAT '''
@@ -29,7 +29,7 @@ class CatsResource(BaseResource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = Cat()
+        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['cat'],
@@ -42,12 +42,13 @@ class CatsResource(BaseResource):
     def get(self):
         ''' Obtém os registros de CAT, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'catweb'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = Cat()
+            self.domain = Thematic()
         return self.domain
 
 class CatsOpResource(CatsResource):
@@ -64,10 +65,11 @@ class CatsOpResource(CatsResource):
     def get(self, operation):
         ''' Obtém os registros de CAT, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'catweb'
         return self.__get_domain().find_and_operate(operation, options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = Cat()
+            self.domain = Thematic()
         return self.domain

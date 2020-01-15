@@ -2,7 +2,7 @@
 from flask import request, Response
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
-from model.indicadores.indicadores_municipais import IndicadoresMunicipais
+from model.thematic import Thematic
 
 class IndicadoresMunicipaisResource(BaseResource):
     ''' Classe de múltiplos Indicadores Municipais '''
@@ -32,7 +32,7 @@ class IndicadoresMunicipaisResource(BaseResource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = IndicadoresMunicipais()
+        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['indicadores_municipais'],
@@ -46,44 +46,11 @@ class IndicadoresMunicipaisResource(BaseResource):
     def get(self):
         ''' Obtém os registros de indicadores municipais, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'indicadoresmunicipais'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = IndicadoresMunicipais()
-        return self.domain
-
-class IndicadoresMunicipaisChartResource(BaseResource):
-    ''' Classe de múltiplos Indicadores Municipais '''
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = IndicadoresMunicipais()
-
-    @swagger.doc({
-        'tags':['indicadores_municipais'],
-        'description':'Obtém todos os indicadores municipais, de acordo com os \
-        parâmetros informados',
-        'parameters':[
-        ],
-        'responses': {
-            '200': {'description': 'Indicadores Municipais'}
-        }
-    })
-    def get(self):
-        ''' Obtém os registros de indicadores municipais, conforme parâmetros informados '''
-        # TODO Após testes, remover fake_options, retornadno a construção do options
-        #      usando request.args
-        fake_options = {
-            "categorias": 'cd_mun_ibge,nu_competencia',
-            "valor": 'vl_indicador',
-            "filtros": "eq-nu_competencia-'2010',and,eq-cd_indicador-'06_02_03_03'"
-        }
-        options = self.build_options(fake_options)
-        return Response(self.__get_domain().load_chart(options), mimetype='text/html')
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = IndicadoresMunicipais()
+            self.domain = Thematic()
         return self.domain

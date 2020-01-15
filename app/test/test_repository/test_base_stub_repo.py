@@ -19,8 +19,17 @@ class StubRepository(BaseRepository):
         'QRY_FIND_DATASET': 'SELECT {} FROM {} {} {} {}',
         'QRY_FIND_JOINED_DATASET': 'SELECT {} FROM {} LEFT JOIN {} ON {} {} {} {}'
     }
+
     def load_and_prepare(self):
         self.dao = 'Instanciei o DAO'
+
+class StubRepositoryCustomPartition(StubRepository):
+    ''' Fake repo to test instance methods '''
+    DEFAULT_PARTITIONING = ''
+
+class StubRepositoryCustomPartitionMultipleValues(StubRepository):
+    ''' Fake repo to test instance methods '''
+    DEFAULT_PARTITIONING = 'a, b, c'
 
 class BaseRepositoryInstantiationTest(unittest.TestCase):
     ''' Tests instantiation errors '''
@@ -29,13 +38,29 @@ class BaseRepositoryInstantiationTest(unittest.TestCase):
             implementação de load_and_prepare. '''
         self.assertRaises(NotImplementedError, BaseRepository)
 
-class BaseRepositoryTableNameTest(unittest.TestCase):
-    ''' Validates recovery of table name '''
-    def test_validate_positive(self):
+class BaseRepositoryGeneralTest(unittest.TestCase):
+    ''' General tests over StubRepo '''
+    def test_table_name(self):
         ''' Verifica correta obtenção de nome de tabela '''
         repo = StubRepository()
         tbl_name = repo.get_table_name('MAIN')
         self.assertEqual(tbl_name, 'indicadores')
+    
+    def test_get_partitioning_empty(self):
+        ''' Verifica correta obtenção de cláusula de partitioning quando não há
+            particionamento especificado na classe '''
+        repo = StubRepositoryCustomPartition()
+        self.assertEqual(repo.replace_partition("min_part"), 'MIN({val_field}) OVER() AS api_calc_{calc}')
+
+    def test_get_partitioning_default(self):
+        ''' Verifica correta obtenção dde cláusula de particionamento '''
+        repo = StubRepository()
+        self.assertEqual(repo.replace_partition("min_part"), 'MIN({val_field}) OVER(PARTITION BY {partition}) AS api_calc_{calc}')
+    
+    def test_exclude_from_partition(self):
+        ''' Verifica a correta exclusão do particionamento de campos inexistentes no SELECT '''
+        repo = StubRepositoryCustomPartitionMultipleValues()
+        self.assertEqual(repo.exclude_from_partition(['a'], ['count']), 'a')
 
 class BaseRepositoryNamedQueryTest(unittest.TestCase):
     ''' Validates recovery of named query '''
@@ -190,31 +215,6 @@ class BaseRepositoryLoadAndPrepareTest(unittest.TestCase):
         ''' Verifica declaração do método de carregamento do dao. '''
         repo = StubRepository()
         self.assertEqual(repo.get_dao(), 'Instanciei o DAO')
-
-class BaseRepositoryGetJoinConditionTest(unittest.TestCase):
-    ''' Classe de construção da cláusula do join '''
-    def test_undefined(self):
-        ''' Lança erro ao tentar carregar um join de tabela não definida. '''
-        repo = StubRepository()
-        self.assertRaises(
-            KeyError,
-            repo.get_join_condition,
-            'invalid_table'
-        )
-
-    def test_default(self):
-        ''' Verifica construção de cláusula padrão do JOIN. '''
-        repo = StubRepository()
-        result = repo.get_join_condition('municipio')
-        self.assertEqual(result, 'cd_mun_ibge = cd_municipio_ibge_dv')
-
-    # COMPOSIÇÃO DO JOIN DESATIVADO
-    # def test_added_condition(self):
-    #     ''' Verifica composição de cláusula padrão com adicional montado
-    #         no filtro. '''
-    #     repo = StubRepository()
-    #     result = repo.get_join_condition('municipio', 'minha_condicao')
-    #     self.assertEqual(result, 'cd_mun_ibge = cd_municipio_ibge_dv AND minha_condicao')
 
 class BaseRepositoryBuildJoinedGroupStringTest(unittest.TestCase):
     ''' Classe de construção da cláusula do join '''
@@ -679,4 +679,87 @@ class BaseRepositoryCombineValAggrTest(unittest.TestCase):
              'count(nu_competencia) AS agr_count_nu_competencia, '
              'sum(vl_indicador) AS agr_sum_vl_indicador, count(vl_indicador) '
              'AS agr_count_vl_indicador')
+        )
+
+class BaseRepositoryStdCalcsTest(unittest.TestCase):
+    ''' Classe de teste de geração de string para cálculos com partitioning '''
+    def test_std_calc_max(self):
+        ''' Testa um cálculo de min e max '''
+        options = {
+            "valor": "vl_indicador",
+            "calcs": ["min_part", "max_part"],
+            "categorias": ["cd_mun_ibge", "nu_ano"]
+        }
+        repo = StubRepository()
+        self.assertEqual(
+            repo.build_std_calcs(options),
+            'MIN(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_min_part, MAX(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_max_part'
+        )
+
+    def test_std_calc_avg(self):
+        ''' Testa um cálculo de soma, que deve gerar, adicionalmente, min e max '''
+        options = {
+            "valor": "vl_indicador",
+            "calcs": ["avg_part"],
+            "categorias": ["cd_mun_ibge", "nu_ano"]
+        }
+        repo = StubRepository()
+        self.assertEqual(
+            repo.build_std_calcs(options),
+            'MIN(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_min_part, MAX(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_max_part, AVG(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_avg_part'
+        )
+
+    def test_std_calc_default_partitioning_empty_string(self):
+        ''' Testa um cálculo com partitioning padrão vazia '''
+        options = {
+            "valor": "vl_indicador",
+            "calcs": ["min_part", "max_part"],
+            "categorias": ["cd_mun_ibge", "nu_ano"]
+        }
+        repo = StubRepositoryCustomPartition()
+        self.assertEqual(
+            repo.build_std_calcs(options),
+            'MIN(vl_indicador) OVER() AS api_calc_min_part, MAX(vl_indicador) OVER() AS api_calc_max_part'
+        )
+
+    def test_std_calc_default_partitioning(self):
+        ''' Testa um cálculo com partitioning padrão existente '''
+        options = {
+            "valor": "vl_indicador",
+            "calcs": ["min_part", "max_part"],
+            "categorias": ["cd_mun_ibge", "nu_ano"]
+        }
+        repo = StubRepositoryCustomPartitionMultipleValues()
+        self.assertEqual(
+            repo.build_std_calcs(options),
+            'MIN(vl_indicador) OVER(PARTITION BY a, b, c) AS api_calc_min_part, MAX(vl_indicador) OVER(PARTITION BY a, b, c) AS api_calc_max_part'
+        )
+
+    def test_std_calc_custom_partitioning(self):
+        ''' Testa um cálculo com sobrescrita do partitioning '''
+        options = {
+            "valor": "vl_indicador",
+            "calcs": ["min_part", "max_part"],
+            "categorias": ["cd_mun_ibge", "nu_ano"],
+            "partition": "nu_ano"
+        }
+        repo = StubRepository()
+        self.assertEqual(
+            repo.build_std_calcs(options),
+            'MIN(vl_indicador) OVER(PARTITION BY nu_ano) AS api_calc_min_part, MAX(vl_indicador) OVER(PARTITION BY nu_ano) AS api_calc_max_part'
+        )
+
+    def test_std_calc_invalid_calc(self):
+        ''' Testa se lança exceção quando envia um tipo de cálculo não previsto '''
+        options = {
+            "valor": "vl_indicador",
+            "calcs": ["sum"],
+            "categorias": ["cd_mun_ibge", "nu_ano"],
+            "partition": "nu_ano"
+        }
+        repo = StubRepository()
+        self.assertRaises(
+            KeyError,
+            repo.build_std_calcs,
+            options
         )

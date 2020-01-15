@@ -2,7 +2,7 @@
 from flask import request
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
-from model.ti.indicadores_br import IndicadoresTIBrasil
+from model.thematic import Thematic
 
 class IndicadoresTIBrasilResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -20,7 +20,7 @@ class IndicadoresTIBrasilResource(BaseResource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = IndicadoresTIBrasil()
+        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['beneficio'],
@@ -33,10 +33,11 @@ class IndicadoresTIBrasilResource(BaseResource):
     def get(self):
         ''' Obtém os registros de Benefícios, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'tiindicadoresnacionais'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = IndicadoresTIBrasil()
+            self.domain = Thematic()
         return self.domain

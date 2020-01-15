@@ -237,15 +237,7 @@ class BaseRepository(object):
 
     def get_join_condition(self, table_name, join_clauses=None):
         ''' Obtém a condição do join das tabelas '''
-        main_join = self.ON_JOIN[table_name]
-        if join_clauses is None:
-            return main_join
-        # COMPOSIÇÃO DO JOIN COM FILTRO DESATIVADO
-        # joined_filters = self.build_filter_string(join_clauses, table_name, True)
-        # if joined_filters is None or joined_filters == '':
-        #     return main_join
-        # return main_join + ' AND ' + joined_filters
-        return main_join
+        pass
 
     def get_join_suffix(self, table_name):
         ''' Obtém uma string de sufixo de campo de tabela juntada '''
@@ -283,7 +275,7 @@ class BaseRepository(object):
 
     def build_std_calcs(self, options):
         '''Constrói campos calculados de valor, como min, max e normalizado '''
-        if self.VAL_FIELD is None or self.DEFAULT_PARTITIONING is None:
+        if self.VAL_FIELD is None or self.get_default_partitioning(options) is None:
             return ''
 
         # Pega o valor passado ou padrão, para montar a query
@@ -293,8 +285,8 @@ class BaseRepository(object):
 
         # Pega o valor do particionamento
         if not self.check_params(options, ['partition']):
-            if self.DEFAULT_PARTITIONING != '':
-                res_partition = self.DEFAULT_PARTITIONING
+            if self.get_default_partitioning(options) != '':
+                res_partition = self.get_default_partitioning(options)
             else:
                 res_partition = "'1'"
         else:
@@ -334,7 +326,7 @@ class BaseRepository(object):
                 )
             # Resumes identification of calc
             arr_calcs.append(
-                self.replace_partition(calc).format(
+                self.replace_partition(calc, options).format(
                     val_field=val_field,
                     partition=str_res_partition,
                     calc=calc
@@ -342,21 +334,24 @@ class BaseRepository(object):
             )
         return ', '.join(arr_calcs)
 
-    def replace_partition(self, qry_part):
+    def replace_partition(self, qry_part, options={}):
         ''' Changes OVER clause when there's no partitioning '''
-        if self.DEFAULT_PARTITIONING == '':
+        if self.get_default_partitioning(options) == '':
             return self.CALCS_DICT[qry_part].replace("PARTITION BY {partition}", "")
         return self.CALCS_DICT[qry_part]
 
-    def exclude_from_partition(self, categorias, agregacoes):
+    def exclude_from_partition(self, categorias, agregacoes, options={}):
         ''' Remove do partition as categorias não geradas pela agregação '''
-        partitions = self.DEFAULT_PARTITIONING.split(", ")
-        groups = self.build_grouping_string(categorias, agregacoes).split(", ")
+        partitions = self.get_default_partitioning(options).split(", ")
+        groups = self.build_grouping_string(categorias, agregacoes).replace('GROUP BY ', '').split(", ")
         result = []
         for partition in partitions:
             if partition in groups:
                 result.append(partition)
         return ", ".join(result)
+    
+    def get_default_partitioning(self, options):
+        return self.DEFAULT_PARTITIONING
 
     def combine_val_aggr(self, valor, agregacao, suffix=None):
         ''' Combina valores e agregções para construir a string correta '''

@@ -2,7 +2,7 @@
 from flask import request
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
-from model.indicadores.indicadores_mesorregionais import IndicadoresMesorregionais
+from model.thematic import Thematic
 
 class IndicadoresMesorregionaisResource(BaseResource):
     ''' Classe de múltiplos Indicadores Mesorregionais '''
@@ -20,7 +20,7 @@ class IndicadoresMesorregionaisResource(BaseResource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = IndicadoresMesorregionais()
+        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['indicadores_mesorregionais'],
@@ -34,10 +34,11 @@ class IndicadoresMesorregionaisResource(BaseResource):
     def get(self):
         ''' Obtém os registros de indicadores mesorregionais, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'indicadoresmesorregionais'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = IndicadoresMesorregionais()
+            self.domain = Thematic()
         return self.domain

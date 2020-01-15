@@ -2,7 +2,7 @@
 from flask import request
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
-from model.sst.indicadores_mun import IndicadoresSSTMunicipios
+from model.thematic import Thematic
 
 class IndicadoresSSTMunicipiosResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -28,7 +28,7 @@ class IndicadoresSSTMunicipiosResource(BaseResource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = IndicadoresSSTMunicipios()
+        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['beneficio'],
@@ -41,10 +41,11 @@ class IndicadoresSSTMunicipiosResource(BaseResource):
     def get(self):
         ''' Obtém os registros de Benefícios, conforme parâmetros informados '''
         options = self.build_options(request.args)
+        options['theme'] = 'sstindicadoresmunicipais'
         return self.__get_domain().find_dataset(options)
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
-            self.domain = IndicadoresSSTMunicipios()
+            self.domain = Thematic()
         return self.domain

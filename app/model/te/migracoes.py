@@ -116,7 +116,7 @@ class MigracoesEscravo(BaseModel):
             return True
         past_path.append(next_target)
         for link in links:
-            if link["source"] == next_target:
-                if self.is_circular_added_link(link["target"], past_path, links):
-                    return True
+            if (link["source"] == next_target and
+                self.is_circular_added_link(link["target"], past_path, links)):
+                return True
         return False

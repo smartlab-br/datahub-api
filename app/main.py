@@ -171,5 +171,8 @@ api.add_resource(OrgsAssistenciaSocialResource, '/orgs/assistenciasocial')
 # Endpoint para obter a estrutura de dados de um template de card
 api.add_resource(CardTemplateResource, '/cardtemplate/<string:cd_template>')
 
+from resources.v1.charts import ChartsResource
+api.add_resource(ChartsResource, '/charts')
+
 if __name__ == '__main__':
     application.run(request_handler=FLPORequestHandler)

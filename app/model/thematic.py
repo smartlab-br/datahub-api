@@ -84,7 +84,7 @@ class Thematic(BaseModel):
     
     def fetch_metadata(self, options):
         if 'theme' in options:    
-            for each_source in self.METADATA:
-                if options['theme'] in each_source['dataset']:
+            for each_source_key, each_source in self.METADATA.items():
+                if options['theme'] in each_source['datasets']:
                     return each_source['source']
         return self.METADATA['ibge']['source']

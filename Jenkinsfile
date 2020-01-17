@@ -23,6 +23,7 @@ pipeline {
             }
             environment {
                 PYTHONPATH = "${pwd()}/app:$PYTHONPATH"
+                PYTHONDONTWRITEBYTECODE = 1
             }
             steps {
                 executeUnitTests()
@@ -35,11 +36,11 @@ pipeline {
             }
         }
 
-        stage('SonarQube analysis') {
-            steps {
-                sonarScanner()
-            }
-        }
+//        stage('SonarQube analysis') {
+//            steps {
+//                sonarScanner()
+//            }
+//        }
 
         stage('Build and Register Image') {
             steps {

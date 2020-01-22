@@ -15,12 +15,12 @@ class Thematic(BaseModel):
             ],
             'source': {
                 'fonte': 'SMARTLAB',
-                'link': 'http://smartlab.mpt.mp.br/'
+                'link': 'https://smartlabbr.org/'
             }
         },
         'ibge': {
             'datasets': [],
-            'source': {'fonte': 'IBGE', 'link': 'http://ibge.gov.br/'}
+            'source': {'fonte': 'IBGE', 'link': 'https://ibge.gov.br/'}
         },
         'ibge_censoagro': {
             'datasets': [
@@ -28,7 +28,7 @@ class Thematic(BaseModel):
             ],
             'source': {
                 'fonte': 'IBGE - Censo Agropecuário, Florestal e Aquícola, 2017', 
-                'link': 'http://ibge.gov.br/'
+                'link': 'https://ibge.gov.br/'
             }
         },
         'trabalho': {
@@ -56,7 +56,7 @@ class Thematic(BaseModel):
             'datasets': ['sisben'],
             'source': {
                 'fonte': 'INSS - Instituto Nacional do Seguro Social',
-                'link': 'http://inss.gov.br/'
+                'link': 'https://inss.gov.br/'
             }
         },
         'prf': {

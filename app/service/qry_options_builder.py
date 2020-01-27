@@ -14,9 +14,14 @@ class QueryOptionsBuilder():
             filtros = filtros.split(',')
             filtros = [f.replace('|', ',') for f in filtros]
 
-        theme = cls.extract_qry_param(r_args, 'theme')
-        if theme is None:
+        if 'theme' in r_args:
+            theme = r_args['theme']
+        else:
             theme = 'MAIN'
+
+        as_image = False
+        if 'as_image' in r_args and r_args['as_image'] == 'S':
+            as_image = True
 
         return {
             "categorias": categorias,
@@ -29,7 +34,8 @@ class QueryOptionsBuilder():
             "offset": r_args.get('offset'),
             "calcs": cls.extract_qry_param(r_args, 'calcs'),
             "partition": cls.extract_qry_param(r_args, 'partition'),
-            "theme": theme
+            "theme": theme,
+            "as_image": as_image
         }
 
     @staticmethod

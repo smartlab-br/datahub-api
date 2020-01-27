@@ -172,7 +172,7 @@ api.add_resource(OrgsAssistenciaSocialResource, '/orgs/assistenciasocial')
 api.add_resource(CardTemplateResource, '/cardtemplate/<string:cd_template>')
 
 from resources.v1.charts import ChartsResource
-api.add_resource(ChartsResource, '/charts')
+api.add_resource(ChartsResource, '/charts/<string:chart_type>')
 
 if __name__ == '__main__':
     application.run(request_handler=FLPORequestHandler)

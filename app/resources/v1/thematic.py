@@ -1,4 +1,5 @@
 ''' Controller para fornecer dados da CEE '''
+import json
 from flask import request, Response
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
@@ -63,7 +64,7 @@ class ThematicResource(BaseResource):
         ''' Obtém os registros do dataset temático, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = theme
-        return self.__get_domain().find_dataset(options)
+        return json.loads(self.__get_domain().find_dataset(options))
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''

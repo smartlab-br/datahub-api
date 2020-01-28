@@ -2,14 +2,9 @@
 from flask_restful_swagger_2 import swagger
 from flask import request
 from resources.base import BaseResource
-from model.thematic import Thematic
 
 class ThematicResource(BaseResource):
     ''' Classe de múltiplos Indicadores Municipais '''
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
-
     @swagger.doc({
         'tags':['dataset'],
         'description':'Obtém todos os registros do dataset temático, de acordo \
@@ -64,9 +59,3 @@ class ThematicResource(BaseResource):
         options = self.build_options(request.args)
         options['theme'] = theme
         return self.__get_domain().find_dataset(options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain

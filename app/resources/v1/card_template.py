@@ -2,7 +2,6 @@
 from flask_restful_swagger_2 import swagger
 from flask_restful import Resource
 from flask import request
-from model.thematic import Thematic
 
 class CardTemplateResource(Resource):
     ''' Classe que obtém a estrutura de dados de um modelo de card. '''

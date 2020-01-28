@@ -2,7 +2,6 @@
 from flask_restful_swagger_2 import swagger
 from flask import request
 from resources.base import BaseResource
-from model.thematic import Thematic
 
 class IndicadoresMunicipaisResource(BaseResource):
     ''' Classe de múltiplos Indicadores Municipais '''
@@ -30,10 +29,6 @@ class IndicadoresMunicipaisResource(BaseResource):
             campo-campo_novo)."}
     ]
 
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
-
     @swagger.doc({
         'tags':['indicadores_municipais'],
         'description':'Obtém todos os indicadores municipais, de acordo com os \
@@ -48,9 +43,3 @@ class IndicadoresMunicipaisResource(BaseResource):
         options = self.build_options(request.args)
         options['theme'] = 'indicadoresmunicipais'
         return self.__get_domain().find_dataset(options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain

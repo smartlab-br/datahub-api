@@ -1,6 +1,7 @@
 ''' Controller para fornecer dados da CEE '''
 from flask_restful import Resource
 from service.qry_options_builder import QueryOptionsBuilder
+from model.thematic import Thematic
 
 class BaseResource(Resource):
     ''' Classe de base de resource '''
@@ -42,3 +43,13 @@ class BaseResource(Resource):
     def build_options(r_args):
         ''' Constrói as opções da pesquisa '''
         return QueryOptionsBuilder.build_options(r_args)
+
+    def __init__(self):
+        ''' Construtor'''
+        self.domain = Thematic()
+
+    def __get_domain(self):
+        ''' Carrega o modelo de domínio, se não o encontrar '''
+        if self.domain is None:
+            self.domain = Thematic()
+        return self.domain

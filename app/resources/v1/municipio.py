@@ -3,7 +3,6 @@ from flask_restful_swagger_2 import swagger
 from flask import request
 from resources.base import BaseResource
 from model.municipio import Municipio
-from model.thematic import Thematic
 
 class MunicipiosResource(BaseResource):
     ''' Classe de múltiplos Municípios '''
@@ -26,10 +25,6 @@ class MunicipiosResource(BaseResource):
             campo-campo_novo)."}
     ]
 
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
-
     @swagger.doc({
         'tags':['municipio'],
         'description':'Obtém todos os Municípios, de acordo com os \
@@ -44,12 +39,6 @@ class MunicipiosResource(BaseResource):
         options = self.build_options(request.args)
         options['theme'] = 'municipio'
         return self.__get_domain().find_dataset(options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain
 
 class MunicipioResource(BaseResource):
     ''' Classe de Municipio '''

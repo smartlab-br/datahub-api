@@ -2,7 +2,6 @@
 from flask_restful_swagger_2 import swagger
 from flask import request
 from resources.base import BaseResource
-from model.thematic import Thematic
 
 class IndicadoresTIMptUnidadesResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -25,10 +24,6 @@ class IndicadoresTIMptUnidadesResource(BaseResource):
             campo-campo_novo)."}
     ]
 
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
-
     @swagger.doc({
         'tags':['beneficio'],
         'description':'Obtém todos os benefícios do INSS, de acordo com os parâmetros informados.',
@@ -42,9 +37,3 @@ class IndicadoresTIMptUnidadesResource(BaseResource):
         options = self.build_options(request.args)
         options['theme'] = 'tiindicadoresunidadempt'
         return self.__get_domain().find_dataset(options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain

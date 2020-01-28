@@ -207,7 +207,9 @@ class BaseModel():
                     }
                 }]
             elif isinstance(each_arg, list):
-                struct[each_arg_key] = [self.templates_to_fixed(each_item, data_collection) for each_item in each_arg]
+                struct[each_arg_key] = [
+                    self.templates_to_fixed(each_item, data_collection) for each_item in each_arg
+                ]
             elif isinstance(each_arg, dict):
                 if 'template' in each_arg:
                     each_arg = self.replace_template_arg(each_arg, data_collection)
@@ -249,7 +251,13 @@ class BaseModel():
 
             # Creates formatted column by applying number format method
             # in the declared named_prop
-            each_obj['dataset'][each_fmt['prop']] = [NumberFormatter.format(row[each_fmt['named_prop']], args) for index, row in each_obj['dataset'].iterrows()]
+            each_obj['dataset'][each_fmt['prop']] = [
+                NumberFormatter.format(row[each_fmt['named_prop']], args)
+                for
+                index, row
+                in
+                each_obj['dataset'].iterrows()
+            ]
         return each_obj
 
     @staticmethod
@@ -295,7 +303,12 @@ class BaseModel():
         any_nodata = False
         for each_inst in each_obj_struct['instances']:
             try:
-                data_collection[each_inst['name']] = cls.get_collection_from_type(each_obj['dataset'], each_inst['type'], each_inst['named_prop'], options['cd_analysis_unit'])
+                data_collection[each_inst['name']] = cls.get_collection_from_type(
+                    each_obj['dataset'],
+                    each_inst['type'],
+                    each_inst['named_prop'],
+                    options['cd_analysis_unit']
+                )
             except:
                 data_collection[each_inst['name']] = None
                 any_nodata = True
@@ -368,7 +381,14 @@ class BaseModel():
         else:
             struct['template'] = str(struct['template']).format(*tuple(base_args))
             del struct['keep_template']
-            struct['args'] = [self.del_keywords(i) for i in struct['args'] if 'as_is' in i and i['as_is']]
+            struct['args'] = [
+                self.del_keywords(i)
+                for
+                i
+                in
+                struct['args']
+                if 'as_is' in i and i['as_is']
+            ]
         # Returns cleaned arg
         return struct
 
@@ -381,7 +401,8 @@ class BaseModel():
                 del struct[keyword]
         return struct
 
-    def run_named_function(self, struct, base_object):
+    @staticmethod
+    def run_named_function(struct, base_object):
         ''' Gets value from function set in config '''
         fn_args = []
 
@@ -452,7 +473,9 @@ class BaseModel():
             if each_filter[0] == 'nn':
                 base_dataset = base_dataset.dropna(subset=each_filter[1:])
             if each_filter[0] == 'eq':
-                base_dataset = base_dataset[base_dataset[each_filter[1]].astype(str) == each_filter[2]]
+                base_dataset = base_dataset[
+                    base_dataset[each_filter[1]].astype(str) == each_filter[2]
+                ]
             if each_filter[0] == 'in':
                 base_dataset = base_dataset[base_dataset[each_filter[1]].isin(each_filter[2:])]
         return base_dataset

@@ -2,8 +2,8 @@
 import unittest
 from service.number_formatter import NumberFormatter
 
-class NumberFormatterTest(unittest.TestCase):
-    ''' Classe que testa a formatação de números '''
+class NumberFormatterLanguageTest(unittest.TestCase):
+    ''' Classe que testa a formatação de números em pt e en '''
     def test_pt_inteiro(self):
         ''' Verifica se a formatação de inteiro em pt_br está correta '''
         fmt = NumberFormatter.format(
@@ -85,6 +85,8 @@ class NumberFormatterTest(unittest.TestCase):
         )
         self.assertEqual(fmt, "<span>R$</span>53.481,6")
 
+class NumberFormatterOptionsTest(unittest.TestCase):
+    ''' Test different options combinations '''
     def test_no_valor_with_no_default(self):
         ''' Verifica se retorna '-' quando não há nem valor nem default '''
         fmt = NumberFormatter.format(None, {})

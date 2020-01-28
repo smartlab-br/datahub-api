@@ -1,9 +1,9 @@
 ''' Controller para fornecer dados da CEE '''
 from flask_restful_swagger_2 import swagger
-from flask_restful import Resource
 from flask import request
+from resources.base import BaseResource
 
-class CardTemplateResource(Resource):
+class CardTemplateResource(BaseResource):
     ''' Classe que obtém a estrutura de dados de um modelo de card. '''
     @swagger.doc({
         'tags':['card_template'],
@@ -49,5 +49,5 @@ class CardTemplateResource(Resource):
         if 'datasource' in request.args:
             options = request.args.copy()
             options['theme'] = request.args.get('datasource')
-            return Thematic().get_template(cd_template, options)
+            return self.__get_domain().get_template(cd_template, options)
         raise ValueError('Datasource inválido ou sem templates')

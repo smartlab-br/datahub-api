@@ -1,6 +1,6 @@
 ''' Repository para recuperar informações da CEE '''
-from repository.base import ImpalaRepository
 import pandas as pd
+from repository.base import ImpalaRepository
 
 #pylint: disable=R0903
 class MunicipioRepository(ImpalaRepository):

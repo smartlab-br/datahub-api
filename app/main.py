@@ -89,7 +89,7 @@ CONFIG_NAME = os.getenv('FLASK_CONFIGURATION', 'dev')
 application.config.from_object(CONFIG[CONFIG_NAME])
 
 @application.teardown_appcontext
-def close_db_connection(error):
+def close_db_connection(_error):
     ''' Cleanup on application crash '''
     # Encerra a conexão com o impala
     if hasattr(g, 'impala_connection'):

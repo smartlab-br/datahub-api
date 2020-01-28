@@ -150,7 +150,7 @@ class BaseModelRunNamedFunctionTest(unittest.TestCase):
                     'function': 'slice',
                     'args': [{"fixed": 0}, {"fixed": 2}]
                 },
-                range(10)
+                list(range(10))
             ),
             [0, 1]
         )
@@ -169,7 +169,7 @@ class BaseModelRunNamedFunctionTest(unittest.TestCase):
             [0, 1]
         )
 
-    def test_run_slice_function(self):
+    def test_run_slice_function_on_object(self):
         ''' Test slicing a dataframe object '''
         # Defining a custom class for instantiation
         class CustomClass():

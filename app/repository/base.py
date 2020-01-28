@@ -3,7 +3,7 @@ from impala.util import as_pandas
 from datasources import get_impala_connection
 
 #pylint: disable=R0903
-class BaseRepository(object):
+class BaseRepository():
     ''' Generic class for repositories '''
     NAMED_QUERIES = {
         'QRY_FIND_DATASET': 'SELECT {} FROM {} {} {} {} {} {}',
@@ -27,27 +27,27 @@ class BaseRepository(object):
                         'AS api_calc_{calc}'
                        ),
         "norm_pos_part": ('CASE '
-                            '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
-                                'MIN({val_field}) OVER(PARTITION BY {partition})) '
+                          '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
+                          'MIN({val_field}) OVER(PARTITION BY {partition})) '
                           'WHEN 0 '
                           'THEN 0.5 '
                           'ELSE '
                           '({val_field} - MIN({val_field}) OVER(PARTITION BY {partition})) / '
-                            '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
-                                'MIN({val_field}) OVER(PARTITION BY {partition})) '
+                          '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
+                          'MIN({val_field}) OVER(PARTITION BY {partition})) '
                           'END '
                           'AS api_calc_{calc}'
                          ),
         "ln_norm_pos_part": ('CASE '
-                                '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
-                                    'MIN({val_field}) OVER(PARTITION BY {partition})) '
+                             '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
+                             'MIN({val_field}) OVER(PARTITION BY {partition})) '
                              'WHEN 0 '
                              'THEN LOG10(1.5) '
                              'ELSE '
-                                'LOG10(({val_field} - MIN({val_field}) '
-                                    'OVER(PARTITION BY {partition})) / '
-                                    '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
-                                    'MIN({val_field}) OVER(PARTITION BY {partition})) + 1.0001) '
+                             'LOG10(({val_field} - MIN({val_field}) '
+                             'OVER(PARTITION BY {partition})) / '
+                             '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
+                             'MIN({val_field}) OVER(PARTITION BY {partition})) + 1.0001) '
                              'END '
                              'AS api_calc_{calc}'
                             ),
@@ -304,7 +304,7 @@ class BaseRepository(object):
         str_res_partition = res_partition
         if isinstance(res_partition, list):
             str_res_partition = ",".join(res_partition)
-        
+
         # Constrói a query
         arr_calcs = []
         for calc in options['calcs']:
@@ -334,23 +334,27 @@ class BaseRepository(object):
             )
         return ', '.join(arr_calcs)
 
-    def replace_partition(self, qry_part, options={}):
+    def replace_partition(self, qry_part, options=None):
         ''' Changes OVER clause when there's no partitioning '''
         if self.get_default_partitioning(options) == '':
             return self.CALCS_DICT[qry_part].replace("PARTITION BY {partition}", "")
         return self.CALCS_DICT[qry_part]
 
-    def exclude_from_partition(self, categorias, agregacoes, options={}):
+    def exclude_from_partition(self, categorias, agregacoes, options=None):
         ''' Remove do partition as categorias não geradas pela agregação '''
         partitions = self.get_default_partitioning(options).split(", ")
-        groups = self.build_grouping_string(categorias, agregacoes).replace('GROUP BY ', '').split(", ")
+        groups = (
+            self.build_grouping_string(categorias, agregacoes).replace('GROUP BY ', '')
+            .split(", ")
+        )
         result = []
         for partition in partitions:
             if partition in groups:
                 result.append(partition)
         return ", ".join(result)
-    
+
     def get_default_partitioning(self, options):
+        ''' Default partitioning statement '''
         return self.DEFAULT_PARTITIONING
 
     def combine_val_aggr(self, valor, agregacao, suffix=None):

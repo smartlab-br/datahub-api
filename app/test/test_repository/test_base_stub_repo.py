@@ -51,12 +51,18 @@ class BaseRepositoryGeneralTest(unittest.TestCase):
         ''' Verifica correta obtenção de cláusula de partitioning quando não há
             particionamento especificado na classe '''
         repo = StubRepositoryCustomPartition()
-        self.assertEqual(repo.replace_partition("min_part"), 'MIN({val_field}) OVER() AS api_calc_{calc}')
+        self.assertEqual(
+            repo.replace_partition("min_part"),
+            'MIN({val_field}) OVER() AS api_calc_{calc}'
+        )
 
     def test_get_partitioning_default(self):
         ''' Verifica correta obtenção dde cláusula de particionamento '''
         repo = StubRepository()
-        self.assertEqual(repo.replace_partition("min_part"), 'MIN({val_field}) OVER(PARTITION BY {partition}) AS api_calc_{calc}')
+        self.assertEqual(
+            repo.replace_partition("min_part"),
+            'MIN({val_field}) OVER(PARTITION BY {partition}) AS api_calc_{calc}'
+        )
 
     def test_exclude_from_partition(self):
         ''' Verifica a correta exclusão do particionamento de campos inexistentes no SELECT '''
@@ -694,7 +700,9 @@ class BaseRepositoryStdCalcsTest(unittest.TestCase):
         repo = StubRepository()
         self.assertEqual(
             repo.build_std_calcs(options),
-            'MIN(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_min_part, MAX(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_max_part'
+            ('MIN(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_min_part, '
+             'MAX(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_max_part'
+            )
         )
 
     def test_std_calc_avg(self):
@@ -707,7 +715,10 @@ class BaseRepositoryStdCalcsTest(unittest.TestCase):
         repo = StubRepository()
         self.assertEqual(
             repo.build_std_calcs(options),
-            'MIN(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_min_part, MAX(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_max_part, AVG(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_avg_part'
+            ('MIN(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_min_part, '
+             'MAX(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_max_part, '
+             'AVG(vl_indicador) OVER(PARTITION BY cd_indicador) AS api_calc_avg_part'
+            )
         )
 
     def test_std_calc_default_partitioning_empty_string(self):
@@ -720,7 +731,9 @@ class BaseRepositoryStdCalcsTest(unittest.TestCase):
         repo = StubRepositoryCustomPartition()
         self.assertEqual(
             repo.build_std_calcs(options),
-            'MIN(vl_indicador) OVER() AS api_calc_min_part, MAX(vl_indicador) OVER() AS api_calc_max_part'
+            ('MIN(vl_indicador) OVER() AS api_calc_min_part, '
+             'MAX(vl_indicador) OVER() AS api_calc_max_part'
+            )
         )
 
     def test_std_calc_default_partitioning(self):
@@ -733,7 +746,9 @@ class BaseRepositoryStdCalcsTest(unittest.TestCase):
         repo = StubRepositoryCustomPartitionMultipleValues()
         self.assertEqual(
             repo.build_std_calcs(options),
-            'MIN(vl_indicador) OVER(PARTITION BY a, b, c) AS api_calc_min_part, MAX(vl_indicador) OVER(PARTITION BY a, b, c) AS api_calc_max_part'
+            ('MIN(vl_indicador) OVER(PARTITION BY a, b, c) AS api_calc_min_part, '
+             'MAX(vl_indicador) OVER(PARTITION BY a, b, c) AS api_calc_max_part'
+            )
         )
 
     def test_std_calc_custom_partitioning(self):
@@ -747,7 +762,9 @@ class BaseRepositoryStdCalcsTest(unittest.TestCase):
         repo = StubRepository()
         self.assertEqual(
             repo.build_std_calcs(options),
-            'MIN(vl_indicador) OVER(PARTITION BY nu_ano) AS api_calc_min_part, MAX(vl_indicador) OVER(PARTITION BY nu_ano) AS api_calc_max_part'
+            ('MIN(vl_indicador) OVER(PARTITION BY nu_ano) AS api_calc_min_part, '
+             'MAX(vl_indicador) OVER(PARTITION BY nu_ano) AS api_calc_max_part'
+            )
         )
 
     def test_std_calc_invalid_calc(self):

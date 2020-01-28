@@ -1,6 +1,6 @@
 ''' Repository genérico '''
 from impala.util import as_pandas
-from datasources import get_hive_connection, get_impala_connection
+from datasources import get_impala_connection
 
 #pylint: disable=R0903
 class BaseRepository(object):
@@ -504,7 +504,7 @@ class BaseRepository(object):
         return False
 
 class HadoopRepository(BaseRepository):
-    '''Generic class for hive repositories '''
+    ''' Generic class for hive/impala repositories '''
     def load_and_prepare(self):
         ''' Método abstrato para carregamento do dataset '''
         raise NotImplementedError("Repositórios precisam implementar load_and_prepare")
@@ -584,14 +584,8 @@ class HadoopRepository(BaseRepository):
 
         return self.fetch_data(query)
 
-class HiveRepository(HadoopRepository):
-    '''Generic class for hive repositories '''
-    def load_and_prepare(self):
-        ''' Prepara o DAO '''
-        self.dao = get_hive_connection()
-
 class ImpalaRepository(HadoopRepository):
-    '''Generic class for hive repositories '''
+    '''Generic class for impala repositories '''
     def load_and_prepare(self):
         ''' Prepara o DAO '''
         self.dao = get_impala_connection()

@@ -19,8 +19,10 @@ class StubHadoopRepository(HadoopRepository):
         'QRY_FIND_JOINED_DATASET': 'SELECT {} FROM {} LEFT JOIN {} ON {} {} {} {}'
     }
     def load_and_prepare(self):
+        ''' Overriding method outside test scope '''
         self.dao = 'Instanciei o DAO'
     def fetch_data(self, query):
+        ''' Overriding methd outside test scope '''
         return query
 
 class HadoopRepositoryFindDatasetTest(unittest.TestCase):

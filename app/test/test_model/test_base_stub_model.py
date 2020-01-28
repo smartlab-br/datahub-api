@@ -1,5 +1,6 @@
 '''Main tests in API'''
 import unittest
+from io import StringIO
 import pandas as pd
 from model.base import BaseModel
 
@@ -46,7 +47,6 @@ class BaseModelWrapResultTest(unittest.TestCase):
 
     def test_valid_dataset(self):
         ''' Verifica se retorna dataset encapsulado corretamente '''
-        from io import StringIO
         model = StubModel()
 
         str_dataset = StringIO(
@@ -79,65 +79,65 @@ class BaseModelTemplateTest(unittest.TestCase):
         ''' Test first-tier interpolation '''
         model = StubModel()
         data_collection = {
-            "stub": { "col_1": "prop_arg" }
+            "stub": {"col_1": "prop_arg"}
         }
         rules = {
             "template": "One {} {}, two {}, three {}",
             "args": [
-                { "as_is": True, "fixed": "asisarg1" },
-                { "as_is": True, "fixed": "asisarg2" },
-                { "fixed": "fixedarg" },
-                { "named_prop": "col_1", "base_object": "stub" }
+                {"as_is": True, "fixed": "asisarg1"},
+                {"as_is": True, "fixed": "asisarg2"},
+                {"fixed": "fixedarg"},
+                {"named_prop": "col_1", "base_object": "stub"}
             ]
         }
         self.assertEqual(
             model.replace_template_arg(rules, data_collection),
             {'fixed': 'One {0} {1}, two fixedarg, three prop_arg'}
-        ) 
+        )
 
     def test_replace_template_arg_keep_template(self):
         ''' Test first-tier interpolation '''
         model = StubModel()
         data_collection = {
-            "stub": { "col_1": "prop_arg" }
+            "stub": {"col_1": "prop_arg"}
         }
         rules = {
             "template": "One {} {}, two {}, three {}",
             "keep_template": True,
             "args": [
-                { "as_is": True, "fixed": "asisarg1" },
-                { "as_is": True, "fixed": "asisarg2" },
-                { "fixed": "fixedarg" },
-                { "named_prop": "col_1", "base_object": "stub" }
+                {"as_is": True, "fixed": "asisarg1"},
+                {"as_is": True, "fixed": "asisarg2"},
+                {"fixed": "fixedarg"},
+                {"named_prop": "col_1", "base_object": "stub"}
             ]
         }
         self.assertEqual(
             model.replace_template_arg(rules, data_collection),
             {
                 "template": 'One {0} {1}, two fixedarg, three prop_arg',
-                "args": [ { "fixed": "asisarg1" }, { "fixed": "asisarg2" } ]
+                "args": [{"fixed": "asisarg1"}, {"fixed": "asisarg2"}]
             }
-        ) 
+        )
 
     def test_replace_named_prop(self):
         ''' Test named_prop substitution '''
         model = StubModel()
         data_collection = {
-            "stub": { "col_1": 1.23 }
+            "stub": {"col_1": 1.23}
         }
-        rules = { 
+        rules = {
             "named_prop": "col_1",
             "base_object": "stub",
             "format": "monetario",
-            "precision": 1, 
+            "precision": 1,
             "multiplier": 2,
             "uiTags": False,
-            "collapse": { "format": "inteiro" }
+            "collapse": {"format": "inteiro"}
         }
         self.assertEqual(
             model.replace_named_prop(rules, data_collection),
-            { "fixed": "R$2,5" }
-        ) 
+            {"fixed": "R$2,5"}
+        )
 
 class BaseModelRunNamedFunctionTest(unittest.TestCase):
     ''' Test functions calls by reflection '''
@@ -148,13 +148,13 @@ class BaseModelRunNamedFunctionTest(unittest.TestCase):
             model.run_named_function(
                 {
                     'function': 'slice',
-                    'args': [ { "fixed": 0 }, { "fixed": 2 } ]
+                    'args': [{"fixed": 0}, {"fixed": 2}]
                 },
-                [ x for x in range(10)]
+                range(10)
             ),
             [0, 1]
         )
-    
+
     def test_run_slice_function_ignore_non_fixed_args(self):
         ''' Test if non-fixed args are ignored correctly '''
         model = StubModel()
@@ -162,19 +162,21 @@ class BaseModelRunNamedFunctionTest(unittest.TestCase):
             model.run_named_function(
                 {
                     'function': 'slice',
-                    'args': [ { "fixed": 0 }, { "prop": "vals" }, { "fixed": 2 } ]
+                    'args': [{"fixed": 0}, {"prop": "vals"}, {"fixed": 2}]
                 },
-                [ x for x in range(10)]
+                list(range(10))
             ),
             [0, 1]
         )
-    
+
     def test_run_slice_function(self):
         ''' Test slicing a dataframe object '''
         # Defining a custom class for instantiation
         class CustomClass():
-            vals = [ x for x in range(10)]
+            ''' Creating a class for running its function '''
+            vals = list(range(10))
             def fake_slice(self, limit):
+                ''' Method to call by reflection '''
                 return self.vals[limit:]
         # Running test
         model = StubModel()
@@ -182,7 +184,7 @@ class BaseModelRunNamedFunctionTest(unittest.TestCase):
             model.run_named_function(
                 {
                     'function': 'fake_slice',
-                    'args': [ { "fixed": 5 } ]
+                    'args': [{"fixed": 5}]
                 },
                 CustomClass()
             ),

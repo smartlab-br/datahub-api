@@ -1,6 +1,6 @@
 ''' Controller para fornecer dados da CEE '''
-from flask import request, Response
 from flask_restful_swagger_2 import swagger
+from flask import request
 from resources.base import BaseResource
 from model.thematic import Thematic
 

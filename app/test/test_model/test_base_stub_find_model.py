@@ -1,5 +1,6 @@
 '''Main tests in API'''
 import unittest
+from io import StringIO
 import pandas as pd
 from model.base import BaseModel
 from repository.base import HadoopRepository
@@ -30,15 +31,15 @@ class StubFindModelRepository(HadoopRepository):
         'QRY_FIND_JOINED_DATASET': 'SELECT {} FROM {} LEFT JOIN {} ON {} {} {} {}'
     }
     def load_and_prepare(self):
+        ''' Overriding method outside test scope '''
         self.dao = 'Instanciei o DAO'
 
     def find_joined_dataset(self, options=None):
+        ''' Overriding method outside test scope '''
         return self.find_dataset(options)
 
     def find_dataset(self, options=None):
         ''' Retorno estático para execução dos testes '''
-        from io import StringIO
-
         str_dataset = StringIO(
             """nm_indicador;nu_competencia;vl_indicador
                 Ficticio;2099;1
@@ -87,7 +88,7 @@ class BaseModelFindDatasetTest(unittest.TestCase):
         expected = "".join(str_expected.split())
 
         self.assertEqual(result, expected)
-    
+
     def test_no_wrap(self):
         ''' Verifica se retorna o dataset sem o wrapping '''
         model = StubFindModel()

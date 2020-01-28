@@ -21,6 +21,7 @@ class StubRepository(BaseRepository):
     }
 
     def load_and_prepare(self):
+        ''' Overriding method outside test scope '''
         self.dao = 'Instanciei o DAO'
 
 class StubRepositoryCustomPartition(StubRepository):
@@ -45,7 +46,7 @@ class BaseRepositoryGeneralTest(unittest.TestCase):
         repo = StubRepository()
         tbl_name = repo.get_table_name('MAIN')
         self.assertEqual(tbl_name, 'indicadores')
-    
+
     def test_get_partitioning_empty(self):
         ''' Verifica correta obtenção de cláusula de partitioning quando não há
             particionamento especificado na classe '''
@@ -56,7 +57,7 @@ class BaseRepositoryGeneralTest(unittest.TestCase):
         ''' Verifica correta obtenção dde cláusula de particionamento '''
         repo = StubRepository()
         self.assertEqual(repo.replace_partition("min_part"), 'MIN({val_field}) OVER(PARTITION BY {partition}) AS api_calc_{calc}')
-    
+
     def test_exclude_from_partition(self):
         ''' Verifica a correta exclusão do particionamento de campos inexistentes no SELECT '''
         repo = StubRepositoryCustomPartitionMultipleValues()

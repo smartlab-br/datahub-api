@@ -1,7 +1,7 @@
 ''' Request handlers and related utilities '''
+from collections.abc import Iterable
 from werkzeug.serving import WSGIRequestHandler, _log
 import colors # pip3 install ansicolors
-from collections.abc import Iterable
 
 class FLPORequestHandler(WSGIRequestHandler):
     ''' Request Handler to override WSGI's '''

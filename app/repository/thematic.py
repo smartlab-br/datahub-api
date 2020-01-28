@@ -20,11 +20,11 @@ class ThematicRepository(ImpalaRepository):
 
         'sisben': 'sst_beneficio',
         'catweb': 'sst_cat',
-        'sstindicadoresnacionais': 'sst_indicadores_br', 
-        'sstindicadoresmunicipais': 'sst_indicadores_mun', 
-        'sstindicadoresestaduais': 'sst_indicadores_mun', 
+        'sstindicadoresnacionais': 'sst_indicadores_br',
+        'sstindicadoresmunicipais': 'sst_indicadores_mun',
+        'sstindicadoresestaduais': 'sst_indicadores_mun',
         'sstindicadoresunidadempt': 'sst_indicadores_mpt_unidade',
-        
+
         'estadicmunic': 'estadic_munic',
         'estadicuf': 'estadic_munic_uf',
         'estadicunidadempt': 'estadic_munic_mpt_unidade',
@@ -67,10 +67,11 @@ class ThematicRepository(ImpalaRepository):
     }
 
     def get_default_partitioning(self, options):
+        ''' Gets default partitioning from thematic datasets' definition '''
         if 'theme' not in options:
             return self.DEFAULT_PARTITIONING['MAIN']
-        elif options['theme'] in self.DEFAULT_PARTITIONING:
+        if options['theme'] in self.DEFAULT_PARTITIONING:
             return self.DEFAULT_PARTITIONING[options['theme']]
-        elif options['theme'] in self.DEFAULT_PARTITIONING['NONE']:
+        if options['theme'] in self.DEFAULT_PARTITIONING['NONE']:
             return ''
         return self.DEFAULT_PARTITIONING['MAIN']

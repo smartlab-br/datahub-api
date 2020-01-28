@@ -54,8 +54,7 @@ class BaseResourceBuildOptionsTest(unittest.TestCase):
             "limit": None,
             "offset": None,
             "calcs": None,
-            "partition": None,
-            "theme": 'MAIN',
+            "partition": None
         }
         built = BaseResource.build_options(qry_params)
         self.assertEqual(built, expected)
@@ -68,7 +67,7 @@ class BaseResourceBuildOptionsTest(unittest.TestCase):
             "valor": 'vl_indicador',
             "agregacao": 'sum',
             "ordenacao": '-vl_indicador',
-            "filtros": 'eq-ds_indicador-Acidentes\, B91,and,eq-nu_competencia-2010',
+            "filtros": r'eq-ds_indicador-Acidentes\, B91,and,eq-nu_competencia-2010',
             "pivot": 'nm_indicador',
             "limit": None,
             "offset": None,
@@ -88,13 +87,12 @@ class BaseResourceBuildOptionsTest(unittest.TestCase):
             "limit": None,
             "offset": None,
             "calcs": None,
-            "partition": None,
-            "theme": 'MAIN',
+            "partition": None
         }
         built = BaseResource.build_options(qry_params)
         self.assertEqual(built, expected)
 
-def test_allow_hyphen_and_comma(self):
+    def test_allow_hyphen_and_comma(self):
         ''' Verifica a correta construção de parâmetros quando há uma vírgula ou hífen no filtro'''
         qry_params = {
             "categorias":
@@ -102,7 +100,7 @@ def test_allow_hyphen_and_comma(self):
             "valor": 'vl_indicador',
             "agregacao": 'sum',
             "ordenacao": '-vl_indicador',
-            "filtros": 'eq-ds_indicador-Acidentes\, B91\-,and,eq-nu_competencia-2010',
+            "filtros": r'eq-ds_indicador-Acidentes\, B91\-,and,eq-nu_competencia-2010',
             "pivot": 'nm_indicador',
             "limit": None,
             "offset": None,
@@ -117,7 +115,7 @@ def test_allow_hyphen_and_comma(self):
             "valor": ['vl_indicador'],
             "agregacao": ['sum'],
             "ordenacao": ['-vl_indicador'],
-            "where": ['eq-ds_indicador-Acidentes, B91\-', 'and', 'eq-nu_competencia-2010'],
+            "where": [r'eq-ds_indicador-Acidentes, B91\-', 'and', 'eq-nu_competencia-2010'],
             "pivot": ['nm_indicador'],
             "limit": None,
             "offset": None,

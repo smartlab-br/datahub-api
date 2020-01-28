@@ -11,7 +11,7 @@ from service.qry_options_builder import QueryOptionsBuilder
 from service.pandas_operator import PandasOperator
 
 #pylint: disable=R0903
-class BaseModel(object):
+class BaseModel():
     ''' Definição do repo '''
     METADATA = {}
 
@@ -60,7 +60,7 @@ class BaseModel(object):
                     "metadata": self.fetch_metadata(options),
                     "dataset": dataset
                 }
-            elif 'as_dict' in options and options['as_dict']:
+            if 'as_dict' in options and options['as_dict']:
                 return {
                     "metadata": self.fetch_metadata(options),
                     "dataset": dataset.to_dict('records')
@@ -74,7 +74,7 @@ class BaseModel(object):
         ''' Método abstrato para carregamento do repositório '''
         raise NotImplementedError("Models precisam implementar get_repo")
 
-    def fetch_metadata(self, options={}):
+    def fetch_metadata(self, options=None):
         ''' Método abstrato para carregamento do dataset '''
         return self.METADATA
 
@@ -101,7 +101,9 @@ class BaseModel(object):
     def get_template(self, cd_template, options):
         ''' Gets and fills a template '''
         # Gets a template from git
-        location = app.config['GIT_VIEWCONF_BASE_URL'].format('br/cards', options['datasource'], cd_template)
+        location = app.config['GIT_VIEWCONF_BASE_URL'].format(
+            'br/cards', options['datasource'], cd_template
+        )
         struct = yaml.load(requests.get(location, verify=False).content)
 
         data_collection = {}
@@ -114,9 +116,9 @@ class BaseModel(object):
             )
         # Adds query params as fixed data in the collection
         if 'coefficient' in options:
-            data_collection = { **data_collection, **self.get_coefficients(options['coefficient'])}
+            data_collection = {**data_collection, **self.get_coefficients(options['coefficient'])}
         if 'term' in options:
-            data_collection = { **data_collection, **self.get_terms(options['term'])}
+            data_collection = {**data_collection, **self.get_terms(options['term'])}
         # Removes data_collection definition from yaml
         del struct['api_obj_collection']
 
@@ -145,9 +147,6 @@ class BaseModel(object):
             # Adds complimentary options
             each_options = QueryOptionsBuilder.build_options(each_options)
             each_options["as_pandas"] = True
-
-            if 'theme' in options:
-                each_options['theme'] = options['theme']
 
             # Builds the options to query impala
             each_obj = self.find_dataset(each_options)
@@ -191,7 +190,7 @@ class BaseModel(object):
                     struct[each_arg_key] = self.replace_template_arg(each_arg, base_object)['fixed']
                 else:
                     struct[each_arg_key] = self.remove_templates(each_arg, base_object)
-            
+
         return struct
 
     def templates_to_fixed(self, struct, data_collection, any_nodata=False):
@@ -223,7 +222,7 @@ class BaseModel(object):
     def get_formatted_value(structure, data_collection):
         ''' Gets the formatted value '''
         if (structure['base_object'] in data_collection and
-            data_collection[structure['base_object']] is not None):
+                data_collection[structure['base_object']] is not None):
             fmt_arg = data_collection[structure['base_object']][structure['named_prop']]
             if 'format' in structure:
                 fmt_arg = NumberFormatter.format(fmt_arg, structure)
@@ -250,11 +249,12 @@ class BaseModel(object):
 
             # Creates formatted column by applying number format method
             # in the declared named_prop
-            each_obj['dataset'][each_fmt['prop']] = [ NumberFormatter.format(row[each_fmt['named_prop']], args) for index, row in each_obj['dataset'].iterrows() ]
+            each_obj['dataset'][each_fmt['prop']] = [NumberFormatter.format(row[each_fmt['named_prop']], args) for index, row in each_obj['dataset'].iterrows()]
         return each_obj
 
     @staticmethod
     def apply_coefficient(str_coefficients, each_obj):
+        ''' Applies the given coefficients to the values in the dataset '''
         coefficients = str_coefficients.split(',')
         for coefficient in coefficients:
             coefficient_parts = coefficient.split("-")
@@ -264,6 +264,7 @@ class BaseModel(object):
 
     @staticmethod
     def get_coefficients(str_coefficients):
+        ''' Adds coefficients passed in the request to the structure '''
         coefficients = str_coefficients.split(',')
         coefficient_values = {}
         for coefficient in coefficients:
@@ -277,6 +278,7 @@ class BaseModel(object):
 
     @staticmethod
     def get_terms(str_terms):
+        ''' Adds terms passed in the request to the structure '''
         terms = str_terms.split(',')
         term_values = {}
         for term in terms:
@@ -307,18 +309,16 @@ class BaseModel(object):
         ''' Use pandas filter to set a collection '''
         if inst_type == 'from_id':
             return dataset.loc[dataset[named_prop] == int(id_au)].iloc[0]
-        elif inst_type == 'first_occurence':
+        if inst_type == 'first_occurence':
             return dataset.reset_index().loc[0]
-        elif inst_type == 'min':
+        if inst_type == 'min':
             if dataset[named_prop].dtype == 'object':
                 return dataset.loc[dataset[named_prop] == dataset[named_prop].min()].iloc[0]
-            else:
-                return dataset.loc[dataset[named_prop].idxmin()]
-        elif inst_type == 'max':
+            return dataset.loc[dataset[named_prop].idxmin()]
+        if inst_type == 'max':
             if dataset[named_prop].dtype == 'object':
                 return dataset.loc[dataset[named_prop] == dataset[named_prop].max()].iloc[0]
-            else:
-                return dataset.loc[dataset[named_prop].idxmax()]
+            return dataset.loc[dataset[named_prop].idxmax()]
         return None
 
     def replace_named_prop(self, struct, data_collection):
@@ -341,6 +341,8 @@ class BaseModel(object):
         return struct
 
     def replace_template_arg(self, struct, data_collection):
+        ''' Replaces the template for a fixed structure or just replaces
+            its arguments, according to attribute keep_template '''
         # Gets base arguments from base object
         base_args = []
         kept_args = 0
@@ -392,8 +394,7 @@ class BaseModel(object):
         # Runs function
         if struct['function'] == 'slice':
             return base_object[fn_args[0]:fn_args[1]]
-        else:
-            return getattr(base_object, struct['function'])(*tuple(fn_args))
+        return getattr(base_object, struct['function'])(*tuple(fn_args))
 
     def find_and_operate(self, operation, options=None):
         ''' Obtém um conjunto de dados e opera em cima deles '''
@@ -458,12 +459,13 @@ class BaseModel(object):
 
     @staticmethod
     def resort_dataset(base_dataset, rules):
+        ''' Re-execute sorting on the dataset '''
         # Checks descending
         if rules is None:
             return base_dataset
 
         ascending = not all(['-' in x for x in rules])
 
-        clean_rules = [x.replace('-','') for x in rules]
+        clean_rules = [x.replace('-', '') for x in rules]
 
         return base_dataset.sort_values(by=clean_rules, ascending=ascending)

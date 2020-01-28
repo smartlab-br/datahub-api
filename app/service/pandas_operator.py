@@ -12,7 +12,7 @@ class PandasOperator():
         ''' Runs an aoperation, that functions as a macro for building additional columns in a dataset '''
         if operation == 'rerank':
             return cls.rerank(dataset)
-        elif 'cut' in operation: # Verifica se a operação é de CUT
+        if 'cut' in operation: # Verifica se a operação é de CUT
             # Segrega a identificação do padrão de CUT
             pattern = operation.split('-')
             if len(pattern) < 2:
@@ -24,8 +24,7 @@ class PandasOperator():
             # Gets patterns from GIT
             location = app.config['GIT_VIEWCONF_BASE_URL'].format('options', 'cut', pattern_id)
             return cls.cut(dataset, target, yaml.load(requests.get(location, verify=False).content))
-        else:
-            return dataset
+        return dataset
 
     @staticmethod
     def rerank(dataset):
@@ -36,7 +35,7 @@ class PandasOperator():
         dataset['agr_sum_vl_indicador_br'] = dataset.groupby('cd_indicador')['agr_sum_vl_indicador'].transform('sum')
         dataset['rerank_perc_br'] = dataset['agr_sum_vl_indicador'] / dataset['agr_sum_vl_indicador_br']
 
-        dataset['rerank_rank_uf'] = dataset.groupby(['cd_uf','cd_indicador'])['agr_sum_vl_indicador'].rank(method='min', ascending=False)
+        dataset['rerank_rank_uf'] = dataset.groupby(['cd_uf', 'cd_indicador'])['agr_sum_vl_indicador'].rank(method='min', ascending=False)
         dataset['agr_sum_vl_indicador_uf'] = dataset.groupby(['cd_uf', 'cd_indicador'])['agr_sum_vl_indicador'].transform('sum')
         dataset['rerank_perc_uf'] = dataset['agr_sum_vl_indicador'] / dataset['agr_sum_vl_indicador_uf']
 
@@ -46,7 +45,12 @@ class PandasOperator():
     def cut(dataset, target, options):
         ''' Cuts the dataset, placing items on bins, based on config '''
         # Gets the array of binned-data
-        cut_vals = pd.cut(dataset[target], options['bins'], right=options['right'], labels=options['labels'])
+        cut_vals = pd.cut(
+            dataset[target],
+            options['bins'],
+            right=options['right'],
+            labels=options['labels']
+        )
         # Adds resulting vector to dataset
         dataset['cut'] = cut_vals
 

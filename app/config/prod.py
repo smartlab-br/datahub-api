@@ -1,19 +1,12 @@
-from kazoo.client import KazooClient
+''' Config loader for production environment '''
 import os
+from kazoo.client import KazooClient
 
-
-class ProductionConfig(object):
-
+class ProductionConfig():
+    ''' Config loader for production environment '''
     zk = KazooClient(hosts=os.getenv('ZOOKEEPER_HOST') + ':' + os.getenv('ZOOKEEPER_PORT'))
     zk.start()
-    data, stat = zk.get("/spai/datahub-api/prod/hive_host")
-    HIVE_HOST = data.decode("utf-8")
-    data, stat = zk.get("/spai/datahub-api/prod/hive_port")
-    HIVE_PORT = data.decode("utf-8")
-    data, stat = zk.get("/spai/datahub-api/prod/hive_user")
-    HIVE_USER = data.decode("utf-8")
-    data, stat = zk.get("/spai/datahub-api/prod/hive_pwd")
-    HIVE_PWD = data.decode("utf-8")
+
     data, stat = zk.get("/spai/datahub-api/prod/impala_host")
     IMPALA_HOST = data.decode("utf-8")
     data, stat = zk.get("/spai/datahub-api/prod/impala_port")

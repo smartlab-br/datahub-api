@@ -10,7 +10,7 @@ class Thematic(BaseModel):
             'datasets': [
                 'sstindicadoresnacionais', 'sstindicadoresmunicipais',
                 'sstindicadoresestaduais', 'sstindicadoresunidadempt',
-                'tiindicadoresnacionais', 'tiindicadoresmunicipais', 
+                'tiindicadoresnacionais', 'tiindicadoresmunicipais',
                 'tiindicadoresestaduais', 'tiindicadoresunidadempt'
             ],
             'source': {
@@ -27,7 +27,7 @@ class Thematic(BaseModel):
                 'censoagromunicipal', 'censoagroestadual', 'censoagronacional'
             ],
             'source': {
-                'fonte': 'IBGE - Censo Agropecuário, Florestal e Aquícola, 2017', 
+                'fonte': 'IBGE - Censo Agropecuário, Florestal e Aquícola, 2017',
                 'link': 'https://ibge.gov.br/'
             }
         },
@@ -81,10 +81,11 @@ class Thematic(BaseModel):
         if self.repo is None:
             self.repo = ThematicRepository()
         return self.repo
-    
-    def fetch_metadata(self, options):
-        if 'theme' in options:    
-            for each_source_key, each_source in self.METADATA.items():
-                if options['theme'] in each_source['datasets']:
+
+    def fetch_metadata(self, options=None):
+        ''' Gets the metadata from thematic datasets' definitions '''
+        if options is not None and 'theme' in options:
+            for each_source in self.METADATA.items():
+                if options['theme'] in each_source['dataset']:
                     return each_source['source']
         return self.METADATA['ibge']['source']

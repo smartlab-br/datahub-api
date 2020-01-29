@@ -267,7 +267,9 @@ class BaseModel():
         for coefficient in coefficients:
             coefficient_parts = coefficient.split("-")
             if coefficient_parts[0] in each_obj['dataset']:
-                each_obj['dataset'][coefficient_parts[0]] = each_obj['dataset'][coefficient_parts[0]] * float(coefficient_parts[1])
+                each_obj['dataset'][coefficient_parts[0]] = each_obj['dataset'][
+                    coefficient_parts[0]
+                ] * float(coefficient_parts[1])
         return each_obj
 
     @staticmethod

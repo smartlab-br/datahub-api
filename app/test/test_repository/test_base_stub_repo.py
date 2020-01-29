@@ -1,28 +1,8 @@
 
 '''Main tests in API'''
 import unittest
+from test.stubs.repository import StubRepository
 from repository.base import BaseRepository
-
-class StubRepository(BaseRepository):
-    ''' Fake repo to test instance methods '''
-    TABLE_NAMES = {
-        'MAIN': 'indicadores',
-        'municipio': 'municipio'
-    }
-    JOIN_SUFFIXES = {
-        'municipio': '_mun'
-    }
-    ON_JOIN = {
-        'municipio': 'cd_mun_ibge = cd_municipio_ibge_dv'
-    }
-    NAMED_QUERIES = {
-        'QRY_FIND_DATASET': 'SELECT {} FROM {} {} {} {}',
-        'QRY_FIND_JOINED_DATASET': 'SELECT {} FROM {} LEFT JOIN {} ON {} {} {} {}'
-    }
-
-    def load_and_prepare(self):
-        ''' Overriding method outside test scope '''
-        self.dao = 'Instanciei o DAO'
 
 class StubRepositoryCustomPartition(StubRepository):
     ''' Fake repo to test instance methods '''

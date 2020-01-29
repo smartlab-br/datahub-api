@@ -19,7 +19,9 @@ class NumberFormatter():
             return valor
 
         # Sets default values
-        (precision, multiplier, collapse, str_locale, n_format, ui_tags) = cls.load_defaults(options)
+        (
+            precision, multiplier, collapse, str_locale, n_format, ui_tags
+        ) = cls.load_defaults(options)
 
         # Applies multiplier and sets precision
         valor = cls.apply_multiplier(valor, multiplier)

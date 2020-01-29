@@ -9,7 +9,8 @@ class PandasOperator():
     ''' Class for sequence of pandas datasets manipulations '''
     @classmethod
     def operate(cls, dataset, operation):
-        ''' Runs an aoperation, that functions as a macro for building additional columns in a dataset '''
+        ''' Runs an aoperation, that functions as a macro for building additional columns in
+            a dataset '''
         if operation == 'rerank':
             return cls.rerank(dataset)
         if 'cut' in operation: # Verifica se a operação é de CUT
@@ -30,14 +31,22 @@ class PandasOperator():
     def rerank(dataset):
         ''' Gets rankings '''
         # Architecture step: [1] 2 N
-        # (1) Funciona apenas para atender a uma demanda de indicadores temáticos do trabalho escravo
-        dataset['rerank_rank_br'] = dataset.groupby('cd_indicador')['agr_sum_vl_indicador'].rank(method='min', ascending=False)
-        dataset['agr_sum_vl_indicador_br'] = dataset.groupby('cd_indicador')['agr_sum_vl_indicador'].transform('sum')
-        dataset['rerank_perc_br'] = dataset['agr_sum_vl_indicador'] / dataset['agr_sum_vl_indicador_br']
+        # (1) Funciona apenas para atender a uma demanda de indicadores temáticos do
+        # trabalho escravo
+        rules = {
+            'br': 'cd_indicador',
+            'uf': ['cd_uf', 'cd_indicador']
+        }
 
-        dataset['rerank_rank_uf'] = dataset.groupby(['cd_uf', 'cd_indicador'])['agr_sum_vl_indicador'].rank(method='min', ascending=False)
-        dataset['agr_sum_vl_indicador_uf'] = dataset.groupby(['cd_uf', 'cd_indicador'])['agr_sum_vl_indicador'].transform('sum')
-        dataset['rerank_perc_uf'] = dataset['agr_sum_vl_indicador'] / dataset['agr_sum_vl_indicador_uf']
+        for key, value in rules.items():
+            rank_key = f'rerank_rank_{key}'
+            dataset[rank_key] = dataset.groupby(value)['agr_sum_vl_indicador'].rank(
+                method='min', ascending=False
+            )
+            sum_key = f'agr_sum_vl_indicador_{key}'
+            dataset[sum_key] = dataset.groupby(value)['agr_sum_vl_indicador'].transform('sum')
+            perc_key = f'rerank_perc_{key}'
+            dataset[perc_key] = dataset['agr_sum_vl_indicador'] / dataset[sum_key]
 
         return dataset
 

@@ -234,7 +234,7 @@ class BaseModel():
                     each_inst['named_prop'],
                     options['cd_analysis_unit']
                 )
-            except (ValueError, KeyError, TypeError):
+            except (ValueError, KeyError, TypeError, IndexError):
                 data_collection[each_inst['name']] = None
                 any_nodata = True
             if each_inst['name'] not in data_collection:

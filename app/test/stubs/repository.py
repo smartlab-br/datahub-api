@@ -53,7 +53,8 @@ class StubFindModelRepository(StubRepository):
         ''' Overriding method outside test scope '''
         return self.find_dataset(options)
 
-    def find_dataset(self, options=None):
+    #pylint: disable=R0201
+    def find_dataset(self, _options):
         ''' Retorno estático para execução dos testes '''
         str_dataset = StringIO(
             """nm_indicador;nu_competencia;vl_indicador
@@ -66,7 +67,7 @@ class StubFindModelRepository(StubRepository):
 
 class StubFindModelAgrRepository(StubFindModelRepository):
     ''' Fake repo to test instance methods '''
-    def find_dataset(self, options=None):
+    def find_dataset(self, _options):
         ''' Retorno estático para execução dos testes '''
         str_dataset = StringIO(
             """nm_indicador;nu_competencia;agr_sum_vl_indicador

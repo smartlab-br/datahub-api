@@ -46,10 +46,15 @@ class BaseResource(Resource):
 
     def __init__(self):
         ''' Construtor'''
-        self.domain = Thematic()
+        self.domain = None
+        self.__set_domain()
 
     def __get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
             self.domain = Thematic()
         return self.domain
+
+    def __set_domain(self):
+        ''' Setter invoked from constructor '''
+        self.domain = Thematic()

@@ -10,7 +10,7 @@ class NumberFormatter():
         # Escapes with default, when there's no value
         try:
             valor = cls.validate(valor)
-        except:
+        except ValueError:
             if 'default' in options and options['default'] is not None:
                 return options['default']
             return '-'

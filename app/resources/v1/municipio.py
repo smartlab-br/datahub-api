@@ -42,10 +42,6 @@ class MunicipiosResource(BaseResource):
 
 class MunicipioResource(BaseResource):
     ''' Classe de Municipio '''
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Municipio()
-
     @swagger.doc({
         'tags':['municipio'],
         'description':'Obtém um único município de acordo com o código do IBGE',
@@ -73,3 +69,7 @@ class MunicipioResource(BaseResource):
         if self.domain is None:
             self.domain = Municipio()
         return self.domain
+
+    def __set_domain(self):
+        ''' Setter invoked from constructor '''
+        self.domain = Municipio()

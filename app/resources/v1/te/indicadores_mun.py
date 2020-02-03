@@ -39,13 +39,15 @@ class IndicadoresEscravoMunicipiosResource(BaseResource):
         options['theme'] = 'teindicadoresmunicipais'
         return self.__get_domain().find_dataset(options)
 
+#pylint: disable=W0221
 class IndicadoresEscravoMunicipiosOpResource(IndicadoresEscravoMunicipiosResource):
     ''' Classe de múltiplas único município '''
     @swagger.doc({
         'tags': ['beneficio'],
         'description': 'Obtém todos os indicadores do trabalho escravo,'
                        'de acordo com a operação e os parâmetros informados.',
-        'parameters': IndicadoresEscravoMunicipiosResource.CUSTOM_SWAGGER_PARAMS + BaseResource.DEFAULT_SWAGGER_PARAMS,
+        'parameters': IndicadoresEscravoMunicipiosResource.CUSTOM_SWAGGER_PARAMS + \
+            BaseResource.DEFAULT_SWAGGER_PARAMS,
         'responses': {
             '200': {'description': 'Benefícios'}
         }

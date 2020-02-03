@@ -2,6 +2,7 @@
 import os
 from kazoo.client import KazooClient
 
+#pylint: disable=R0903
 class StagingConfig():
     ''' Config loader for production environment '''
     zk = KazooClient(hosts=os.getenv('ZOOKEEPER_HOST') + ':' + os.getenv('ZOOKEEPER_PORT'))

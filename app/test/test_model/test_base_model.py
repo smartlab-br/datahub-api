@@ -1,32 +1,8 @@
 '''Main tests in API'''
 import unittest
+from test.stubs.constants import SAMPLE_DATAFRAME, SAMPLE_DATAFRAME_NA
 import numpy as np
-import pandas as pd
 from model.base import BaseModel
-
-SAMPLE_DATAFRAME = pd.DataFrame.from_dict(
-    {
-        'col_1': ['d', 'b', 'a', 'c'],
-        'col_2': [3, 2, 1, 0],
-        'col_3': [3, 2, 1, 0]
-    }
-)
-SAMPLE_DATAFRAME_NA = pd.DataFrame.from_dict(
-    {
-        'col_1': ['d', 'b', 'a', 'c'],
-        'col_2': [3, 2, 1, None],
-        'col_3': [3, 2, 1, None]
-    }
-)
-SAMPLE_DATAFRAME_REAL = pd.DataFrame.from_dict(
-    {
-        'col_1': ['d', 'b', 'a', 'c'],
-        'col_2': [3000.3, 2000.2, 1000.1, 0.0],
-        'col_3': [3000.3, 2000.2, 1000.1, 0.0],
-        'col_4': [3000.3, 2000.2, 1000.1, 0.0],
-        'col_5': [3000.3, 2000.2, 1000.1, None]
-    }
-)
 
 class BaseModelGetPandasAggregationTest(unittest.TestCase):
     ''' Classe que testa o mapeamento de agregações para funções do pandas '''
@@ -72,99 +48,6 @@ class BaseModelConvertAggregationToPandasTest(unittest.TestCase):
             'another_field': np.mean
         }
         self.assertEqual(model.convert_aggr_to_np(aggrs, vals), expected)
-
-class BaseModelTemplateTest(unittest.TestCase):
-    ''' Test behaviours linked to first-tier template interpolation '''
-    def test_del_keywords(self):
-        ''' Tests removal of keywords from configuration after usage '''
-        self.assertEqual(
-            BaseModel.del_keywords({"as_is": True, "keep_template": False, "test": "test"}),
-            {"test": "test"}
-        )
-
-    def test_get_terms(self):
-        ''' Test if custom terms form a dictionary correctly '''
-        self.assertEqual(
-            BaseModel.get_terms('first-test,second-term'),
-            {"term_first": {"value" : "test"}, "term_second": {"value": "term"}}
-        )
-
-    def test_get_coefficients(self):
-        ''' Test if custom coefficients form a dictionary correctly '''
-        self.assertEqual(
-            BaseModel.get_coefficients('first-1.2-test,second-3-term'),
-            {
-                "coef_first": {"value": 1.2, "label": "test"},
-                "coef_second": {"value": 3, "label": "term"}
-            }
-        )
-
-    def test_apply_coefficients(self):
-        ''' Test if custom coefficients are applied correctly to a dataset '''
-        self.assertEqual(
-            BaseModel.apply_coefficient(
-                'col_2-2-test,col_3-3-term',
-                {"dataset": SAMPLE_DATAFRAME.copy()}
-            )["dataset"].to_dict(),
-            {
-                'col_1': {0: 'd', 1: 'b', 2: 'a', 3: 'c'},
-                'col_2': {0: 6.0, 1: 4.0, 2: 2.0, 3: 0.0},
-                'col_3': {0: 9.0, 1: 6.0, 2: 3.0, 3: 0.0}
-            }
-        )
-
-    def test_run_formatters(self):
-        ''' Test if formatters run correctly given the dataset and format options '''
-        self.assertEqual(
-            BaseModel.run_formatters(
-                [
-                    {
-                        "prop": "col_2",
-                        "named_prop": "col_2",
-                        "format": 'real',
-                        "precision": 1,
-                    },
-                    {
-                        "prop": "col_3",
-                        "named_prop": "col_3",
-                        "format": 'inteiro',
-                        "multiplier": 2
-                    },
-                    {
-                        "prop": "col_4",
-                        "named_prop": "col_4",
-                        "format": 'real',
-                        "collapse": {"format": "inteiro"}
-                    },
-                    {
-                        "prop": "col_5",
-                        "named_prop": "col_5",
-                        "format": 'real',
-                        "default": "N/A"
-                    }
-                ],
-                {"dataset": SAMPLE_DATAFRAME_REAL.copy()}
-            )['dataset'].to_dict(),
-            ({
-                'col_1': {0: 'd', 1: 'b', 2: 'a', 3: 'c'},
-                'col_2': {0: "3.000,3", 1: "2.000,2", 2: "1.000,1", 3: "0"},
-                'col_3': {0: "6.001", 1: "4.000", 2: "2.000", 3: "0"},
-                'col_4': {
-                    0: "3<span>mil</span>", 1: "2<span>mil</span>", 2: "1<span>mil</span>", 3: "0"
-                },
-                'col_5': {0: "3.000", 1: "2.000", 2: "1.000", 3: "N/A"}
-            })
-        )
-
-    def test_get_formatted_value_from_object(self):
-        ''' Test if object attribute is correctly formatted. '''
-        self.assertEqual(
-            BaseModel.get_formatted_value(
-                {"base_object": "obj1", "named_prop": "field1", "format": "monetario"},
-                {"obj1": {"field1": 1.0}}
-            ),
-            "<span>R$</span>1"
-        )
 
 class BaseModelTemplateSortingTest(unittest.TestCase):
     ''' Test sorting in template processing '''

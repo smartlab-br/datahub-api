@@ -30,13 +30,10 @@ class MigracoesSankeyEscravoResource(BaseResource):
             campo-campo_novo)."}
     ]
 
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = MigracoesEscravo()
-
     @swagger.doc({
         'tags':['migracoes'],
-        'description':'Obtém todas as migracoes identificadas no resgate de um trbalhador para geração de gráfico de fluxos sankey.',
+        'description':'Obtém todas as migracoes identificadas no resgate de \
+            um trbalhador para geração de gráfico de fluxos sankey.',
         'parameters': CUSTOM_SWAGGER_PARAMS + BaseResource.DEFAULT_SWAGGER_PARAMS,
         'responses': {
             '200': {'description': 'Migracoes'}
@@ -52,3 +49,7 @@ class MigracoesSankeyEscravoResource(BaseResource):
         if self.domain is None:
             self.domain = MigracoesEscravo()
         return self.domain
+
+    def __set_domain(self):
+        ''' Setter invoked from constructor '''
+        self.domain = MigracoesEscravo()

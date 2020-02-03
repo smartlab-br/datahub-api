@@ -2,7 +2,6 @@
 '''Main tests in API'''
 import unittest
 from test.stubs.repository import StubRepository
-from repository.base import BaseRepository
 
 class StubRepositoryCustomPartition(StubRepository):
     ''' Fake repo to test instance methods '''
@@ -11,13 +10,6 @@ class StubRepositoryCustomPartition(StubRepository):
 class StubRepositoryCustomPartitionMultipleValues(StubRepository):
     ''' Fake repo to test instance methods '''
     DEFAULT_PARTITIONING = 'a, b, c'
-
-class BaseRepositoryInstantiationTest(unittest.TestCase):
-    ''' Tests instantiation errors '''
-    def test_invalid_load(self):
-        ''' Verifica lançamento de exceção ao instanciar classe sem
-            implementação de load_and_prepare. '''
-        self.assertRaises(NotImplementedError, BaseRepository)
 
 class BaseRepositoryGeneralTest(unittest.TestCase):
     ''' General tests over StubRepo '''
@@ -190,14 +182,6 @@ class BaseRepositoryBuildOrderStringTest(unittest.TestCase):
 
 class BaseRepositoryLoadAndPrepareTest(unittest.TestCase):
     ''' Classe que testa o carregamento do dao '''
-    def test_undefined(self):
-        ''' Retorna exceção quando o repositório não define o método
-            de carregamento do dao. '''
-        self.assertRaises(
-            NotImplementedError,
-            BaseRepository
-        )
-
     def test_valid(self):
         ''' Verifica declaração do método de carregamento do dao. '''
         repo = StubRepository()

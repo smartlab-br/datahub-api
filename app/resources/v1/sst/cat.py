@@ -40,6 +40,7 @@ class CatsResource(BaseResource):
         options['theme'] = 'catweb'
         return self.__get_domain().find_dataset(options)
 
+#pylint: disable=W0221
 class CatsOpResource(CatsResource):
     ''' Classe de múltiplas único município '''
     @swagger.doc({

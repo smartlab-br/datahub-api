@@ -16,10 +16,7 @@ class IndicadoresMptUnidadesResource(BaseResource):
             nu_competencia_max, tp_competencia, ds_fonte, vl_indicador, \
             vl_indicador_br, rank_br, rank_br_total, media_br, pct_br, \
             vl_indicador_min_br, vl_indicador_max_br, rank_prt_total, \
-            cd_unidade, cd_prt, nm_prt, nm_unidade e sg_unidade. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            cd_unidade, cd_prt, nm_prt, nm_unidade e sg_unidade. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

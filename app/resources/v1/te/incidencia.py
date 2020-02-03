@@ -9,10 +9,7 @@ class IncidenciaEscravoResource(BaseResource):
         {"name": "categorias", "required": True, "type": 'string', "in": "query",
          "description": "Informações que devem ser trazidas no dataset. \
             Campos disponíveis: cd_ibge, ano, nm_municipio, cd_uf, \
-            qt_nat, qt_res, qt_rgt, rk_nat, rk_res e rk_rgt. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            qt_nat, qt_res, qt_rgt, rk_nat, rk_res e rk_rgt. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

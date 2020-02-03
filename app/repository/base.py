@@ -138,9 +138,7 @@ class BaseRepository():
             else:
                 nu_cats.append(categoria)
         if agregacao is not None:
-            blocking_aggr = ['DISTINCT']
-            blocking_cond = len([x for x in agregacao if x.upper() in blocking_aggr])
-            if blocking_cond == 0:
+            if QueryBuilder.is_valid_grouping(agregacao):
                 return f'GROUP BY {", ".join(nu_cats)}'
             return ''
         raise ValueError('Invalid aggregation (no value)')

@@ -7,17 +7,7 @@ class IndicadoresEscravoEstadosResource(BaseResource):
     ''' Classe de múltiplas incidências '''
     CUSTOM_SWAGGER_PARAMS = [
         {"name": "categorias", "required": True, "type": 'string', "in": "query",
-         "description": "Informações que devem ser trazidas no dataset. \
-            Campos disponíveis: cd_mun_ibge, nu_competencia, \
-            nu_competencia_min, nu_competencia_max, nm_uf, sg_uf, \
-            cd_unidade, cd_prt, cd_regiao, nm_regiao, cd_uf, \
-            cd_indicador, ds_agreg_primaria, ds_agreg_secundaria, \
-            ds_indicador, vl_indicador, vl_indicador_br, \
-            vl_indicador_min_br, vl_indicador_max_br, media_br, pct_br, \
-            rank_br e rank_br_total. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+         "description": BaseResource.CAT_IND_UF}
     ]
 
     @swagger.doc({

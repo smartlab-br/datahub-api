@@ -9,10 +9,7 @@ class OperacoesEscravoResource(BaseResource):
         {"name": "categorias", "required": True, "type": 'string', "in": "query",
          "description": "Informações que devem ser trazidas no dataset. \
             Campos disponíveis: cd_ibge, ano, qt_ope, qt_inspecoes, \
-            qt_inspecoes_com_resgate, qt_resgatados e cd_uf. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            qt_inspecoes_com_resgate, qt_resgatados e cd_uf. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

@@ -24,10 +24,7 @@ class MigracoesSankeyEscravoResource(BaseResource):
             cd_mesorregiao_res, nm_mesorregiao_res, cd_microrregiao_res, \
             nm_microrregiao_res, cd_regiao_res, nm_regiao_res, \
             cd_municipio_ibge_dv_res, nm_municipio_res, \
-            nm_municipio_sem_acento_res e cd_uf_res. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            nm_municipio_sem_acento_res e cd_uf_res. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

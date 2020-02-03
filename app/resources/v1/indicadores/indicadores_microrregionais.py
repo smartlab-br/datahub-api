@@ -11,10 +11,7 @@ class IndicadoresMicrorregionaisResource(BaseResource):
             Campos disponíveis: cd_microrregiao, nm_microrregiao, \
             nm_indicador, ds_indicador, nu_ano_indicador, ds_fonte, \
             cd_dimensao, ds_grupo, ds_subgrupo, ds_operador e \
-            vl_indicador. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            vl_indicador. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

@@ -7,14 +7,7 @@ class IndicadoresTIBrasilResource(BaseResource):
     ''' Classe de múltiplas incidências '''
     CUSTOM_SWAGGER_PARAMS = [
         {"name": "categorias", "required": True, "type": 'string', "in": "query",
-         "description": "Informações que devem ser trazidas no dataset. \
-            Campos disponíveis: cd_mun_ibge, nu_competencia, \
-            cd_indicador, ds_agreg_primaria, ds_agreg_secundaria, \
-            ds_indicador, ds_fonte, nu_competencia_min, nu_competencia_max, \
-            vl_indicador, vl_indicador_min, vl_indicador_max e media_br. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+         "description": BaseResource.CAT_IND_BR}
     ]
 
     @swagger.doc({

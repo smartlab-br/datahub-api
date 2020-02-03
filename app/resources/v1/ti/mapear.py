@@ -15,10 +15,7 @@ class MapearInfantilResource(BaseResource):
             cd_municipio_ibge_dv, cd_municipio_ibge, nm_municipio, nm_municipio_sem_acento, cd_uf, \
             latitude, longitude, nm_uf, sg_uf, nm_municipio_uf, cd_unidade, cd_prt, nm_prt, nm_unidade, \
             tp_unidade, sg_unidade, cd_mesorregiao, nm_mesorregiao, cd_microrregiao, nm_microrregiao, \
-            cd_regiao e nm_regiao \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            cd_regiao e nm_regiao " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

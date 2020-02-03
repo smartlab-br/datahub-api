@@ -9,10 +9,7 @@ class MLExposicaoResgateFeatureImportanceResource(BaseResource):
         {"name": "categorias", "required": True, "type": 'string', "in": "query",
          "description": "Informações que devem ser trazidas no dataset. \
             Campos disponíveis: cd_indicador, ds_indicador, \
-            ds_indicador_curto, importancia. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            ds_indicador_curto, importancia. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

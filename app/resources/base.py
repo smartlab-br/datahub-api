@@ -38,6 +38,35 @@ class BaseResource(Resource):
             ln_var_part, norm_pos_part, ln_norm_pos_part, norm_part e \
             ln_norm_part."}
     ]
+    CAT_DETAIL = "Para renomear campos do dataset de retorno, após o campo de \
+        consulta, adicionar o novo nome, separado por '-' (ex: campo-campo_novo)."
+    CAT_IND_BR = "Informações que devem ser trazidas no dataset. \
+        Campos disponíveis: cd_mun_ibge, nu_competencia, \
+        cd_indicador, ds_agreg_primaria, ds_agreg_secundaria, \
+        ds_indicador, ds_fonte, nu_competencia_min, nu_competencia_max, \
+        vl_indicador, vl_indicador_min, vl_indicador_max e media_br. \
+        " + CAT_DETAIL
+    CAT_IND_UF = "Informações que devem ser trazidas no dataset. \
+        Campos disponíveis: cd_mun_ibge, nu_competencia, \
+        nu_competencia_min, nu_competencia_max, nm_uf, sg_uf, \
+        cd_prt, nm_prt, cd_regiao, nm_regiao, cd_uf, cd_indicador, \
+        ds_agreg_primaria, ds_agreg_secundaria, ds_indicador, \
+        ds_fonte, vl_indicador, vl_indicador_br, vl_indicador_min_br, \
+        vl_indicador_max_br, media_br, pct_br, rank_br e \
+        rank_br_total. " + CAT_DETAIL
+    CAT_IND_MUN = "Informações que devem ser trazidas no dataset. \
+        Campos disponíveis: cd_mun_ibge, nu_competencia, \
+        nu_competencia_min, nu_competencia_max, nm_municipio_uf, \
+        latitude, longitude, nm_uf, sg_uf, cd_unidade, cd_prt, \
+        nm_prt, nm_unidade, tp_unidade, sg_unidade, cd_mesorregiao, \
+        nm_mesorregiao, cd_microrregiao, nm_microrregiao, \
+        cd_regiao, nm_regiao, cd_mun_ibge_dv, nm_municipio, cd_uf, \
+        cd_indicador, ds_agreg_primaria, ds_agreg_secundaria, \
+        ds_indicador, vl_indicador, vl_indicador_uf, \
+        vl_indicador_min_uf, vl_indicador_max_uf, media_uf, pct_uf, \
+        rank_uf, rank_uf_total, vl_indicador_br, vl_indicador_min_br \
+        vl_indicador_max_br, media_br, pct_br, rank_br e \
+        rank_br_total. " + CAT_DETAIL
 
     @staticmethod
     def build_options(r_args):

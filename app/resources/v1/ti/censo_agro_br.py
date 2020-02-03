@@ -10,10 +10,7 @@ class CensoAgroBrasilResource(BaseResource):
          "description": "Informações que devem ser trazidas no dataset. \
             Campos disponíveis: cd_uf, tot_ocupados, tot_ocup_men14, \
             perc_tot_14, men_14_parente, part_com_parentesco, \
-            men_14_sem_parente e part_sem_parentesco. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            men_14_sem_parente e part_sem_parentesco. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

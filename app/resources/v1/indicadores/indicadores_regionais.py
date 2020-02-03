@@ -10,10 +10,7 @@ class IndicadoresRegionaisResource(BaseResource):
          "description": "Informações que devem ser trazidas no dataset. \
             Campos disponíveis: cd_regiao, nm_regiao, nm_indicador, \
             ds_indicador, nu_ano_indicador, ds_fonte, cd_dimensao, \
-            ds_grupo, ds_subgrupo, ds_operador e vl_indicador. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            ds_grupo, ds_subgrupo, ds_operador e vl_indicador. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

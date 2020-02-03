@@ -18,10 +18,7 @@ class IndicadoresTIMptUnidadesResource(BaseResource):
             vl_indicador_max_prt, media_prt, pct_prt, rank_prt, \
             rank_prt_total, vl_indicador_br, vl_indicador_min_br \
             vl_indicador_max_br, media_br, pct_br, rank_br e \
-            rank_br_total. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            rank_br_total. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

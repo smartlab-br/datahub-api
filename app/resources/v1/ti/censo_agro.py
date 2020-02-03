@@ -9,10 +9,7 @@ class CensoAgroMunicipiosResource(BaseResource):
         {"name": "categorias", "required": True, "type": 'string', "in": "query",
          "description": "Informações que devem ser trazidas no dataset. \
             Campos disponíveis: cod_mun, qt_ocupados, qt_ocupados_menores14, \
-            percent_ocupados_men_14. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            percent_ocupados_men_14. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

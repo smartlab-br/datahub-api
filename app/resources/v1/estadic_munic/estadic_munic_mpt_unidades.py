@@ -13,10 +13,7 @@ class EstadicMunicMptUnidadesResource(BaseResource):
             vl_indicador, tema, sub_tema, cd_indicador, ds_indicador, \
             spai_vl_indicador, spai_vl_indicador_txt, total_br, \
             presenca_total_br, pct_presenca_br, cd_mun_ibge, cd_uf, \
-            nm_uf, sg_uf, cd_regiao e nm_regiao. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            nm_uf, sg_uf, cd_regiao e nm_regiao. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

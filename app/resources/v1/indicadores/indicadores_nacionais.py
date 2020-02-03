@@ -14,10 +14,7 @@ class IndicadoresNacionaisResource(BaseResource):
             ds_indicador_prefixo, ds_indicador_curto, ds_agreg_primaria, \
             ds_agreg_secundaria, nu_competencia, nu_competencia_min, \
             nu_competencia_max, tp_competencia, ds_fonte, vl_indicador e \
-            rank_br_total. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            rank_br_total. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

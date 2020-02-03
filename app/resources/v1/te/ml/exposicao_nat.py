@@ -15,10 +15,7 @@ class MLExposicaoNaturalidadeResource(BaseResource):
             nm_municipio_uf, nm_uf, sg_uf, latitude, longitude, \
             altitude, cd_unidade, nm_unidade, tp_unidade, cd_prt, \
             nm_prt, cd_mesorregiao, nm_mesorregiao, cd_microrregiao, \
-            nm_microrregiao, cd_regiao, nm_regiao. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            nm_microrregiao, cd_regiao, nm_regiao. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

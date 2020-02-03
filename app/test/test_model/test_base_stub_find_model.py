@@ -7,9 +7,7 @@ from model.base import BaseModel
 
 class StubFindModel(BaseModel):
     ''' Classe de STUB da abstração de models '''
-    METADATA = {
-        "fonte": 'Instituto STUB'
-    }
+    METADATA = {"fonte": 'Instituto STUB'}
     def get_repo(self):
         ''' Método abstrato para carregamento do repositório '''
         return StubFindModelRepository()
@@ -29,8 +27,7 @@ class BaseModelFindDatasetTest(unittest.TestCase):
                 "pivot": None
             }, **COMMON_OPTIONS
         }
-        str_result = model.find_dataset(options)
-        result = "".join(str_result.split())
+        result = "".join(model.find_dataset(options).split())
 
         str_expected = COMMON_EXPECTED_RESPONSE_STRING.format(
             """

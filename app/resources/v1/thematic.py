@@ -10,10 +10,7 @@ class ThematicResource(BaseResource):
          "description": "Identificador do tema para buscar a tabela \
             correspondente."},
         {"name": "categorias", "required": True, "type": 'string', "in": "query",
-         "description": "Informações que devem ser trazidas no dataset. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+         "description": "Informações que devem ser trazidas no dataset. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

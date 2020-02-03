@@ -19,10 +19,7 @@ class MunicipiosResource(BaseResource):
             nm_prt, nm_unidade, tp_unidade, sg_unidade, cd_mesorregiao, \
             nm_mesorregiao, cd_microrregiao, nm_microrregiao, \
             nu_portaria_mpt, tp_area, cd_geomunicipio_ibge, \
-            cd_municipio_rfb, cd_regiao e nm_regiao. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            cd_municipio_rfb, cd_regiao e nm_regiao. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

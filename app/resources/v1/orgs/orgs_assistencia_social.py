@@ -10,10 +10,7 @@ class OrgsAssistenciaSocialResource(BaseResource):
          "description": "Informações que devem ser trazidas no dataset. \
             Campos disponíveis: categoria, razaoSocial, nome, municipio, uf, \
             endereco, bairro, referencia, cep, responsavel, cnpj, email, \
-            google_lat,google_lng. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            google_lat,google_lng. " + BaseResource.CAT_DETAIL}
     ]
 
     @swagger.doc({

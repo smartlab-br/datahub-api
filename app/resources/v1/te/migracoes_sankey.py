@@ -39,9 +39,9 @@ class MigracoesSankeyEscravoResource(BaseResource):
     def get(self):
         ''' Obtém os registros de migracoes, conforme parâmetros informados '''
         options = self.build_options(request.args)
-        return self.__get_domain().find_dataset_sankey(options)
+        return self.get_domain().find_dataset_sankey(options)
 
-    def __get_domain(self):
+    def get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
             self.domain = MigracoesEscravo()

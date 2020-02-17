@@ -26,4 +26,4 @@ class OrgsAssistenciaSocialResource(BaseResource):
         ''' Obtém os registros de CRAS e CREAS, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'assistenciasocial'
-        return self.__get_domain().find_dataset(options)
+        return self.get_domain().find_dataset(options)

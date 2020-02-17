@@ -26,4 +26,4 @@ class CensoAgroEstadosResource(BaseResource):
         ''' Obtém os registros de Censo Rural, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'censoagroestadual'
-        return self.__get_domain().find_dataset(options)
+        return self.get_domain().find_dataset(options)

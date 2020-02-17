@@ -26,4 +26,4 @@ class ThematicResource(BaseResource):
         ''' Obtém os registros do dataset temático, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = theme
-        return self.__get_domain().find_dataset(options)
+        return self.get_domain().find_dataset(options)

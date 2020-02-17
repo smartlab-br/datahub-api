@@ -29,4 +29,4 @@ class EstadicMunicMptUnidadesResource(BaseResource):
         ''' Obtém os registros de indicadores municipais, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'estadicunidadempt'
-        return self.__get_domain().find_dataset(options)
+        return self.get_domain().find_dataset(options)

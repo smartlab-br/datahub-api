@@ -30,4 +30,4 @@ class MLExposicaoNaturalidadeResource(BaseResource):
         ''' Obtém a classificação de todos os municípios '''
         options = self.build_options(request.args)
         options['theme'] = 'temlexposicaonaturais'
-        return self.__get_domain().find_dataset(options)
+        return self.get_domain().find_dataset(options)

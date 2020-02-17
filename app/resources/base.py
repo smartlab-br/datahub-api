@@ -78,7 +78,7 @@ class BaseResource(Resource):
         self.domain = None
         self.__set_domain()
 
-    def __get_domain(self):
+    def get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
             self.domain = Thematic()

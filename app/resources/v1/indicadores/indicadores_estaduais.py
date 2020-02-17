@@ -32,4 +32,4 @@ class IndicadoresEstaduaisResource(BaseResource):
         ''' Obtém os registros de indicadores estaduais, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'indicadoresestaduais'
-        return self.__get_domain().find_dataset(options)
+        return self.get_domain().find_dataset(options)

@@ -26,4 +26,4 @@ class IndicadoresRegionaisResource(BaseResource):
         ''' Obtém os registros de indicadores regionais, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'indicadoresregionais'
-        return self.__get_domain().find_dataset(options)
+        return self.get_domain().find_dataset(options)

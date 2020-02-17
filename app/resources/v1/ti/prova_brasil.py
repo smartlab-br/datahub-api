@@ -31,4 +31,4 @@ class ProvaBrasilInfantilResource(BaseResource):
         ''' Obtém os registros do Mapear, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'provabrasil'
-        return self.__get_domain().find_dataset(options)
+        return self.get_domain().find_dataset(options)

@@ -49,5 +49,5 @@ class CardTemplateResource(BaseResource):
         if 'datasource' in request.args:
             options = request.args.copy()
             options['theme'] = request.args.get('datasource')
-            return self.__get_domain().get_template(cd_template, options)
+            return self.get_domain().get_template(cd_template, options)
         raise ValueError('Datasource inválido ou sem templates')

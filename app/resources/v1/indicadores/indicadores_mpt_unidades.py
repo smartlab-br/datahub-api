@@ -32,4 +32,4 @@ class IndicadoresMptUnidadesResource(BaseResource):
         ''' Obtém os registros de indicadores regionais do MPT, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'indicadoresmptunidades'
-        return self.__get_domain().find_dataset(options)
+        return self.get_domain().find_dataset(options)

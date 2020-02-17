@@ -35,7 +35,7 @@ class CatsResource(BaseResource):
         ''' Obtém os registros de CAT, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'catweb'
-        return self.__get_domain().find_dataset(options)
+        return self.get_domain().find_dataset(options)
 
 #pylint: disable=W0221
 class CatsOpResource(CatsResource):
@@ -53,4 +53,4 @@ class CatsOpResource(CatsResource):
         ''' Obtém os registros de CAT, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'catweb'
-        return self.__get_domain().find_and_operate(operation, options)
+        return self.get_domain().find_and_operate(operation, options)

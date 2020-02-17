@@ -1,26 +1,14 @@
 ''' Controller para fornecer dados da CEE '''
-from flask import request
 from flask_restful_swagger_2 import swagger
+from flask import request
 from resources.base import BaseResource
-from model.thematic import Thematic
 
 class IndicadoresTIBrasilResource(BaseResource):
     ''' Classe de múltiplas incidências '''
     CUSTOM_SWAGGER_PARAMS = [
         {"name": "categorias", "required": True, "type": 'string', "in": "query",
-         "description": "Informações que devem ser trazidas no dataset. \
-            Campos disponíveis: cd_mun_ibge, nu_competencia, \
-            cd_indicador, ds_agreg_primaria, ds_agreg_secundaria, \
-            ds_indicador, ds_fonte, nu_competencia_min, nu_competencia_max, \
-            vl_indicador, vl_indicador_min, vl_indicador_max e media_br. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+         "description": BaseResource.CAT_IND_BR}
     ]
-
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['beneficio'],
@@ -34,10 +22,4 @@ class IndicadoresTIBrasilResource(BaseResource):
         ''' Obtém os registros de Benefícios, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'tiindicadoresnacionais'
-        return self.__get_domain().find_dataset(options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain
+        return self.get_domain().find_dataset(options)

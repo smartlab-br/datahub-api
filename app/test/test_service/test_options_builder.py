@@ -15,7 +15,7 @@ class OptionsBuilderTest(unittest.TestCase):
             "valor": 'c,d',
             "agregacao": 'e,f',
             "ordenacao": 'g,h',
-            "filtros": 'eq-o-comma\,separated,and,eq-p-q',
+            "filtros": r'eq-o-comma\,separated,and,eq-p-q',
             "pivot": 'i,j',
             "limit": '10',
             "offset": '11',
@@ -25,20 +25,20 @@ class OptionsBuilderTest(unittest.TestCase):
         }
 
         opts = QueryOptionsBuilder.build_options(r_args)
-        
+
         self.assertEqual(
             opts,
             {
-                "categorias": ['a','b'],
-                "valor": ['c','d'],
-                "agregacao": ['e','f'],
-                "ordenacao": ['g','h'],
-                "where": ['eq-o-comma,separated','and','eq-p-q'],
-                "pivot": ['i','j'],
+                "categorias": ['a', 'b'],
+                "valor": ['c', 'd'],
+                "agregacao": ['e', 'f'],
+                "ordenacao": ['g', 'h'],
+                "where": ['eq-o-comma,separated', 'and', 'eq-p-q'],
+                "pivot": ['i', 'j'],
                 "limit": '10',
                 "offset": '11',
-                "calcs": ['k','l'],
-                "partition": ['m','n'],
+                "calcs": ['k', 'l'],
+                "partition": ['m', 'n'],
                 "theme": ['t']
             }
         )
@@ -50,7 +50,7 @@ class OptionsBuilderTest(unittest.TestCase):
             "valor": 'c,d',
             "agregacao": 'e,f',
             "ordenacao": 'g,h',
-            "where": 'eq-o-comma\,separated,and,eq-p-q',
+            "where": r'eq-o-comma\,separated,and,eq-p-q',
             "pivot": 'i,j',
             "limit": '10',
             "offset": '11',
@@ -59,5 +59,4 @@ class OptionsBuilderTest(unittest.TestCase):
         }
 
         opts = QueryOptionsBuilder.build_options(r_args)
-        
         self.assertEqual(opts['theme'], 'MAIN')

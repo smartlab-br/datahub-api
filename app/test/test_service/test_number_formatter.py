@@ -2,12 +2,12 @@
 import unittest
 from service.number_formatter import NumberFormatter
 
-class NumberFormatterTest(unittest.TestCase):
-    ''' Classe que testa a formatação de números '''
+class NumberFormatterLanguageTest(unittest.TestCase):
+    ''' Classe que testa a formatação de números em pt e en '''
     def test_pt_inteiro(self):
         ''' Verifica se a formatação de inteiro em pt_br está correta '''
         fmt = NumberFormatter.format(
-            2019, 
+            2019,
             {"format": 'inteiro', "str_locale": 'pt_br'}
         )
         self.assertEqual(fmt, "2.019")
@@ -24,7 +24,7 @@ class NumberFormatterTest(unittest.TestCase):
         ''' Verifica se a formatação de percentual em pt_br está correta '''
         fmt = NumberFormatter.format(
             53.481,
-            { "format": 'porcentagem', "str_locale": 'pt_br'}
+            {"format": 'porcentagem', "str_locale": 'pt_br'}
         )
         self.assertEqual(fmt, "53,5<span>%</span>")
 
@@ -85,6 +85,8 @@ class NumberFormatterTest(unittest.TestCase):
         )
         self.assertEqual(fmt, "<span>R$</span>53.481,6")
 
+class NumberFormatterOptionsTest(unittest.TestCase):
+    ''' Test different options combinations '''
     def test_no_valor_with_no_default(self):
         ''' Verifica se retorna '-' quando não há nem valor nem default '''
         fmt = NumberFormatter.format(None, {})
@@ -94,15 +96,22 @@ class NumberFormatterTest(unittest.TestCase):
         ''' Verifica se retorna default quando não há valor '''
         fmt = NumberFormatter.format(None, {"default": "N/A"})
         self.assertEqual(fmt, "N/A")
-    
+
     def test_valor_with_no_format(self):
         ''' Verifica se retorna o próprio valor quando não há definição de formato '''
         fmt = NumberFormatter.format(99, {})
         self.assertEqual(fmt, 99)
-    
+
     def test_custom_options(self):
         ''' Verifica se retorna os parâmetros customizados corretamente '''
-        (precision, multiplier, collapse, str_locale, n_format, ui_tags) = NumberFormatter.load_defaults({
+        (
+            precision,
+            multiplier,
+            collapse,
+            str_locale,
+            _n_format,
+            ui_tags
+        ) = NumberFormatter.load_defaults({
             "precision": 4,
             "multiplier": 5,
             "collapse": True,
@@ -121,23 +130,25 @@ class NumberFormatterTest(unittest.TestCase):
         ''' Verifica se retorna 'R$' no prefixo quando não houver tag '''
         prefix = NumberFormatter.get_unit_prefix('monetario', False)
         self.assertEqual(prefix, 'R$')
-    
+
     def test_multiplying_string(self):
         ''' Verifica se multiplica corretamente quando os parâmetros são strings '''
         fmt = NumberFormatter.apply_multiplier('2', '2')
         self.assertEqual(fmt, 4)
-    
+
     def test_suffix_percent_no_tags(self):
         ''' Verifica se retorna os sufixos corretamente - percentual sem tag '''
-        (valor, suffix_string, order_magnitude) = NumberFormatter.get_value_suffix(98.76, 'porcentagem', {}, False)
+        (_valor, suffix_string, _order_magnitude) = NumberFormatter.get_value_suffix(
+            98.76, 'porcentagem', {}, False
+        )
         self.assertEqual(suffix_string, '%')
-    
+
     def test_suffix_collapse_no_tags(self):
         ''' Verifica se retorna os sufixos corretamente - collapsed with no tags'''
-        (valor, suffix_string, order_magnitude) = NumberFormatter.get_value_suffix(
+        (_valor, suffix_string, _order_magnitude) = NumberFormatter.get_value_suffix(
             10000,
             'inteiro',
-            { "format": 'real', "precision": 1, "uiTags": False },
+            {"format": 'real', "precision": 1, "uiTags": False},
             True
         )
         self.assertEqual(suffix_string, 'mil')
@@ -150,7 +161,7 @@ class NumberFormatterTest(unittest.TestCase):
                 10000,
                 10.0,
                 1,
-                { "format": 'real', "precision": 1, "uiTags": False },
+                {"format": 'real', "precision": 1, "uiTags": False},
             )
         )
 
@@ -175,12 +186,12 @@ class NumberFormatterTest(unittest.TestCase):
         ''' Verifica se retorna o valor da string convertido para float '''
         fmt = NumberFormatter.validate("53481.0")
         self.assertEqual(fmt, 53481.0)
-    
+
     def test_valid_int_value_as_string(self):
         ''' Verifica se retorna o valor da string inteira convertido para float '''
         fmt = NumberFormatter.validate("53481")
         self.assertEqual(fmt, 53481.0)
-    
+
     def test_invalid_string(self):
         ''' Verifica se erro é lançado quando o valor for uma string não numérica '''
         self.assertRaises(
@@ -196,7 +207,7 @@ class NumberFormatterTest(unittest.TestCase):
             NumberFormatter.validate,
             None
         )
-    
+
     def test_validate_nan_value(self):
         ''' Verifica se erro é lançado quando um valor NaN é enviado '''
         self.assertRaises(

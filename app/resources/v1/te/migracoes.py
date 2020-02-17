@@ -1,8 +1,7 @@
 ''' Controller para fornecer dados da CEE '''
-from flask import request
 from flask_restful_swagger_2 import swagger
+from flask import request
 from resources.base import BaseResource
-from model.thematic import Thematic
 
 class MigracoesEscravoResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -24,15 +23,8 @@ class MigracoesEscravoResource(BaseResource):
             cd_mesorregiao_res, nm_mesorregiao_res, cd_microrregiao_res, \
             nm_microrregiao_res, cd_regiao_res, nm_regiao_res, \
             cd_municipio_ibge_dv_res, nm_municipio_res, \
-            nm_municipio_sem_acento_res e cd_uf_res. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            nm_municipio_sem_acento_res e cd_uf_res. " + BaseResource.CAT_DETAIL}
     ]
-
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['migracoes'],
@@ -46,10 +38,4 @@ class MigracoesEscravoResource(BaseResource):
         ''' Obtém os registros de migracoes, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'migracoesescravos'
-        return self.__get_domain().find_dataset(options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain
+        return self.get_domain().find_dataset(options)

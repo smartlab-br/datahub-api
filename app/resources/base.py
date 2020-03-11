@@ -39,6 +39,6 @@ class BaseResource(Resource):
     ]
 
     @staticmethod
-    def build_options(r_args):
+    def build_options(r_args, rules='query'):
         ''' Constrói as opções da pesquisa '''
-        return QueryOptionsBuilder.build_options(r_args)
+        return QueryOptionsBuilder.build_options(r_args, rules)

@@ -249,7 +249,7 @@ class BaseRepository(object):
         if not self.check_params(options, ['categorias']):
             raise ValueError('Invalid Categories - required')
         categorias = self.transform_categorias(categorias)
-        prepended_aggr = self.prepend_aggregations(options['agregacao'])
+        prepended_aggr = self.prepend_aggregations(options.get('agregacao'))
         str_calcs = ''
         if self.check_params(options, ['calcs']):
             calcs_options = options.copy()
@@ -495,7 +495,7 @@ class BaseRepository(object):
                          'TRUNCATE', 'DELETE', 'CONCAT', 'UPDATE', 'FROM', ';',
                          '|']
         for key, option in options.items():
-            if option is not None and key not in ['no_wrap', 'as_pandas', 'as_dict', 'as_image']:
+            if (option is not None and key in ["categorias", "valor", "agregacao", "ordenacao", "where", "pivot", "limit", "offset", "calcs", "partition", "theme"]):
                 checked_words = ','.join(option).upper()
                 if key in ['limit', 'offset']:
                     checked_words = option.upper()
@@ -520,24 +520,24 @@ class HadoopRepository(BaseRepository):
         if self.catch_injection(options):
             raise ValueError('SQL reserved words not allowed!')
         str_where = ''
-        if options['where'] is not None:
-            str_where = ' WHERE ' + self.build_filter_string(options['where'])
+        if options.get('where') is not None:
+            str_where = ' WHERE ' + self.build_filter_string(options.get('where'))
         str_group = ''
         nu_cats = options['categorias']
-        if options['pivot'] is not None:
+        if options.get('pivot') is not None:
             nu_cats = nu_cats + options['pivot']
-        if options['agregacao'] is not None and options['agregacao']:
+        if options.get('agregacao') is not None and options.get('agregacao'):
             str_group = self.build_grouping_string(
                 nu_cats,
                 options['agregacao']
             )
         str_categorias = self.build_categorias(nu_cats, options)
         str_limit = ''
-        if options['limit'] is not None:
-            str_limit = f'LIMIT {options["limit"]}'
+        if options.get('limit') is not None:
+            str_limit = f'LIMIT {options.get("limit")}'
         str_offset = ''
-        if options['offset'] is not None:
-            str_offset = f'OFFSET {options["offset"]}'
+        if options.get('offset') is not None:
+            str_offset = f'OFFSET {options.get("offset")}'
         if 'theme' not in options:
             options['theme'] = 'MAIN'
         query = self.get_named_query('QRY_FIND_DATASET').format(
@@ -545,7 +545,7 @@ class HadoopRepository(BaseRepository):
             self.get_table_name(options['theme']),
             str_where,
             str_group,
-            self.build_order_string(options['ordenacao']),
+            self.build_order_string(options.get('ordenacao')),
             str_limit,
             str_offset
         )

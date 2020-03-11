@@ -18,22 +18,22 @@ class BaseModel(object):
     def find_dataset(self, options=None):
         ''' Obtém todos, sem tratamento '''
         result = self.get_repo().find_dataset(options)
-        if options['pivot'] is not None:
-            if options['calcs'] is not None and options['calcs']:
+        if options.get('pivot') is not None:
+            if options.get('calcs') is not None and options.get('calcs'):
                 nu_val = 'api_calc_' + options['calcs'][0]
-            elif options['valor'] is None:
+            elif options.get('valor') is None:
                 nu_val = self.get_repo().get_agr_string(options['agregacao'][0], '*').split()[-1]
             else:
                 nu_val = self.get_repo().get_agr_string(
-                    options['agregacao'][0], options['valor'][0]
+                    options.get('agregacao')[0], options.get('valor')[0]
                 ).split()[-1]
             result = pd.DataFrame(result)
             result = pd.pivot_table(
                 result, values=[nu_val],
-                columns=options['pivot'],
-                index=options['categorias'],
+                columns=options.get('pivot'),
+                index=options.get('categorias'),
                 aggfunc=self.convert_aggr_to_np(
-                    options['agregacao'],
+                    options.get('agregacao'),
                     [nu_val]
                 )
             )

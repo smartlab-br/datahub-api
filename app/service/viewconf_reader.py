@@ -68,6 +68,7 @@ class ViewConfReader():
         ''' Creates new options from predefined rules '''
         nu_options = {}
         au = options.get('au')
+        visao = options.get('visao', 'uf')
 
         if len(str(au)) > 2 or (len(str(au)) == 2 and visao == 'uf'):
             nu_options['cd_uf']=str(au)[:2]

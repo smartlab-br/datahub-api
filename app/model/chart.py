@@ -57,7 +57,16 @@ class Chart(BaseModel):
             return export_png(chart, filename="chart.png")
         elif lib == 'FOLIUM':
             print(chart)
-            return {'html': chart.get_root()}
+            import imgkit
+
+            tst = imgkit.from_string(chart._repr_html_(), 'test.png', options={"xvfb": ""})
+            print(tst)
+            
+            tst2 = open('test.png', 'r')
+            print(tst2)
+
+            return tst2
+            
         pass
 
     @staticmethod
@@ -68,7 +77,6 @@ class Chart(BaseModel):
             (script, div) = components(chart)
             return {'script': script, 'div': div}
         elif lib == 'FOLIUM':
-            print(chart)
             return {'div': chart._repr_html_(), 'mime': 'text/html'}
         pass
 

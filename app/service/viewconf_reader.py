@@ -3,7 +3,9 @@ import requests
 import urllib
 import yaml
 from flask import current_app as app
+from service.number_formatter import NumberFormatter
 from service.qry_options_builder import QueryOptionsBuilder
+import numpy as np
 
 class ViewConfReader():
     ''' Service that formats a number into a HTML snippet '''
@@ -74,3 +76,30 @@ class ViewConfReader():
             nu_options['cd_uf']=str(au)[:2]
 
         return nu_options
+    
+    @classmethod
+    def generate_columns(cls, dataframe, options):
+        ''' Create new columns by applying calcs and formatters '''
+        # Applying calcs
+        calcs = options.get('api',{}).get('options',{}).get('calcs')
+        for calc in calcs:
+            dataframe['calc_' + calc.get('id')] = dataframe.apply(
+                getattr(cls, calc.get('function')),
+                axis=1,
+                **calc
+            )
+        
+        # Applying formatters
+        formatters = options.get('api',{}).get('options',{}).get('formatters')
+        for fmtr in formatters:
+            dataframe['fmt_' + fmtr.get('id')] = dataframe[fmtr.get('id')].apply(
+                NumberFormatter.format,
+                options = fmtr
+            )
+        
+        return dataframe
+
+    @staticmethod
+    def get_proportional_indicator_uf(row, **kwargs):
+        ''' Custom function to get the data as a positive number based on moved log curve '''
+        return np.log(((row.get(kwargs.get('campo', 'vl_indicador')) - row.get(kwargs.get('media', 'media_uf'))) / row.get(kwargs.get('media', 'media_uf'))) + 1.01)

@@ -7,6 +7,8 @@ from bokeh.embed import components
 from bokeh.io import export_png
 import io
 import folium
+import json
+import requests
 from service.viewconf_reader import ViewConfReader
 
 class Chart(BaseModel):
@@ -57,16 +59,70 @@ class Chart(BaseModel):
             return export_png(chart, filename="chart.png")
         elif lib == 'FOLIUM':
             print(chart)
-            import imgkit
+            ##### Teste 1 - imgkit
+            # import imgkit
 
-            tst = imgkit.from_string(chart._repr_html_(), 'test.png', options={"xvfb": ""})
-            print(tst)
+            # tst = imgkit.from_string(chart._repr_html_(), '/usr/share/test.png', options={"xvfb": ""})
+            # print(tst)
             
-            tst2 = open('test.png', 'r')
-            print(tst2)
+            # tst2 = open('/usr/share/test.png', 'r')
+            # print(tst2)
 
-            return tst2
+            # return tst2
+
+            ##### Teste 2 - selenium
+            # import os
+            # import time
+            # from selenium import webdriver
+
+            # delay=5
+            # fn='testmap.html'
             
+            # tmpurl='file://{path}/{mapfile}'.format(path=os.getcwd(),mapfile=fn)
+            # chart.save(fn)
+
+            # from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
+            # # FIREFOX
+            # # cap = DesiredCapabilities().FIREFOX
+            # # cap["marionette"] = False
+            # # browser = webdriver.Firefox(capabilities=cap)
+
+            # # CHROME
+            # chromeOptions = webdriver.ChromeOptions() 
+            # chromeOptions.binary_location = "/opt/google/chrome/"
+            # chromeOptions.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2}) 
+            # chromeOptions.add_argument("--no-sandbox") 
+            # chromeOptions.add_argument("--disable-setuid-sandbox") 
+            # chromeOptions.add_argument("--disable-dev-shm-using") 
+            # chromeOptions.add_argument("--disable-extensions") 
+            # chromeOptions.add_argument("--disable-gpu") 
+            # chromeOptions.add_argument("--remote-debugging-port=9222")
+            # chromeOptions.add_argument("start-maximized") 
+            # chromeOptions.add_argument("disable-infobars") 
+            # chromeOptions.add_argument("--headless") 
+            # chromeOptions.add_argument(r"user-data-dir=/usr/share/cache/") 
+            # print(chromeOptions)
+            # browser = webdriver.Chrome('/usr/local/bin/chromedriver', chrome_options=chromeOptions) 
+            # # browser = webdriver.Chrome('/path/to/chromedriver')  # Optional argument, if not specified will search path.
+            # # browser = webdriver.Chrome()  # Optional argument, if not specified will search path.
+
+            # browser.get(tmpurl)
+            # #Give the map tiles some time to load
+            # time.sleep(delay)
+            # browser.save_screenshot('map.png')
+            # browser.quit()
+
+            # return open('map.png')
+
+            ##### Teste 3 - bokeh
+            import json
+            import pandas as pd
+            import geopandas as gpd
+            from bokeh.io import output_notebook, show, output_file
+            from bokeh.plotting import figure
+            from bokeh.models import GeoJSONDataSource, LinearColorMapper, ColorBar
+            from bokeh.palettes import brewer
         pass
 
     @staticmethod
@@ -114,18 +170,26 @@ class Chart(BaseModel):
         else:
             # Trocar por topojson dos estados no Brasil
             state_geo = f'https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-29-mun.json'
+        state_geo = requests.get(state_geo).json()
 
         dataframe['str_id'] = dataframe[chart_options.get('id_field')].astype(str)
+        dataframe['idx'] = dataframe[chart_options.get('id_field')]
+
+        # Runs dataframe modifiers from viewconf
+        dataframe = ViewConfReader().generate_columns(dataframe, options)
 
         # TODO 2 - Ver tooltips automatizados (falta bind da linha do dataset com o valor do item corrente)
-        # dataframe['tooltip'] = dataframe.apply(tooltip_gen_default, axis=1, headers=options.get('headers'))
+        dataframe = dataframe.set_index('idx')    
+        for each_au in state_geo.get('features'):
+            each_au.get('properties').update(json.loads(dataframe.loc[int(each_au.get('properties').get('id'))].to_json()), headers=options.get('headers'))
+        state_geo = json.dumps(state_geo)
 
-        # [REM] Sobrescrevendo para teste
-        chart_options = {
-            'id_field': 'str_id',
-            'topo_key': "codarea",
-            'value_field': 'vl_indicador'
-        }
+        # # [REM] Sobrescrevendo para teste
+        # chart_options = {
+        #     'id_field': 'str_id',
+        #     'topo_key': "codarea",
+        #     'value_field': 'vl_indicador'
+        # }
 
         n = folium.Map(tiles=tiles_url, attr = tiles_attribution)
 
@@ -134,22 +198,18 @@ class Chart(BaseModel):
             geo_data=state_geo,
             name='choropleth',
             data=dataframe,
-            columns=[chart_options['id_field'], chart_options['value_field']],
+            columns=['str_id', chart_options['value_field']],
             key_on='feature.properties.id',
             fill_color='Blues',
             fill_opacity=0.7,
             line_opacity=0.2,
-            bins=list(dataframe[chart_options['value_field']].quantile([0, 0.11, 0.22, 0.33, 0.44, 0.55, 0.66, 0.77, 0.88, 1])),
+            # bins=list(dataframe[chart_options['value_field']].quantile([0, 0.11, 0.22, 0.33, 0.44, 0.55, 0.66, 0.77, 0.88, 1])),
             legend_name='Unemployment Rate (%)',
             highlight=True
         )
 
-        tooltip_fields=['id','name','description']
-        # tooltip_fields=['tooltip']
-        # for each_tooltip in dataframe['tooltip']:
-        #     chart.geojson.add_child(folium.features.Tooltip(each_tooltip))
         folium.features.GeoJsonTooltip(
-            fields=tooltip_fields,
+            fields=[hdr.get('value') for hdr in options.get('headers')],
             localize=True,
             sticky=False,
             labels=True).add_to(chart.geojson)

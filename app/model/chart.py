@@ -187,16 +187,11 @@ class Chart(BaseModel):
             each_au.get('properties').update(json.loads(dataframe.loc[int(each_au.get('properties').get('id'))].to_json()), headers=options.get('headers'))
         state_geo = json.dumps(state_geo)
 
-        # # [REM] Sobrescrevendo para teste
-        # chart_options = {
-        #     'id_field': 'str_id',
-        #     'topo_key': "codarea",
-        #     'value_field': 'vl_indicador'
-        # }
+        # Creating map instance
+        n = folium.Map(tiles=tiles_url, attr = tiles_attribution, control_scale = True)
 
-        n = folium.Map(tiles=tiles_url, attr = tiles_attribution)
-
-        # TODO 3 - Ajustar cores para a escala (linear, não em bins - tentar remover extremos, passando um array de cores HEX)
+        # TODO 2 - Ajustar cores para a escala (linear, não em bins - tentar remover extremos, passando um array de cores HEX)
+        # Creating the choropleth layer
         chart = folium.Choropleth(
             geo_data=state_geo,
             name='choropleth',
@@ -207,29 +202,34 @@ class Chart(BaseModel):
             fill_opacity=0.7,
             line_opacity=0.2,
             # bins=list(dataframe[chart_options['value_field']].quantile([0, 0.11, 0.22, 0.33, 0.44, 0.55, 0.66, 0.77, 0.88, 1])),
-            # legend_name='Unemployment Rate (%)',
-            legend=False,
-            highlight=True
+            highlight = True
         )
 
-        # Adding tooltip to map
+        # Adding tooltip to choropleth
+        # TODO 3 - Mudar fontes, adicionar título
         folium.features.GeoJsonTooltip(
             fields=tooltip_columns,
             localize=True,
             sticky=False,
-            labels=True).add_to(chart.geojson)
+            labels=True
+        ).add_to(chart.geojson)
 
         # Adding marker to current analysis unit
         if np.issubdtype(dataframe.index.dtype, np.number):
             au = int(au)
-        folium.Marker(
-            [dataframe.loc[au]['latitude'], dataframe.loc[au]['longitude']],
-            icon=folium.Icon(color='red')
-        #    popup=data.iloc[i]['name']
-        ).add_to(n)
+        au_row = dataframe.loc[au]
+        au_title = 'Analysis Unit'
+        if len(options.get('headers', [])) > 0:
+            au_title = au_row[options.get('headers', [])[0]['text']]
+        marker_layer = folium.map.FeatureGroup(name = au_title)
+        folium.map.Marker(
+            [au_row['latitude'], au_row['longitude']],
+            icon=folium.Icon(color='red') # TODO 4 - create function to find contrasting color.
+        ).add_to(marker_layer)
 
+        # Adding layers to map
+        marker_layer.add_to(n)
         chart.add_to(n)
-
         folium.LayerControl().add_to(n)
 
         n.fit_bounds(n.get_bounds())

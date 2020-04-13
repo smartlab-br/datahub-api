@@ -2,6 +2,7 @@
 from model.base import BaseModel
 from model.thematic import Thematic
 import matplotlib.pyplot as plt
+import numpy as np
 from bokeh.plotting import figure, show, output_file
 from bokeh.embed import components
 from bokeh.io import export_png
@@ -155,7 +156,8 @@ class Chart(BaseModel):
         ''' Gera um mapa topojson a partir das opções enviadas '''
         # http://localhost:5000/charts/choropleth?from_viewconf=S&au=2927408&card_id=mapa_pib_brasil&dimension=socialeconomico&as_image=S
         # Default values
-        tiles_url = 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png'
+        # tiles_url = 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png'
+        tiles_url = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
         tiles_attribution = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         visao = options.get('visao', 'uf')
 
@@ -177,8 +179,8 @@ class Chart(BaseModel):
 
         # Runs dataframe modifiers from viewconf
         dataframe = ViewConfReader().generate_columns(dataframe, options)
+        (dataframe, tooltip_columns) = ViewConfReader.rename_columns(dataframe, options.get('headers'))
 
-        # TODO 2 - Ver tooltips automatizados (falta bind da linha do dataset com o valor do item corrente)
         dataframe = dataframe.set_index('idx')    
         for each_au in state_geo.get('features'):
             each_au.get('properties').update(json.loads(dataframe.loc[int(each_au.get('properties').get('id'))].to_json()), headers=options.get('headers'))
@@ -204,15 +206,26 @@ class Chart(BaseModel):
             fill_opacity=0.7,
             line_opacity=0.2,
             # bins=list(dataframe[chart_options['value_field']].quantile([0, 0.11, 0.22, 0.33, 0.44, 0.55, 0.66, 0.77, 0.88, 1])),
-            legend_name='Unemployment Rate (%)',
+            # legend_name='Unemployment Rate (%)',
+            legend=False,
             highlight=True
         )
 
+        # Adding tooltip to map
         folium.features.GeoJsonTooltip(
-            fields=[hdr.get('value') for hdr in options.get('headers')],
+            fields=tooltip_columns,
             localize=True,
             sticky=False,
             labels=True).add_to(chart.geojson)
+
+        # Adding marker to current analysis unit
+        if np.issubdtype(dataframe.index.dtype, np.number):
+            au = int(au)
+        folium.Marker(
+            [dataframe.loc[au]['latitude'], dataframe.loc[au]['longitude']],
+            icon=folium.Icon(color='red')
+        #    popup=data.iloc[i]['name']
+        ).add_to(n)
 
         chart.add_to(n)
 

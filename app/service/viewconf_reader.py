@@ -103,3 +103,9 @@ class ViewConfReader():
     def get_proportional_indicator_uf(row, **kwargs):
         ''' Custom function to get the data as a positive number based on moved log curve '''
         return np.log(((row.get(kwargs.get('campo', 'vl_indicador')) - row.get(kwargs.get('media', 'media_uf'))) / row.get(kwargs.get('media', 'media_uf'))) + 1.01)
+
+    @staticmethod
+    def rename_columns(dataframe, headers):
+        rules = {hdr.get('value'):hdr.get('text') for hdr in headers}
+        dataframe = dataframe.rename(columns = rules)
+        return (dataframe, list(rules.values()))

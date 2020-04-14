@@ -180,7 +180,6 @@ class Chart(BaseModel):
 
         # Runs dataframe modifiers from viewconf
         dataframe = ViewConfReader().generate_columns(dataframe, options)
-        (dataframe, tooltip_columns) = ViewConfReader.rename_columns(dataframe, options.get('headers'))
 
         dataframe = dataframe.set_index('idx')    
         for each_au in state_geo.get('features'):
@@ -206,9 +205,9 @@ class Chart(BaseModel):
         )
 
         # Adding tooltip to choropleth
-        # TODO 3 - Mudar fontes, adicionar título
         folium.features.GeoJsonTooltip(
-            fields=tooltip_columns,
+            fields = [hdr.get('value') for hdr in options.get('headers')],
+            aliases = [hdr.get('text') for hdr in options.get('headers')],
             localize=True,
             sticky=False,
             labels=True
@@ -220,7 +219,7 @@ class Chart(BaseModel):
         au_row = dataframe.loc[au]
         au_title = 'Analysis Unit'
         if len(options.get('headers', [])) > 0:
-            au_title = au_row[options.get('headers', [])[0]['text']]
+            au_title = au_row[options.get('headers', [])[0]['value']]
         marker_layer = folium.map.FeatureGroup(name = au_title)
         folium.map.Marker(
             [au_row['latitude'], au_row['longitude']],

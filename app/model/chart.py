@@ -120,6 +120,20 @@ class Chart(BaseModel):
         tiles_attribution = 'Esri, USGS | Esri, HERE | Esri, Garmin, FAO, NOAA'
         visao = options.get('visao', 'uf')
 
+        style_statement = "<link href='https://fonts.googleapis.com/css2?family=Pathway+Gothic+One&display=swap' rel='stylesheet'>\
+            <style>\
+                .legend.leaflet-control{display:none}\
+                .leaflet-tooltip table tbody tr:first-child th{display:none;}\
+                .leaflet-tooltip table tbody tr:first-child td{\
+                    font-family: 'Pathway Gothic One', Calibri, sans-serif;\
+                    font-size: 2.5em;\
+                    font-weight: 700;\
+                }\
+                .leaflet-tooltip table tbody tr:nth-child(2){\
+                    border-top: 1px solid black;\
+                }\
+            </style>"
+
         au = options.get('au')
         chart_options = options.get('chart_options')
 
@@ -189,5 +203,6 @@ class Chart(BaseModel):
         chart.add_to(n)
         folium.LayerControl().add_to(n)
 
+        n.get_root().header.add_child(folium.Element(style_statement))
         n.fit_bounds(n.get_bounds())
         return n

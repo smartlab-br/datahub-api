@@ -19,8 +19,10 @@ class ChartsResource(BaseResource):
         options['chart_type'] = chart_type
         content = self.__get_domain().get_chart(options)
 
-        if options['as_image']:
-            return send_file(content, attachment_filename="chart.png", mimetype="image/png")
+        if options.get('as_image'):
+            response = Response(content)
+            response.headers.set('Content-Type', 'image/png')
+            return response
         if content.get('mime'):
             return Response(content.get('div'), mimetype=content.get('mime'))
         return content

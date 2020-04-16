@@ -6,11 +6,19 @@ import numpy as np
 from bokeh.plotting import figure, show, output_file
 from bokeh.embed import components
 from bokeh.io import export_png
+from bokeh.io.export import get_screenshot_as_png
 import io
 import folium
 import json
 import requests
 from service.viewconf_reader import ViewConfReader
+# Novos
+# FIREFOX-ESR tem que estar no PATH
+import os
+import time
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 class Chart(BaseModel):
     ''' Model for fetching dinamic and static charts '''
@@ -57,73 +65,23 @@ class Chart(BaseModel):
     def get_image(chart, lib):
         ''' Gets chart as image '''
         if lib == 'BOKEH':
-            return export_png(chart, filename="chart.png")
+            img = get_screenshot_as_png(chart)
+            roiImg = img.crop()
+            imgByteArr = io.BytesIO()
+            
+            roiImg.save(imgByteArr, format='PNG')
+            return imgByteArr.getvalue()
         elif lib == 'FOLIUM':
-            print(chart)
-            ##### Teste 1 - imgkit
-            # import imgkit
-
-            # tst = imgkit.from_string(chart._repr_html_(), '/usr/share/test.png', options={"xvfb": ""})
-            # print(tst)
+            ff_options = Options()
+            ff_options.set_headless(headless=True)
             
-            # tst2 = open('/usr/share/test.png', 'r')
-            # print(tst2)
-
-            # return tst2
-
-            ##### Teste 2 - selenium
-            # import os
-            # import time
-            # from selenium import webdriver
-
-            # delay=5
-            # fn='testmap.html'
+            cap = DesiredCapabilities().FIREFOX
+            cap["marionette"] = True
+            driver = webdriver.Firefox(firefox_options=ff_options, capabilities=cap)
             
-            # tmpurl='file://{path}/{mapfile}'.format(path=os.getcwd(),mapfile=fn)
-            # chart.save(fn)
-
-            # from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-
-            # # FIREFOX
-            # # cap = DesiredCapabilities().FIREFOX
-            # # cap["marionette"] = False
-            # # browser = webdriver.Firefox(capabilities=cap)
-
-            # # CHROME
-            # chromeOptions = webdriver.ChromeOptions() 
-            # chromeOptions.binary_location = "/opt/google/chrome/"
-            # chromeOptions.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2}) 
-            # chromeOptions.add_argument("--no-sandbox") 
-            # chromeOptions.add_argument("--disable-setuid-sandbox") 
-            # chromeOptions.add_argument("--disable-dev-shm-using") 
-            # chromeOptions.add_argument("--disable-extensions") 
-            # chromeOptions.add_argument("--disable-gpu") 
-            # chromeOptions.add_argument("--remote-debugging-port=9222")
-            # chromeOptions.add_argument("start-maximized") 
-            # chromeOptions.add_argument("disable-infobars") 
-            # chromeOptions.add_argument("--headless") 
-            # chromeOptions.add_argument(r"user-data-dir=/usr/share/cache/") 
-            # print(chromeOptions)
-            # browser = webdriver.Chrome('/usr/local/bin/chromedriver', chrome_options=chromeOptions) 
-            # # browser = webdriver.Chrome('/path/to/chromedriver')  # Optional argument, if not specified will search path.
-            # # browser = webdriver.Chrome()  # Optional argument, if not specified will search path.
-
-            # browser.get(tmpurl)
-            # #Give the map tiles some time to load
-            # time.sleep(delay)
-            # browser.save_screenshot('map.png')
-            # browser.quit()
-
-            # return open('map.png')
-
-            ##### Teste 3 - bokeh
-            import json
-            import pandas as pd
-            import geopandas as gpd
-            from bokeh.io import output_notebook, show, output_file
-            from bokeh.plotting import figure
-            from bokeh.models import GeoJSONDataSource, LinearColorMapper, ColorBar
-            from bokeh.palettes import brewer
+            driver.get("data:text/html;charset=utf-8,{html_content}".format(html_content=chart._repr_html_()))
+            
+            return driver.get_screenshot_as_png()
         pass
 
     @staticmethod

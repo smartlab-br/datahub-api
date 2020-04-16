@@ -39,7 +39,7 @@ class OptionsBuilderTest(unittest.TestCase):
                 "offset": '11',
                 "calcs": ['k','l'],
                 "partition": ['m','n'],
-                "theme": ['t']
+                "theme": 't'
             }
         )
 
@@ -60,4 +60,4 @@ class OptionsBuilderTest(unittest.TestCase):
 
         opts = QueryOptionsBuilder.build_options(r_args)
         
-        self.assertEqual(opts['theme'], 'MAIN')
+        self.assertEqual(opts.get('theme'), None)

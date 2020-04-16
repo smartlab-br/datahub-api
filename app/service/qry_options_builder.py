@@ -18,6 +18,7 @@ class QueryOptionsBuilder():
             filtros = filtros.split(',')
             filtros = [f.replace('|', ',') for f in filtros]
             options['where'] = filtros
+            del options['filtros']
 
         if r_args.get('theme') is None and rules in ['query']:
             theme = 'MAIN'

@@ -6,7 +6,7 @@ ENV PYTHONPATH /app:/usr/lib/python3.8/site-packages
 COPY requirements.txt /app/requirements.txt
 COPY app/*.py /app/
 COPY uwsgi.ini /etc/uwsgi/conf.d/
-COPY start.sh /start.sh
+# COPY start.sh /start.sh
 
 ENV MPLLOCALFREETYPE 1
 

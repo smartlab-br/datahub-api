@@ -30,6 +30,7 @@ class ViewConfReader():
     def get_dimension_descriptor(language, observatory, scope, dimension):
         ''' Gets the dimension YAML descriptor as dictionary '''
         location = app.config['GIT_VIEWCONF_BASE_URL'].format(language, observatory, scope, dimension)
+        print(location)
         return yaml.load(requests.get(location, verify=False).content)
 
     @classmethod
@@ -37,9 +38,11 @@ class ViewConfReader():
         ''' Transforms API string into datahub options '''
         url = cls.get_api_url(api_call_obj, custom_args)
         url_parts = urllib.parse.urlparse(url)
+        print(url)
 
         args = [x for x in url_parts.query.split('&')]
         args_dict = {arg.split('=')[0]: arg.split('=')[1] for arg in args}
+        print(args_dict)
         options = QueryOptionsBuilder.build_options(args_dict)
 
         path_parts = url_parts.path.split('/')
@@ -57,11 +60,13 @@ class ViewConfReader():
     def get_card_descriptor(cls, language, observatory, scope, dimension, card_id):
         ''' Gets a single card from a viewconf yaml as a dictionary '''
         dim = cls.get_dimension_descriptor(language, observatory, scope, dimension)
+        print(dim)
         if dim.get('secoes'):
             for secao in dim.get('secoes'):
                 if secao.get('cards'):
                     for card in secao.get('cards'):
                         if card.get('id') == card_id:
+                            print(card)
                             return card
         return None
 

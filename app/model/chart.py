@@ -39,6 +39,7 @@ class Chart(BaseModel):
                 options.get('dimension'),
                 options.get('card_id')
             )
+            print(struct)
             options = {**options, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options}), **struct}
 
         dataframe = Thematic().find_dataset(options)

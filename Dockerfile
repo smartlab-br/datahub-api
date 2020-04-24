@@ -11,9 +11,7 @@ COPY requirements.txt /app/requirements.txt
 # ENV MPLLOCALFREETYPE 1
 # WORKDIR /app
 
-RUN pip3 install -r /app/requirements.txt && \
-    rm -rf /var/cache/apk/* && \
-    rm -rf ~/.cache/
+RUN pip3 install -r /app/requirements.txt
 # # RUN webdrivermanager firefox chrome --linkpath /usr/local/bin
 
 # ENV LANG C.UTF-8

@@ -32,7 +32,7 @@ class Chart(BaseModel):
 
         if options.get('from_viewconf'):
             added_options = ViewConfReader.set_custom_options(options)
-            struct = ViewConfReader.get_card_descriptor(
+            struct = ViewConfReader().get_card_descriptor(
                 options.get('language', 'br'),
                 options.get('observatory', 'td'),
                 options.get('scope', 'municipio'),

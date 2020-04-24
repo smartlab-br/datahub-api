@@ -57,13 +57,11 @@ class ViewConfReader():
     def get_card_descriptor(cls, language, observatory, scope, dimension, card_id):
         ''' Gets a single card from a viewconf yaml as a dictionary '''
         dim = cls.get_dimension_descriptor(language, observatory, scope, dimension)
-        print(dim)
         if dim.get('secoes'):
             for secao in dim.get('secoes'):
                 if secao.get('cards'):
                     for card in secao.get('cards'):
                         if card.get('id') == card_id:
-                            print(card)
                             return card
         return None
 

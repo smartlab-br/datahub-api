@@ -208,13 +208,11 @@ class BaseRepository():
             val_field = options['valor']
 
         # Pega o valor do particionamento
-        if not QueryBuilder.check_params(options, ['partition']):
-            if self.get_default_partitioning(options) != '':
-                res_partition = self.get_default_partitioning(options)
-            else:
-                res_partition = "'1'"
-        else:
+        res_partition = None
+        if self.check_params(options, ['partition']):
             res_partition = options['partition']
+        elif self.get_default_partitioning(options) != '':
+            res_partition = self.get_default_partitioning(options)    
 
         # Transforma o campo de valor em campo agregado conforme query
         if QueryBuilder.check_params(options, ['agregacao']):
@@ -229,7 +227,7 @@ class BaseRepository():
                 )
 
         str_res_partition = res_partition
-        if isinstance(res_partition, list):
+        if res_partition is not None and isinstance(res_partition, list):
             str_res_partition = ",".join(res_partition)
 
         # Constrói a query
@@ -237,23 +235,33 @@ class BaseRepository():
         for calc in options['calcs']:
             # Always appends min and max when calc is not one of them
             if calc not in ['min_part', 'max_part']:
+                pattern = self.replace_partition('min_part')
+                if str_res_partition is None:
+                    pattern = pattern.replace('PARTITION BY {partition}', '')
                 arr_calcs.append(
-                    self.replace_partition('min_part').format(
+                    pattern.format(
                         val_field=val_field,
                         partition=str_res_partition,
                         calc='min_part'
                     )
                 )
+
+                pattern = self.replace_partition('max_part')
+                if str_res_partition is None:
+                    pattern = pattern.replace('PARTITION BY {partition}', '')
                 arr_calcs.append(
-                    self.replace_partition('max_part').format(
+                    pattern.format(
                         val_field=val_field,
                         partition=str_res_partition,
                         calc='max_part'
                     )
                 )
             # Resumes identification of calc
+            pattern = self.replace_partition(calc, options)
+            if str_res_partition is None:
+                pattern = pattern.replace('PARTITION BY {partition}', '')
             arr_calcs.append(
-                self.replace_partition(calc, options).format(
+                pattern.format(
                     val_field=val_field,
                     partition=str_res_partition,
                     calc=calc

@@ -1,9 +1,8 @@
 """API Base """
 import os
-from flask import Flask
-from flask import g
 from flask_cors import CORS
 from flask_restful_swagger_2 import Api
+from flask import Flask, g
 
 from service.request_handler import FLPORequestHandler
 
@@ -41,7 +40,8 @@ from resources.v1.te.operacoes import OperacoesEscravoResource
 from resources.v1.te.migracoes import MigracoesEscravoResource
 from resources.v1.te.migracoes_sankey import MigracoesSankeyEscravoResource
 from resources.v1.te.indicadores_br import IndicadoresEscravoBrasilResource
-from resources.v1.te.indicadores_mun import IndicadoresEscravoMunicipiosResource, IndicadoresEscravoMunicipiosOpResource
+from resources.v1.te.indicadores_mun \
+    import IndicadoresEscravoMunicipiosResource, IndicadoresEscravoMunicipiosOpResource
 from resources.v1.te.indicadores_uf import IndicadoresEscravoEstadosResource
 from resources.v1.te.indicadores_mpt_unidades import IndicadoresEscravoMptUnidadesResource
 # MAchine Learning do Trabalho Escravo
@@ -78,23 +78,19 @@ from resources.v1.card_template import CardTemplateResource
 
 from resources.v1.healthchecks import HCAlive
 
-config = {
+CONFIG = {
     "dev": "config.dev.DevelopmentConfig",
     "prod": "config.prod.ProductionConfig",
     "staging": "config.staging.StagingConfig",
 }
 
 application = Flask(__name__, static_folder='static', static_url_path='') #pylint: disable=C0103
-config_name = os.getenv('FLASK_CONFIGURATION', 'dev')
-application.config.from_object(config[config_name])
+CONFIG_NAME = os.getenv('FLASK_CONFIGURATION', 'dev')
+application.config.from_object(CONFIG[CONFIG_NAME])
 
 @application.teardown_appcontext
-def close_db_connection(error):
+def close_db_connection(_error):
     ''' Cleanup on application crash '''
-    # Encerra a conexão com o hive
-    if hasattr(g, 'hive_connection'):
-        g.hive_connection.close()
-        g.hive_connection = None
     # Encerra a conexão com o impala
     if hasattr(g, 'impala_connection'):
         g.impala_connection.close()
@@ -139,7 +135,10 @@ api.add_resource(IndicadoresSSTMptUnidadesResource, '/sst/indicadoresunidadempt'
 api.add_resource(IncidenciaEscravoResource, '/te/incidencia')
 api.add_resource(IndicadoresEscravoBrasilResource, '/te/indicadoresnacionais')
 api.add_resource(IndicadoresEscravoMunicipiosResource, '/te/indicadoresmunicipais')
-api.add_resource(IndicadoresEscravoMunicipiosOpResource, '/te/indicadoresmunicipais/<string:operation>')
+api.add_resource(
+    IndicadoresEscravoMunicipiosOpResource,
+    '/te/indicadoresmunicipais/<string:operation>'
+)
 api.add_resource(IndicadoresEscravoEstadosResource, '/te/indicadoresestaduais')
 api.add_resource(IndicadoresEscravoMptUnidadesResource, '/te/indicadoresunidadempt')
 api.add_resource(MigracoesEscravoResource, '/te/migracoes')

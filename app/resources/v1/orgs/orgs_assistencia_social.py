@@ -1,8 +1,7 @@
 ''' Controller para fornecer dados das organizações de assistência social '''
-from flask import request
 from flask_restful_swagger_2 import swagger
+from flask import request
 from resources.base import BaseResource
-from model.thematic import Thematic
 
 class OrgsAssistenciaSocialResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -11,15 +10,8 @@ class OrgsAssistenciaSocialResource(BaseResource):
          "description": "Informações que devem ser trazidas no dataset. \
             Campos disponíveis: categoria, razaoSocial, nome, municipio, uf, \
             endereco, bairro, referencia, cep, responsavel, cnpj, email, \
-            google_lat,google_lng. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            google_lat,google_lng. " + BaseResource.CAT_DETAIL}
     ]
-
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['orgs_assistencia_social'],
@@ -34,10 +26,4 @@ class OrgsAssistenciaSocialResource(BaseResource):
         ''' Obtém os registros de CRAS e CREAS, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'assistenciasocial'
-        return self.__get_domain().find_dataset(options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain
+        return self.get_domain().find_dataset(options)

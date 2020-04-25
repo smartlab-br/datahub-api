@@ -8,7 +8,8 @@ from repository.thematic import ThematicRepository
 class MigracoesEscravo(BaseModel):
     ''' Definição do repo '''
     METADATA = {
-        'fonte': 'Ministério da Economia - Secretaria de Trabalho', 'link': 'http://trabalho.gov.br/'
+        'fonte': 'Ministério da Economia - Secretaria de Trabalho',
+        'link': 'http://trabalho.gov.br/'
     }
 
     def __init__(self):
@@ -23,6 +24,7 @@ class MigracoesEscravo(BaseModel):
         return self.repo
 
     def find_dataset_sankey(self, options=None):
+        ''' Getting sankey data '''
         options['no_wrap'] = True
         options['theme'] = 'migracoesescravos'
         dataset = super().find_dataset(options)
@@ -54,7 +56,7 @@ class MigracoesEscravo(BaseModel):
                     "metadata": metadata,
                     "dataset": dataset,
                 }
-            elif 'as_dict' in options and options['as_dict']:
+            if 'as_dict' in options and options['as_dict']:
                 return {
                     "metadata": metadata,
                     "dataset": dataset.to_dict('records'),
@@ -64,10 +66,15 @@ class MigracoesEscravo(BaseModel):
             "dataset": {dataset.to_json(orient="records")} \
             }}'
 
-    def traverse(self, current_data=None, past_path=[], nodes=[], links=[]):
+    def traverse(self, current_data=None, past_path=None, nodes=None, links=None):
         ''' Builds links and nodes for sankey network '''
         # Se a lista de nós está vazia, é o início da recursividade
-        if current_data["target"] in past_path or self.is_circular_added_link(current_data["target"], past_path.copy(), links.copy()):
+        if (current_data["target"] in past_path or
+                self.is_circular_added_link(
+                    current_data["target"],
+                    past_path.copy(),
+                    links.copy()
+                )):
             # Se o target já estiver no caminho percorrido, é circular.
             # Se, alternativamente, formar um caminho circular com os links
             # ja percorridos.
@@ -82,7 +89,7 @@ class MigracoesEscravo(BaseModel):
                 # Não existindo, cria novo nó e adiciona o link
                 nodes.append(mod_data['target'])
                 links.append(mod_data)
-        else: # Não sendo referência circular, adiciona o nó (se já não existir na lista nodes) e o link
+        else: # Não sendo ref circular, adiciona o nó (se já não existir na lista nodes) e o link
             # Não existindo, cria novo nó e adiciona o link
             if not current_data['target'] in nodes:
                 nodes.append(current_data['target'])
@@ -117,6 +124,6 @@ class MigracoesEscravo(BaseModel):
         past_path.append(next_target)
         for link in links:
             if (link["source"] == next_target and
-                self.is_circular_added_link(link["target"], past_path, links)):
+                    self.is_circular_added_link(link["target"], past_path, links)):
                 return True
         return False

@@ -1,8 +1,7 @@
 ''' Controller para fornecer dados da CEE '''
-from flask import request
 from flask_restful_swagger_2 import swagger
+from flask import request
 from resources.base import BaseResource
-from model.thematic import Thematic
 
 class OperacoesEscravoResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -10,15 +9,8 @@ class OperacoesEscravoResource(BaseResource):
         {"name": "categorias", "required": True, "type": 'string', "in": "query",
          "description": "Informações que devem ser trazidas no dataset. \
             Campos disponíveis: cd_ibge, ano, qt_ope, qt_inspecoes, \
-            qt_inspecoes_com_resgate, qt_resgatados e cd_uf. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            qt_inspecoes_com_resgate, qt_resgatados e cd_uf. " + BaseResource.CAT_DETAIL}
     ]
-
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['beneficio'],
@@ -32,10 +24,4 @@ class OperacoesEscravoResource(BaseResource):
         ''' Obtém os registros de Benefícios, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'operacoesresgate'
-        return self.__get_domain().find_dataset(options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain
+        return self.get_domain().find_dataset(options)

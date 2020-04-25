@@ -1,8 +1,7 @@
 ''' Controller para fornecer dados da CEE '''
-from flask import request
 from flask_restful_swagger_2 import swagger
+from flask import request
 from resources.base import BaseResource
-from model.thematic import Thematic
 
 class IndicadoresTIMptUnidadesResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -19,15 +18,8 @@ class IndicadoresTIMptUnidadesResource(BaseResource):
             vl_indicador_max_prt, media_prt, pct_prt, rank_prt, \
             rank_prt_total, vl_indicador_br, vl_indicador_min_br \
             vl_indicador_max_br, media_br, pct_br, rank_br e \
-            rank_br_total. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            rank_br_total. " + BaseResource.CAT_DETAIL}
     ]
-
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['beneficio'],
@@ -41,10 +33,4 @@ class IndicadoresTIMptUnidadesResource(BaseResource):
         ''' Obtém os registros de Benefícios, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'tiindicadoresunidadempt'
-        return self.__get_domain().find_dataset(options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain
+        return self.get_domain().find_dataset(options)

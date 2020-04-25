@@ -1,27 +1,6 @@
 '''Main tests in API'''
 import unittest
-from repository.base import HadoopRepository
-
-class StubHadoopRepository(HadoopRepository):
-    ''' Classe de STUB da abstração de repositórios hadoop (hive e impala) '''
-    TABLE_NAMES = {
-        'MAIN': 'indicadores',
-        'municipio': 'municipio'
-    }
-    JOIN_SUFFIXES = {
-        'municipio': '_mun'
-    }
-    ON_JOIN = {
-        'municipio': 'cd_mun_ibge = cd_municipio_ibge_dv'
-    }
-    NAMED_QUERIES = {
-        'QRY_FIND_DATASET': 'SELECT {} FROM {} {} {} {} {} {}',
-        'QRY_FIND_JOINED_DATASET': 'SELECT {} FROM {} LEFT JOIN {} ON {} {} {} {}'
-    }
-    def load_and_prepare(self):
-        self.dao = 'Instanciei o DAO'
-    def fetch_data(self, query):
-        return query
+from test.stubs.repository import StubHadoopRepository
 
 class HadoopRepositoryFindDatasetTest(unittest.TestCase):
     ''' Classe que testa a obtenção de dados de tabela única '''

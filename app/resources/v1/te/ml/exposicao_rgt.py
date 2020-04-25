@@ -1,8 +1,7 @@
 ''' Controller para fornecer dados da CEE '''
-from flask import request
 from flask_restful_swagger_2 import swagger
+from flask import request
 from resources.base import BaseResource
-from model.thematic import Thematic
 
 class MLExposicaoResgateResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -16,15 +15,8 @@ class MLExposicaoResgateResource(BaseResource):
             nm_municipio_uf, nm_uf, sg_uf, latitude, longitude, \
             altitude, cd_unidade, nm_unidade, tp_unidade, cd_prt, \
             nm_prt, cd_mesorregiao, nm_mesorregiao, cd_microrregiao, \
-            nm_microrregiao, cd_regiao, nm_regiao. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            nm_microrregiao, cd_regiao, nm_regiao. " + BaseResource.CAT_DETAIL}
     ]
-
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['beneficio'],
@@ -38,10 +30,4 @@ class MLExposicaoResgateResource(BaseResource):
         ''' Obtém a classificação de todos os municípios '''
         options = self.build_options(request.args)
         options['theme'] = 'temlexposicaoresgate'
-        return self.__get_domain().find_dataset(options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain
+        return self.get_domain().find_dataset(options)

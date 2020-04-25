@@ -6,7 +6,7 @@ from repository.municipio import MunicipioRepository
 class Municipio(BaseModel):
     ''' Definição do repo '''
     METADATA = {
-        'fonte': 'IBGE', 'link': 'http://ibge.gov.br/'
+        'fonte': 'IBGE', 'link': 'https://ibge.gov.br/'
     }
 
     def __init__(self):

@@ -1,9 +1,10 @@
 ''' Repository genérico '''
 from impala.util import as_pandas
-from datasources import get_hive_connection, get_impala_connection
+from datasources import get_impala_connection
+from service.query_builder import QueryBuilder
 
 #pylint: disable=R0903
-class BaseRepository(object):
+class BaseRepository():
     ''' Generic class for repositories '''
     NAMED_QUERIES = {
         'QRY_FIND_DATASET': 'SELECT {} FROM {} {} {} {} {} {}',
@@ -27,27 +28,27 @@ class BaseRepository(object):
                         'AS api_calc_{calc}'
                        ),
         "norm_pos_part": ('CASE '
-                            '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
-                                'MIN({val_field}) OVER(PARTITION BY {partition})) '
+                          '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
+                          'MIN({val_field}) OVER(PARTITION BY {partition})) '
                           'WHEN 0 '
                           'THEN 0.5 '
                           'ELSE '
                           '({val_field} - MIN({val_field}) OVER(PARTITION BY {partition})) / '
-                            '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
-                                'MIN({val_field}) OVER(PARTITION BY {partition})) '
+                          '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
+                          'MIN({val_field}) OVER(PARTITION BY {partition})) '
                           'END '
                           'AS api_calc_{calc}'
                          ),
         "ln_norm_pos_part": ('CASE '
-                                '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
-                                    'MIN({val_field}) OVER(PARTITION BY {partition})) '
+                             '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
+                             'MIN({val_field}) OVER(PARTITION BY {partition})) '
                              'WHEN 0 '
                              'THEN LOG10(1.5) '
                              'ELSE '
-                                'LOG10(({val_field} - MIN({val_field}) '
-                                    'OVER(PARTITION BY {partition})) / '
-                                    '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
-                                    'MIN({val_field}) OVER(PARTITION BY {partition})) + 1.0001) '
+                             'LOG10(({val_field} - MIN({val_field}) '
+                             'OVER(PARTITION BY {partition})) / '
+                             '(MAX({val_field}) OVER(PARTITION BY {partition}) - '
+                             'MIN({val_field}) OVER(PARTITION BY {partition})) + 1.0001) '
                              'END '
                              'AS api_calc_{calc}'
                             ),
@@ -77,41 +78,35 @@ class BaseRepository(object):
         return self.dao
 
     @staticmethod
-    def validate_field_array(fields):
-        ''' Valida campos, evitando url injection '''
-        chars = set(r'\;,')
-        for field in fields:
-            if any((c in chars) for c in field):
-                return False
-        return True
-
-    def build_agr_array(self, valor=None, agregacao=None):
+    def build_agr_array(valor=None, agregacao=None):
         ''' Combina a agregação com o campo de valor, para juntar nos campos da query '''
         if agregacao is None or not agregacao:
             return []
         result = []
         for each_aggr in agregacao:
-            agr_string = self.get_agr_string(each_aggr, valor)
+            agr_string = QueryBuilder.get_agr_string(each_aggr, valor)
             if agr_string is not None:
                 result.append(agr_string)
         return result
 
-    def build_generic_agr_array(self, agregacao=None):
+    @staticmethod
+    def build_generic_agr_array(agregacao=None):
         ''' Prepara agregação sem campo definido '''
         if agregacao is None or not agregacao:
             return []
         result = []
         for each_aggr in agregacao:
-            agr_string = self.get_agr_string(each_aggr, '*')
+            agr_string = QueryBuilder.get_agr_string(each_aggr, '*')
             if agr_string is not None:
                 result.append(agr_string)
         return result
 
-    def build_order_string(self, ordenacao=None):
+    @staticmethod
+    def build_order_string(ordenacao=None):
         ''' Prepara ordenação '''
         if ordenacao is None or not ordenacao:
             return ''
-        if not self.validate_field_array(ordenacao):
+        if not QueryBuilder.validate_field_array(ordenacao):
             raise ValueError('Invalid aggregation')
         order_str = ''
         for field in ordenacao:
@@ -124,75 +119,6 @@ class BaseRepository(object):
             else:
                 order_str += field
         return order_str
-
-    @staticmethod
-    def get_agr_string(agregacao=None, valor=None):
-        ''' Obtém o alias de uma função, se fora do pardão '''
-        as_is = ['SUM', 'COUNT', 'MAX', 'MIN', 'AVG']
-        ignore = ['DISTINCT']
-        if agregacao.upper() in ignore:
-            return None
-        result = ''
-
-        if agregacao.upper() in as_is:
-            result = (f'{agregacao}({valor}) AS agr_{agregacao}'
-                      f'{("_" +valor) if valor != "*" else ""}')
-        elif agregacao.upper() == 'PCT_COUNT':
-            result = (f'COUNT({valor}) * 100 / SUM(COUNT({valor})) OVER() AS '
-                      f'agr_{agregacao}{("_" +valor) if valor != "*" else ""}')
-        elif agregacao.upper() == 'PCT_SUM':
-            result = (f'SUM({valor}) * 100 / SUM({valor}) OVER() AS '
-                      f'agr_{agregacao}{("_" +valor) if valor != "*" else ""}')
-        elif agregacao.upper() == 'RANK_COUNT':
-            result = (f'RANK() OVER(ORDER BY COUNT({valor}) DESC) AS '
-                      f'agr_{agregacao}{("_" +valor) if valor != "*" else ""}')
-        elif agregacao.upper() == 'RANK_DENSE_COUNT':
-            result = (f'DENSE_RANK() OVER(ORDER BY COUNT({valor}) DESC) AS '
-                      f'agr_{agregacao}{("_" +valor) if valor != "*" else ""}')
-        elif agregacao.upper() == 'RANK_SUM':
-            result = (f'RANK() OVER(ORDER BY SUM({valor}) DESC) AS '
-                      f'agr_{agregacao}{("_" +valor) if valor != "*" else ""}')
-        elif agregacao.upper() == 'RANK_DENSE_SUM':
-            result = (f'DENSE_RANK() OVER(ORDER BY SUM({valor}) DESC) AS '
-                      f'agr_{agregacao}{("_" +valor) if valor != "*" else ""}')
-        else:
-            raise ValueError('Invalid aggregation')
-        return result
-
-    @staticmethod
-    def get_simple_agr_string(agregacao=None, valor=None):
-        ''' Obtém o alias de uma função, se fora do pardão '''
-        as_is = ['SUM', 'COUNT', 'MAX', 'MIN', 'AVG']
-        ignore = ['DISTINCT']
-        if agregacao.upper() in ignore:
-            return None
-        result = ''
-
-        if agregacao.upper() in as_is:
-            result = f'{agregacao}({valor})'
-        else:
-            raise ValueError('Invalid aggregation for calcs')
-        return result
-
-    @staticmethod
-    def build_grouping_string(categorias=None, agregacao=None):
-        ''' Constrói o tracho da query que comanda o agrupamento '''
-        if categorias is None or not categorias:
-            raise ValueError('Invalid fields')
-        nu_cats = []
-        for categoria in categorias:
-            if '-' in categoria:
-                arr_categoria = categoria.split('-')
-                nu_cats.append(arr_categoria[0])
-            else:
-                nu_cats.append(categoria)
-        if agregacao is not None and agregacao:
-            blocking_aggr = ['DISTINCT']
-            blocking_cond = len(list(set([x.upper() for x in agregacao]) & set(blocking_aggr)))
-            if blocking_cond == 0:
-                return f'GROUP BY {", ".join(nu_cats)}'
-            return ''
-        raise ValueError('Invalid aggregation (no value)')
 
     def build_joined_grouping_string(self, categorias=None, agregacao=None, joined=None):
         ''' Constrói o tracho da query que comanda o agrupamento '''
@@ -212,9 +138,7 @@ class BaseRepository(object):
             else:
                 nu_cats.append(categoria)
         if agregacao is not None:
-            blocking_aggr = ['DISTINCT']
-            blocking_cond = len(list(set([x.upper() for x in agregacao]) & set(blocking_aggr)))
-            if blocking_cond == 0:
+            if QueryBuilder.is_valid_grouping(agregacao):
                 return f'GROUP BY {", ".join(nu_cats)}'
             return ''
         raise ValueError('Invalid aggregation (no value)')
@@ -237,7 +161,6 @@ class BaseRepository(object):
 
     def get_join_condition(self, table_name, join_clauses=None):
         ''' Obtém a condição do join das tabelas '''
-        pass
 
     def get_join_suffix(self, table_name):
         ''' Obtém uma string de sufixo de campo de tabela juntada '''
@@ -246,28 +169,29 @@ class BaseRepository(object):
 
     def build_categorias(self, categorias, options):
         ''' Constrói a parte dos atributos selecionados na query '''
-        if not self.check_params(options, ['categorias']):
+        if not QueryBuilder.check_params(options, ['categorias']):
             raise ValueError('Invalid Categories - required')
-        categorias = self.transform_categorias(categorias)
-        prepended_aggr = self.prepend_aggregations(options.get('agregacao'))
+        categorias = QueryBuilder.transform_categorias(categorias)
+        prepended_aggr = QueryBuilder.prepend_aggregations(options['agregacao'])
         str_calcs = ''
-        if self.check_params(options, ['calcs']):
+        if QueryBuilder.check_params(options, ['calcs']):
             calcs_options = options.copy()
             calcs_options['categorias'] = categorias
             str_calcs += self.build_std_calcs(calcs_options)
-        if self.check_params(options, ['agregacao', 'valor']):
+        if QueryBuilder.check_params(options, ['agregacao', 'valor']):
             tmp_cats = self.combine_val_aggr(options['valor'], options['agregacao'])
             if not isinstance(tmp_cats, list):
                 categorias += tmp_cats.split(", ")
             else:
                 categorias += tmp_cats
-        elif (not self.check_params(options, ['agregacao']) and
-              self.check_params(options, ['valor'])):
+        elif (not QueryBuilder.check_params(options, ['agregacao']) and
+              QueryBuilder.check_params(options, ['valor'])):
             categorias += options['valor']
-        elif (self.check_params(options, ['agregacao']) and
-              not self.check_params(options, ['valor'])):
+        elif (QueryBuilder.check_params(options, ['agregacao']) and
+              not QueryBuilder.check_params(options, ['valor'])):
             categorias += self.build_generic_agr_array(options['agregacao'])
-        if self.validate_field_array(categorias) and self.validate_field_array(prepended_aggr):
+        if (QueryBuilder.validate_field_array(categorias) and
+                QueryBuilder.validate_field_array(prepended_aggr)):
             if 'calcs' not in options or options['calcs'] is None or str_calcs == '':
                 return ' '.join(prepended_aggr) + ' ' + ', '.join(categorias)
             return ' '.join(prepended_aggr) + ' ' + ', '.join(categorias) + ', ' + str_calcs
@@ -280,11 +204,11 @@ class BaseRepository(object):
 
         # Pega o valor passado ou padrão, para montar a query
         val_field = self.VAL_FIELD
-        if self.check_params(options, ['valor']):
+        if QueryBuilder.check_params(options, ['valor']):
             val_field = options['valor']
 
         # Pega o valor do particionamento
-        if not self.check_params(options, ['partition']):
+        if not QueryBuilder.check_params(options, ['partition']):
             if self.get_default_partitioning(options) != '':
                 res_partition = self.get_default_partitioning(options)
             else:
@@ -293,9 +217,12 @@ class BaseRepository(object):
             res_partition = options['partition']
 
         # Transforma o campo de valor em campo agregado conforme query
-        if self.check_params(options, ['agregacao']):
-            val_field = self.get_simple_agr_string(options['agregacao'][0], options['valor'][0])
-            if self.check_params(options, ['pivot']):
+        if QueryBuilder.check_params(options, ['agregacao']):
+            val_field = QueryBuilder.get_simple_agr_string(
+                options['agregacao'][0],
+                options['valor'][0]
+            )
+            if QueryBuilder.check_params(options, ['pivot']):
                 res_partition = self.exclude_from_partition(
                     options['categorias'],
                     options['agregacao']
@@ -304,7 +231,7 @@ class BaseRepository(object):
         str_res_partition = res_partition
         if isinstance(res_partition, list):
             str_res_partition = ",".join(res_partition)
-        
+
         # Constrói a query
         arr_calcs = []
         for calc in options['calcs']:
@@ -334,23 +261,26 @@ class BaseRepository(object):
             )
         return ', '.join(arr_calcs)
 
-    def replace_partition(self, qry_part, options={}):
+    def replace_partition(self, qry_part, options=None):
         ''' Changes OVER clause when there's no partitioning '''
         if self.get_default_partitioning(options) == '':
             return self.CALCS_DICT[qry_part].replace("PARTITION BY {partition}", "")
         return self.CALCS_DICT[qry_part]
 
-    def exclude_from_partition(self, categorias, agregacoes, options={}):
+    def exclude_from_partition(self, categorias, agregacoes, options=None):
         ''' Remove do partition as categorias não geradas pela agregação '''
         partitions = self.get_default_partitioning(options).split(", ")
-        groups = self.build_grouping_string(categorias, agregacoes).replace('GROUP BY ', '').split(", ")
+        groups = QueryBuilder.build_grouping_string(categorias, agregacoes).replace(
+            'GROUP BY ', ''
+        ).split(", ")
         result = []
         for partition in partitions:
             if partition in groups:
                 result.append(partition)
         return ", ".join(result)
-    
-    def get_default_partitioning(self, options):
+
+    def get_default_partitioning(self, _options):
+        ''' Default method for getting partitioning '''
         return self.DEFAULT_PARTITIONING
 
     def combine_val_aggr(self, valor, agregacao, suffix=None):
@@ -374,48 +304,6 @@ class BaseRepository(object):
                 result += ', '.join(self.build_agr_array(aux_val, agrs))
         return result
 
-    @staticmethod
-    def transform_categorias(categorias):
-        ''' Regula a mudança de nome de campos '''
-        result = []
-        for categoria in categorias:
-            if '-' in categoria:
-                arr_categoria = categoria.split('-')
-                result.append(arr_categoria[0] + ' AS ' + arr_categoria[1])
-            else:
-                result.append(categoria)
-        return result
-
-    @staticmethod
-    def transform_joined_categorias(categorias, suffix):
-        ''' Regula a mudança de nome de campos '''
-        result = []
-        for categoria in categorias:
-            if '-' in categoria:
-                arr_categoria = categoria.split('-')
-                if arr_categoria[0][-len(suffix):] == suffix:
-                    result.append(arr_categoria[0][:-len(suffix)] + ' AS ' + arr_categoria[1])
-                else:
-                    result.append(arr_categoria[0] + ' AS ' + arr_categoria[1])
-            else:
-                if categoria[-len(suffix):] == suffix:
-                    result.append(categoria[:-len(suffix)])
-                else:
-                    result.append(categoria)
-        return result
-
-    @staticmethod
-    def prepend_aggregations(agregacoes):
-        ''' Monta qualificadores pré-campos do SELECT '''
-        if agregacoes is None:
-            return []
-        possible_prepends = ['DISTINCT']
-        valid_prepends = []
-        for agregacao in agregacoes:
-            if agregacao.upper() in possible_prepends:
-                valid_prepends.append(agregacao)
-        return valid_prepends
-
     def build_joined_categorias(self, categorias, valor=None, agregacao=None,
                                 joined=None):
         ''' Constrói a parte dos atributos selecionados na query '''
@@ -423,12 +311,12 @@ class BaseRepository(object):
             raise ValueError('Invalid Categories - required')
         str_cat = []
         suffix = self.get_join_suffix(joined)
-        str_cat += self.transform_joined_categorias(categorias, suffix)
+        str_cat += QueryBuilder.transform_joined_categorias(categorias, suffix)
         if agregacao is not None and valor is not None:
             str_cat += self.combine_val_aggr(valor, agregacao, suffix)
         elif agregacao is not None and valor is None:
             str_cat += self.build_generic_agr_array(agregacao)
-        if self.validate_field_array(str_cat):
+        if QueryBuilder.validate_field_array(str_cat):
             return ', '.join(str_cat)
         raise ValueError('Invalid attributes')
 
@@ -453,7 +341,7 @@ class BaseRepository(object):
             w_clause = [f.replace('|', '-') for f in w_clause]
             if w_clause[0].upper() == 'AND' or w_clause[0].upper() == 'OR':
                 arr_result.append(w_clause[0])
-            elif self.validate_clause(w_clause, joined, is_on, suffix):
+            elif QueryBuilder.validate_clause(w_clause, joined, is_on, suffix):
                 if w_clause[0].upper() in simple_operators:
                     arr_result.append(
                         f'{w_clause[1]} '
@@ -470,41 +358,12 @@ class BaseRepository(object):
         return ' '.join(arr_result)
 
     @staticmethod
-    def check_params(options, params):
-        ''' Checks if param exists in options '''
-        for param in params:
-            if param not in options or options[param] is None or not options[param]:
-                return False
-        return True
-
-    @staticmethod
-    def validate_clause(clause, joined, is_on, suffix):
-        ''' Valida a construção da cláusula do where ou do on '''
-        if joined is None:
-            return True
-        if joined is not None and is_on and clause[1][-len(suffix):] == suffix:
-            return True
-        if joined is not None and not is_on and clause[1][-len(suffix):] != suffix:
-            return True
-        return False
-
-    @staticmethod
-    def catch_injection(options):
-        ''' Verifica se há alguma palavra reservada indicando SQL Injection '''
-        blocked_words = ['SELECT', 'JOIN', 'UNION', 'WHERE', 'ALTER', 'CREATE',
-                         'TRUNCATE', 'DELETE', 'CONCAT', 'UPDATE', 'FROM', ';',
-                         '|']
-        for key, option in options.items():
-            if (option is not None and key in ["categorias", "valor", "agregacao", "ordenacao", "where", "pivot", "limit", "offset", "calcs", "partition", "theme"]):
-                checked_words = ','.join(option).upper()
-                if key in ['limit', 'offset']:
-                    checked_words = option.upper()
-                if any(blk in checked_words for blk in blocked_words):
-                    return True
-        return False
+    def get_agr_string(agregacao, valor):
+        ''' Proxy for Query Builder function call '''
+        return QueryBuilder.get_agr_string(agregacao, valor)
 
 class HadoopRepository(BaseRepository):
-    '''Generic class for hive repositories '''
+    '''Generic class for hive/impala repositories '''
     def load_and_prepare(self):
         ''' Método abstrato para carregamento do dataset '''
         raise NotImplementedError("Repositórios precisam implementar load_and_prepare")
@@ -517,7 +376,7 @@ class HadoopRepository(BaseRepository):
 
     def find_dataset(self, options=None):
         ''' Obtém dataset de acordo com os parâmetros informados '''
-        if self.catch_injection(options):
+        if QueryBuilder.catch_injection(options):
             raise ValueError('SQL reserved words not allowed!')
         str_where = ''
         if options.get('where') is not None:
@@ -526,8 +385,8 @@ class HadoopRepository(BaseRepository):
         nu_cats = options['categorias']
         if options.get('pivot') is not None:
             nu_cats = nu_cats + options['pivot']
-        if options.get('agregacao') is not None and options.get('agregacao'):
-            str_group = self.build_grouping_string(
+        if options['agregacao'] is not None and options['agregacao']:
+            str_group = QueryBuilder.build_grouping_string(
                 nu_cats,
                 options['agregacao']
             )
@@ -553,7 +412,7 @@ class HadoopRepository(BaseRepository):
 
     def find_joined_dataset(self, options=None):
         ''' Obtém dataset de acordo com os parâmetros informados '''
-        if self.catch_injection(options):
+        if QueryBuilder.catch_injection(options):
             raise ValueError('SQL reserved words not allowed!')
         if options['joined'] is None:
             raise ValueError('Joined table is required')
@@ -584,14 +443,8 @@ class HadoopRepository(BaseRepository):
 
         return self.fetch_data(query)
 
-class HiveRepository(HadoopRepository):
-    '''Generic class for hive repositories '''
-    def load_and_prepare(self):
-        ''' Prepara o DAO '''
-        self.dao = get_hive_connection()
-
 class ImpalaRepository(HadoopRepository):
-    '''Generic class for hive repositories '''
+    '''Generic class for impala repositories '''
     def load_and_prepare(self):
         ''' Prepara o DAO '''
         self.dao = get_impala_connection()

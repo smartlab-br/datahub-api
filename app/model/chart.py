@@ -41,8 +41,10 @@ class Chart(BaseModel):
             )
 
             options = {**options, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options}), **struct}
-
-        dataframe = Thematic().find_dataset(options)
+            dataframe = Thematic().find_dataset({**{'as_pandas': True, 'no_wrap': True}, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options})})
+        else:
+            dataframe = Thematic().find_dataset(options)
+        
         chart = self.get_raw_chart(dataframe, options)
         
         chart_lib = 'BOKEH'
@@ -147,7 +149,7 @@ class Chart(BaseModel):
             # Trocar por topojson dos estados no Brasil
             state_geo = f'https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-29-mun.json'
         state_geo = requests.get(state_geo).json()
-
+        
         dataframe['str_id'] = dataframe[chart_options.get('id_field')].astype(str)
         dataframe['idx'] = dataframe[chart_options.get('id_field')]
 

@@ -84,7 +84,6 @@ class BaseResourceBuildOptionsTest(unittest.TestCase):
             "ordenacao": ['-vl_indicador'],
             "where": ['eq-ds_indicador-Acidentes, B91', 'and', 'eq-nu_competencia-2010'],
             "pivot": ['nm_indicador'],
-            "theme": 'MAIN',
             "limit": None,
             "offset": None,
             "calcs": None,

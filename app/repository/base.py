@@ -209,7 +209,7 @@ class BaseRepository():
 
         # Pega o valor do particionamento
         res_partition = None
-        if self.check_params(options, ['partition']):
+        if QueryBuilder.check_params(options, ['partition']):
             res_partition = options['partition']
         elif self.get_default_partitioning(options) != '':
             res_partition = self.get_default_partitioning(options)    

@@ -145,7 +145,7 @@ class QueryBuilder():
                          'TRUNCATE', 'DELETE', 'CONCAT', 'UPDATE', 'FROM', ';',
                          '|']
         for key, option in options.items():
-            if option is not None and key not in ['no_wrap', 'as_pandas', 'as_dict']:
+            if option is not None and key not in ['no_wrap', 'as_pandas', 'as_dict', 'as_image', 'from_viewconf']:
                 checked_words = ','.join(option).upper()
                 if key in ['limit', 'offset']:
                     checked_words = option.upper()

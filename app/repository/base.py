@@ -172,14 +172,14 @@ class BaseRepository():
         if not QueryBuilder.check_params(options, ['categorias']):
             raise ValueError('Invalid Categories - required')
         categorias = QueryBuilder.transform_categorias(categorias)
-        prepended_aggr = QueryBuilder.prepend_aggregations(options['agregacao'])
+        prepended_aggr = QueryBuilder.prepend_aggregations(options.get('agregacao'))
         str_calcs = ''
         if QueryBuilder.check_params(options, ['calcs']):
             calcs_options = options.copy()
             calcs_options['categorias'] = categorias
             str_calcs += self.build_std_calcs(calcs_options)
         if QueryBuilder.check_params(options, ['agregacao', 'valor']):
-            tmp_cats = self.combine_val_aggr(options['valor'], options['agregacao'])
+            tmp_cats = self.combine_val_aggr(options.get('valor'), options.get('agregacao'))
             if not isinstance(tmp_cats, list):
                 categorias += tmp_cats.split(", ")
             else:
@@ -393,7 +393,7 @@ class HadoopRepository(BaseRepository):
         nu_cats = options['categorias']
         if options.get('pivot') is not None:
             nu_cats = nu_cats + options['pivot']
-        if options['agregacao'] is not None and options['agregacao']:
+        if options.get('agregacao', False):
             str_group = QueryBuilder.build_grouping_string(
                 nu_cats,
                 options['agregacao']

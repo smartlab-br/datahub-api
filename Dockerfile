@@ -1,9 +1,12 @@
 FROM smartlab/flask-dataviz:development
 LABEL maintainer="smartlab-dev@mpt.mp.br"
 
-COPY requirements.txt /app/requirements.txt
+USER root
 
+COPY requirements.txt /app/requirements.txt
 RUN pip3 install -r /app/requirements.txt
+
+USER uwsgi
 
 COPY app /app/
 

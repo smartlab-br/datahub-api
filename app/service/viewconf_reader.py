@@ -29,7 +29,11 @@ class ViewConfReader():
     @staticmethod
     def get_dimension_descriptor(language, observatory, scope, dimension):
         ''' Gets the dimension YAML descriptor as dictionary '''
-        location = app.config['GIT_VIEWCONF_BASE_URL'].format(language, observatory, scope, dimension)
+        location = app.config['GIT_VIEWCONF_BASE_URL'].format(
+            f'{language}/observatorio/{observatory}/localidade/',
+            scope,
+            dimension
+        )
         return yaml.load(requests.get(location, verify=False).content)
 
     @classmethod

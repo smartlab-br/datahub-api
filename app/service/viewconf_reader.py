@@ -6,6 +6,9 @@ from flask import current_app as app
 from service.number_formatter import NumberFormatter
 from service.qry_options_builder import QueryOptionsBuilder
 import numpy as np
+# Novos
+from branca.colormap import LinearColormap
+import brewer2mpl
 
 class ViewConfReader():
     ''' Service that formats a number into a HTML snippet '''
@@ -107,3 +110,37 @@ class ViewConfReader():
     def get_proportional_indicator_uf(row, **kwargs):
         ''' Custom function to get the data as a positive number based on moved log curve '''
         return np.log(((row.get(kwargs.get('campo', 'vl_indicador')) - row.get(kwargs.get('media', 'media_uf'))) / row.get(kwargs.get('media', 'media_uf'))) + 1.01)
+
+    @staticmethod
+    def get_chart_title(options):
+        if options.get('type') == 'multiple-charts':
+            for chart in options.get('charts'):
+                if chart.get('id') == options.get(chart_id):
+                    return chart.get('title', 'background')
+        return options.get('title', {}).get('fixed', 'background')
+
+    @staticmethod
+    def get_color_scale(options, vmin, vmax):
+        # Check if color list is given, escaping if true
+        if options.get('chart_options', {}).get('colorArray'):
+            return options.get('chart_options', {}).get('colorArray')
+        scale_def = options.get('chart_options', {}).get('colorScale', {'name': 'Blues'})
+        if options.get('type') == 'multiple-charts':
+            for chart in options.get('charts'):
+                if chart.get('id') == options.get(chart_id):
+                    if chart.get('options', {}).get('colorArray'):
+                        return chart.get('options', {}).get('colorArray')
+                    scale_def = chart.get('options', {}).get('colorScale', {'name': 'Blues'})
+
+        plt = brewer2mpl.get_map(
+            scale_def.get("name"),
+            scale_def.get('nature', 'sequential'),
+            scale_def.get("levels", 5),
+            reverse = scale_def.get("order", "asc") == 'desc'
+        )
+        
+        return LinearColormap(
+            plt.mpl_colors, 
+            vmin = vmin, 
+            vmax = vmax
+        )

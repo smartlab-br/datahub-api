@@ -12,8 +12,6 @@ import folium
 import json
 import requests
 from service.viewconf_reader import ViewConfReader
-# Novos
-# FIREFOX-ESR tem que estar no PATH
 import os
 import time
 from selenium import webdriver
@@ -164,19 +162,30 @@ class Chart(BaseModel):
         # Creating map instance
         n = folium.Map(tiles=tiles_url, attr = tiles_attribution, control_scale = True)
 
-        # TODO 2 - Ajustar cores para a escala (linear, não em bins - tentar remover extremos, passando um array de cores HEX)
         # Creating the choropleth layer
-        chart = folium.Choropleth(
-            geo_data=state_geo,
-            name='choropleth',
-            data=dataframe,
-            columns=['str_id', chart_options['value_field']],
-            key_on='feature.properties.id',
-            fill_color='Blues',
-            fill_opacity=0.7,
-            line_opacity=0.2,
-            # bins=list(dataframe[chart_options['value_field']].quantile([0, 0.11, 0.22, 0.33, 0.44, 0.55, 0.66, 0.77, 0.88, 1])),
-            highlight = True
+        color_scale = ViewConfReader.get_color_scale(
+            options,
+            dataframe[chart_options['value_field']].min(), 
+            dataframe[chart_options['value_field']].max()
+        )
+        def get_color(feature):
+            value = feature.get('properties',{}).get(chart_options['value_field'])
+            if value is None:
+                return '#8c8c8c' # MISSING -> gray
+            else:
+                return color_scale(value)
+
+        chart = folium.GeoJson(
+            data = state_geo,
+            name = ViewConfReader.get_chart_title(options),
+            style_function = lambda feature: {
+                'fillColor': get_color(feature),
+                'fillOpacity': 0.9,
+                'color' : 'black',
+                'stroke' : 'black',
+                'lineOpacity': 0.2,
+                'weight' : 0.2,
+            }    
         )
 
         # Adding tooltip to choropleth
@@ -186,7 +195,7 @@ class Chart(BaseModel):
             localize=True,
             sticky=False,
             labels=True
-        ).add_to(chart.geojson)
+        ).add_to(chart)
 
         # Adding marker to current analysis unit
         if np.issubdtype(dataframe.index.dtype, np.number):

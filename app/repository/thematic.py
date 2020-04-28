@@ -49,7 +49,8 @@ class ThematicRepository(ImpalaRepository):
         'temlexposicaoresgate': 'te_exposicao_rgt_mun',
         'temlexposicaoresgatefeatures': 'te_exposicao_rgt_feat_importance_mun',
         'temlexposicaonaturais': 'te_exposicao_nat_mun',
-        'temlexposicaonaturaisfeatures': 'te_exposicao_nat_feat_importance_mun'
+        'temlexposicaonaturaisfeatures': 'te_exposicao_nat_feat_importance_mun',
+        'casoscovid19': 'casos_covid_19'
     }
     DEFAULT_PARTITIONING = {
         'MAIN': 'cd_indicador',

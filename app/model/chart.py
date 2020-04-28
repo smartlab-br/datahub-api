@@ -133,6 +133,9 @@ class Chart(BaseModel):
                 .leaflet-tooltip table tbody tr:nth-child(2){\
                     border-top: 1px solid black;\
                 }\
+                path.leaflet-interactive:hover {\
+                    fill-opacity: 1;\
+                }\
             </style>"
 
         au = options.get('au')
@@ -180,7 +183,7 @@ class Chart(BaseModel):
             name = ViewConfReader.get_chart_title(options),
             style_function = lambda feature: {
                 'fillColor': get_color(feature),
-                'fillOpacity': 0.9,
+                'fillOpacity': 0.8,
                 'color' : 'black',
                 'stroke' : 'black',
                 'lineOpacity': 0.2,

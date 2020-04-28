@@ -16,7 +16,7 @@ pipeline {
         stage('Execute unit tests') {
             agent {
                 docker {
-                    image 'smartlab/flask:latest'
+                    image 'smartlab/flask-dataviz:latest'
                     args '-u root:root'
                     reuseNode true
                 }
@@ -52,7 +52,7 @@ pipeline {
 
 def img_parent_pull() {
     //pull img docker
-    def img_flask = docker.image('smartlab/flask:latest')
+    def img_flask = docker.image('smartlab/flask-dataviz:latest')
     img_flask.pull()
 }
 

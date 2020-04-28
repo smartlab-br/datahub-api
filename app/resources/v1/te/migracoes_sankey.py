@@ -47,6 +47,6 @@ class MigracoesSankeyEscravoResource(BaseResource):
             self.domain = MigracoesEscravo()
         return self.domain
 
-    def __set_domain(self):
+    def set_domain(self):
         ''' Setter invoked from constructor '''
         self.domain = MigracoesEscravo()

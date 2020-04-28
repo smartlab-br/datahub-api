@@ -67,6 +67,6 @@ class MunicipioResource(BaseResource):
             self.domain = Municipio()
         return self.domain
 
-    def __set_domain(self):
+    def set_domain(self):
         ''' Setter invoked from constructor '''
         self.domain = Municipio()

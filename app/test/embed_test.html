@@ -1,0 +1,35 @@
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-1.4.0.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-1.4.0.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-1.4.0.min.js"></script>
+</head>
+<body>
+    <div id='teste'></div>
+
+    <script>
+        /* In the api, install pip dependencies:
+                pip3 install -Iv phantomjs==1.1.4 selenium==3.141.0 bokeh==1.4.0
+            and install phantomjs from source. In ubuntu:
+                cd ~
+                export PHANTOM_JS="phantomjs-2.1.1-linux-x86_64"
+                wget https://bitbucket.org/ariya/phantomjs/downloads/$PHANTOM_JS.tar.bz2
+                sudo tar xvjf $PHANTOM_JS.tar.bz2
+                sudo mv $PHANTOM_JS /usr/local/share
+                sudo ln -sf /usr/local/share/$PHANTOM_JS/bin/phantomjs /usr/local/bin
+                phantomjs --version
+        */
+
+        var url = "http://localhost:5000/charts/scatter?theme=sstindicadoresnacionais&categorias=ds_agreg_primaria-v,ds_agreg_secundaria-x,vl_indicador-y&filtros=eq-nu_competencia-2017,and,eq-cd_indicador-%27sst_bene_sexo_idade_dias_perdidos%27&as_image=N"
+        $.get( url, function( data ) {
+            // Creates elements
+            $( "#teste" ).html( data.div );
+            $( "#teste" ).append( data.script );
+
+            // Runs when loaded
+            $( "#teste script" ).onload;
+            alert( "Load was performed." );
+        });
+    </script>
+</body>

@@ -172,14 +172,14 @@ class BaseRepository():
         if not QueryBuilder.check_params(options, ['categorias']):
             raise ValueError('Invalid Categories - required')
         categorias = QueryBuilder.transform_categorias(categorias)
-        prepended_aggr = QueryBuilder.prepend_aggregations(options['agregacao'])
+        prepended_aggr = QueryBuilder.prepend_aggregations(options.get('agregacao'))
         str_calcs = ''
         if QueryBuilder.check_params(options, ['calcs']):
             calcs_options = options.copy()
             calcs_options['categorias'] = categorias
             str_calcs += self.build_std_calcs(calcs_options)
         if QueryBuilder.check_params(options, ['agregacao', 'valor']):
-            tmp_cats = self.combine_val_aggr(options['valor'], options['agregacao'])
+            tmp_cats = self.combine_val_aggr(options.get('valor'), options.get('agregacao'))
             if not isinstance(tmp_cats, list):
                 categorias += tmp_cats.split(", ")
             else:
@@ -208,13 +208,11 @@ class BaseRepository():
             val_field = options['valor']
 
         # Pega o valor do particionamento
-        if not QueryBuilder.check_params(options, ['partition']):
-            if self.get_default_partitioning(options) != '':
-                res_partition = self.get_default_partitioning(options)
-            else:
-                res_partition = "'1'"
-        else:
+        res_partition = None
+        if QueryBuilder.check_params(options, ['partition']):
             res_partition = options['partition']
+        elif self.get_default_partitioning(options) != '':
+            res_partition = self.get_default_partitioning(options)    
 
         # Transforma o campo de valor em campo agregado conforme query
         if QueryBuilder.check_params(options, ['agregacao']):
@@ -229,7 +227,7 @@ class BaseRepository():
                 )
 
         str_res_partition = res_partition
-        if isinstance(res_partition, list):
+        if res_partition is not None and isinstance(res_partition, list):
             str_res_partition = ",".join(res_partition)
 
         # Constrói a query
@@ -237,23 +235,33 @@ class BaseRepository():
         for calc in options['calcs']:
             # Always appends min and max when calc is not one of them
             if calc not in ['min_part', 'max_part']:
+                pattern = self.replace_partition('min_part')
+                if str_res_partition is None:
+                    pattern = pattern.replace('PARTITION BY {partition}', '')
                 arr_calcs.append(
-                    self.replace_partition('min_part').format(
+                    pattern.format(
                         val_field=val_field,
                         partition=str_res_partition,
                         calc='min_part'
                     )
                 )
+
+                pattern = self.replace_partition('max_part')
+                if str_res_partition is None:
+                    pattern = pattern.replace('PARTITION BY {partition}', '')
                 arr_calcs.append(
-                    self.replace_partition('max_part').format(
+                    pattern.format(
                         val_field=val_field,
                         partition=str_res_partition,
                         calc='max_part'
                     )
                 )
             # Resumes identification of calc
+            pattern = self.replace_partition(calc, options)
+            if str_res_partition is None:
+                pattern = pattern.replace('PARTITION BY {partition}', '')
             arr_calcs.append(
-                self.replace_partition(calc, options).format(
+                pattern.format(
                     val_field=val_field,
                     partition=str_res_partition,
                     calc=calc
@@ -379,24 +387,24 @@ class HadoopRepository(BaseRepository):
         if QueryBuilder.catch_injection(options):
             raise ValueError('SQL reserved words not allowed!')
         str_where = ''
-        if options['where'] is not None:
-            str_where = ' WHERE ' + self.build_filter_string(options['where'])
+        if options.get('where') is not None:
+            str_where = ' WHERE ' + self.build_filter_string(options.get('where'))
         str_group = ''
         nu_cats = options['categorias']
-        if options['pivot'] is not None:
+        if options.get('pivot') is not None:
             nu_cats = nu_cats + options['pivot']
-        if options['agregacao'] is not None and options['agregacao']:
+        if options.get('agregacao', False):
             str_group = QueryBuilder.build_grouping_string(
                 nu_cats,
                 options['agregacao']
             )
         str_categorias = self.build_categorias(nu_cats, options)
         str_limit = ''
-        if options['limit'] is not None:
-            str_limit = f'LIMIT {options["limit"]}'
+        if options.get('limit') is not None:
+            str_limit = f'LIMIT {options.get("limit")}'
         str_offset = ''
-        if options['offset'] is not None:
-            str_offset = f'OFFSET {options["offset"]}'
+        if options.get('offset') is not None:
+            str_offset = f'OFFSET {options.get("offset")}'
         if 'theme' not in options:
             options['theme'] = 'MAIN'
         query = self.get_named_query('QRY_FIND_DATASET').format(
@@ -404,7 +412,7 @@ class HadoopRepository(BaseRepository):
             self.get_table_name(options['theme']),
             str_where,
             str_group,
-            self.build_order_string(options['ordenacao']),
+            self.build_order_string(options.get('ordenacao')),
             str_limit,
             str_offset
         )

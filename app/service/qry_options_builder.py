@@ -2,35 +2,37 @@
 class QueryOptionsBuilder():
     ''' Classe de serviço '''
     @classmethod
-    def build_options(cls, r_args):
+    def build_options(cls, r_args, rules = 'query'):
         ''' Constrói as opções da pesquisa '''
+        options = r_args.copy()
+
         categorias = cls.extract_qry_param(r_args, 'categorias')
         if categorias is None:
-            raise ValueError('Categories required')
+            if rules in ['query']:
+                raise ValueError('Categories required')
+        else:
+            options['categorias'] = categorias
 
-        filtros = None
-        if r_args.get('filtros') is not None and r_args.get('filtros'):
+        if r_args.get('filtros') is not None:
             filtros = r_args.get('filtros').replace('\\,', '|')
             filtros = filtros.split(',')
             filtros = [f.replace('|', ',') for f in filtros]
+            options['where'] = filtros
+            del options['filtros']
 
-        theme = cls.extract_qry_param(r_args, 'theme')
-        if theme is None:
+        if r_args.get('theme') is None and rules in ['query']:
             theme = 'MAIN'
 
-        return {
-            "categorias": categorias,
-            "valor": cls.extract_qry_param(r_args, 'valor'),
-            "agregacao": cls.extract_qry_param(r_args, 'agregacao'),
-            "ordenacao": cls.extract_qry_param(r_args, 'ordenacao'),
-            "where": filtros,
-            "pivot": cls.extract_qry_param(r_args, 'pivot'),
-            "limit": r_args.get('limit'),
-            "offset": r_args.get('offset'),
-            "calcs": cls.extract_qry_param(r_args, 'calcs'),
-            "partition": cls.extract_qry_param(r_args, 'partition'),
-            "theme": theme
-        }
+        for k in r_args:
+            if k in ["valor", "agregacao", "ordenacao", "pivot", "calcs", "partition"]:
+                options[k] = cls.extract_qry_param(r_args, k)
+            elif k in ["as_image", "from_viewconf"]:
+                val = False
+                if r_args.get(k, False) == 'S':
+                    val = True
+                options[k] = val
+
+        return options
 
     @staticmethod
     def extract_qry_param(params, param_name):

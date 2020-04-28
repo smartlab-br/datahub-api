@@ -69,14 +69,14 @@ class BaseResource(Resource):
         rank_br_total. " + CAT_DETAIL
 
     @staticmethod
-    def build_options(r_args):
+    def build_options(r_args, rules='query'):
         ''' Constrói as opções da pesquisa '''
-        return QueryOptionsBuilder.build_options(r_args)
+        return QueryOptionsBuilder.build_options(r_args, rules)
 
     def __init__(self):
         ''' Construtor'''
         self.domain = None
-        self.__set_domain()
+        self.set_domain()
 
     def get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
@@ -84,6 +84,6 @@ class BaseResource(Resource):
             self.domain = Thematic()
         return self.domain
 
-    def __set_domain(self):
+    def set_domain(self):
         ''' Setter invoked from constructor '''
         self.domain = Thematic()

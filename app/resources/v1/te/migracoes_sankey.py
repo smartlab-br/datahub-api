@@ -1,6 +1,6 @@
 ''' Controller para fornecer dados da CEE '''
-from flask import request
 from flask_restful_swagger_2 import swagger
+from flask import request
 from resources.base import BaseResource
 from model.te.migracoes import MigracoesEscravo
 
@@ -24,19 +24,13 @@ class MigracoesSankeyEscravoResource(BaseResource):
             cd_mesorregiao_res, nm_mesorregiao_res, cd_microrregiao_res, \
             nm_microrregiao_res, cd_regiao_res, nm_regiao_res, \
             cd_municipio_ibge_dv_res, nm_municipio_res, \
-            nm_municipio_sem_acento_res e cd_uf_res. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            nm_municipio_sem_acento_res e cd_uf_res. " + BaseResource.CAT_DETAIL}
     ]
-
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = MigracoesEscravo()
 
     @swagger.doc({
         'tags':['migracoes'],
-        'description':'Obtém todas as migracoes identificadas no resgate de um trbalhador para geração de gráfico de fluxos sankey.',
+        'description':'Obtém todas as migracoes identificadas no resgate de \
+            um trbalhador para geração de gráfico de fluxos sankey.',
         'parameters': CUSTOM_SWAGGER_PARAMS + BaseResource.DEFAULT_SWAGGER_PARAMS,
         'responses': {
             '200': {'description': 'Migracoes'}
@@ -45,10 +39,14 @@ class MigracoesSankeyEscravoResource(BaseResource):
     def get(self):
         ''' Obtém os registros de migracoes, conforme parâmetros informados '''
         options = self.build_options(request.args)
-        return self.__get_domain().find_dataset_sankey(options)
+        return self.get_domain().find_dataset_sankey(options)
 
-    def __get_domain(self):
+    def get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
             self.domain = MigracoesEscravo()
         return self.domain
+
+    def set_domain(self):
+        ''' Setter invoked from constructor '''
+        self.domain = MigracoesEscravo()

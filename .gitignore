@@ -6,7 +6,6 @@
 .scannerwork
 app/test/report.xml
 app/.scannerwork
-requirements.txt
 start.sh
 Dockerfile
 **/__pycache__

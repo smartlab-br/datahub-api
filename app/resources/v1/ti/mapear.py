@@ -1,8 +1,7 @@
 ''' Controller para fornecer dados da CEE '''
-from flask import request
 from flask_restful_swagger_2 import swagger
+from flask import request
 from resources.base import BaseResource
-from model.thematic import Thematic
 
 class MapearInfantilResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -16,15 +15,8 @@ class MapearInfantilResource(BaseResource):
             cd_municipio_ibge_dv, cd_municipio_ibge, nm_municipio, nm_municipio_sem_acento, cd_uf, \
             latitude, longitude, nm_uf, sg_uf, nm_municipio_uf, cd_unidade, cd_prt, nm_prt, nm_unidade, \
             tp_unidade, sg_unidade, cd_mesorregiao, nm_mesorregiao, cd_microrregiao, nm_microrregiao, \
-            cd_regiao e nm_regiao \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            cd_regiao e nm_regiao " + BaseResource.CAT_DETAIL}
     ]
-
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['mapear'],
@@ -38,10 +30,4 @@ class MapearInfantilResource(BaseResource):
         ''' Obtém os registros do Mapear, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'mapear'
-        return self.__get_domain().find_dataset(options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain
+        return self.get_domain().find_dataset(options)

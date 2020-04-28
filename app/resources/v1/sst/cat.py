@@ -1,8 +1,7 @@
 ''' Controller para fornecer dados da CEE '''
-from flask import request
 from flask_restful_swagger_2 import swagger
+from flask import request
 from resources.base import BaseResource
-from model.thematic import Thematic
 
 class CatsResource(BaseResource):
     ''' Classe de múltiplos CAT '''
@@ -21,15 +20,8 @@ class CatsResource(BaseResource):
             cd_uf, latitude, longitude, nm_uf, sg_uf, nm_municipio_uf, \
             cd_unidade, cd_prt, nm_prt, nm_unidade, tp_unidade, \
             sg_unidade, cd_mesorregiao, nm_mesorregiao, cd_microrregiao, \
-            nm_microrregiao, cd_regiao e nm_regiao. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            nm_microrregiao, cd_regiao e nm_regiao. " + BaseResource.CAT_DETAIL}
     ]
-
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['cat'],
@@ -43,14 +35,9 @@ class CatsResource(BaseResource):
         ''' Obtém os registros de CAT, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'catweb'
-        return self.__get_domain().find_dataset(options)
+        return self.get_domain().find_dataset(options)
 
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain
-
+#pylint: disable=W0221
 class CatsOpResource(CatsResource):
     ''' Classe de múltiplas único município '''
     @swagger.doc({
@@ -66,10 +53,4 @@ class CatsOpResource(CatsResource):
         ''' Obtém os registros de CAT, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'catweb'
-        return self.__get_domain().find_and_operate(operation, options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain
+        return self.get_domain().find_and_operate(operation, options)

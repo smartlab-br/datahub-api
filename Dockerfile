@@ -1,10 +1,13 @@
-FROM smartlab/flask:latest
+FROM smartlab/flask-dataviz:development
 LABEL maintainer="smartlab-dev@mpt.mp.br"
 
-COPY app /app/
-COPY uwsgi.ini /etc/uwsgi/
+USER root
 
-EXPOSE 5000
-WORKDIR /app
+COPY requirements.txt /app/requirements.txt
+RUN pip3 install -r /app/requirements.txt
+
+USER uwsgi
+
+COPY app /app/
 
 ENTRYPOINT ["sh", "/start.sh"]

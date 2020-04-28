@@ -1,9 +1,8 @@
 ''' Controller para fornecer dados da CEE '''
-from flask import request
 from flask_restful_swagger_2 import swagger
+from flask import request
 from resources.base import BaseResource
 from model.municipio import Municipio
-from model.thematic import Thematic
 
 class MunicipiosResource(BaseResource):
     ''' Classe de múltiplos Municípios '''
@@ -20,15 +19,8 @@ class MunicipiosResource(BaseResource):
             nm_prt, nm_unidade, tp_unidade, sg_unidade, cd_mesorregiao, \
             nm_mesorregiao, cd_microrregiao, nm_microrregiao, \
             nu_portaria_mpt, tp_area, cd_geomunicipio_ibge, \
-            cd_municipio_rfb, cd_regiao e nm_regiao. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            cd_municipio_rfb, cd_regiao e nm_regiao. " + BaseResource.CAT_DETAIL}
     ]
-
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['municipio'],
@@ -43,20 +35,10 @@ class MunicipiosResource(BaseResource):
         ''' Obtém os registros de Municípios, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'municipio'
-        return self.__get_domain().find_dataset(options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain
+        return self.get_domain().find_dataset(options)
 
 class MunicipioResource(BaseResource):
     ''' Classe de Municipio '''
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Municipio()
-
     @swagger.doc({
         'tags':['municipio'],
         'description':'Obtém um único município de acordo com o código do IBGE',
@@ -77,10 +59,14 @@ class MunicipioResource(BaseResource):
     })
     def get(self, cd_municipio_ibge):
         ''' Obtém o registro de estabelecimento com um determinado cnpj '''
-        return self.__get_domain().find_by_cd_ibge(cd_municipio_ibge).to_json(orient='records')
+        return self.get_domain().find_by_cd_ibge(cd_municipio_ibge).to_json(orient='records')
 
-    def __get_domain(self):
+    def get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''
         if self.domain is None:
             self.domain = Municipio()
         return self.domain
+
+    def set_domain(self):
+        ''' Setter invoked from constructor '''
+        self.domain = Municipio()

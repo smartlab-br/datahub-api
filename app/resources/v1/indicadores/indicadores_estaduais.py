@@ -1,8 +1,7 @@
 ''' Controller para fornecer dados da CEE '''
-from flask import request
 from flask_restful_swagger_2 import swagger
+from flask import request
 from resources.base import BaseResource
-from model.thematic import Thematic
 
 class IndicadoresEstaduaisResource(BaseResource):
     ''' Classe de múltiplos Indicadores Estaduais '''
@@ -17,15 +16,8 @@ class IndicadoresEstaduaisResource(BaseResource):
             nu_competencia_max, tp_competencia, ds_fonte, vl_indicador, \
             vl_indicador_br, rank_br, rank_br_total, media_br, \
             pct_br, vl_indicador_min_br, vl_indicador_max_br, \
-            rank_uf_total, cd_uf, nm_uf, sg_uf, cd_regiao e nm_regiao. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            rank_uf_total, cd_uf, nm_uf, sg_uf, cd_regiao e nm_regiao. " + BaseResource.CAT_DETAIL}
     ]
-
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['indicadores_estaduais'],
@@ -40,10 +32,4 @@ class IndicadoresEstaduaisResource(BaseResource):
         ''' Obtém os registros de indicadores estaduais, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'indicadoresestaduais'
-        return self.__get_domain().find_dataset(options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain
+        return self.get_domain().find_dataset(options)

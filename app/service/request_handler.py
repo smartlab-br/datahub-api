@@ -1,7 +1,7 @@
 ''' Request handlers and related utilities '''
+from collections.abc import Iterable
 from werkzeug.serving import WSGIRequestHandler, _log
 import colors # pip3 install ansicolors
-from collections.abc import Iterable
 
 class FLPORequestHandler(WSGIRequestHandler):
     ''' Request Handler to override WSGI's '''
@@ -9,7 +9,7 @@ class FLPORequestHandler(WSGIRequestHandler):
     def log(self, _type, message, *args):
         ''' Silences some endpoints '''
         silent_endpoints = ["/hcalive", "/static", "/favicon.ico"]
-        if (type(args[1]) is str or not isinstance(args[1], Iterable) or (
+        if (isinstance(args[1], str) or not isinstance(args[1], Iterable) or (
                 not any(slnt in args[1] for slnt in silent_endpoints) and
                 args[1] != '/')):
             if len(args) >= 5:

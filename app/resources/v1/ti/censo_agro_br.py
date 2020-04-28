@@ -1,8 +1,7 @@
 ''' Controller para fornecer dados da CEE '''
-from flask import request
 from flask_restful_swagger_2 import swagger
+from flask import request
 from resources.base import BaseResource
-from model.thematic import Thematic
 
 class CensoAgroBrasilResource(BaseResource):
     ''' Classe de múltiplas incidências '''
@@ -11,15 +10,8 @@ class CensoAgroBrasilResource(BaseResource):
          "description": "Informações que devem ser trazidas no dataset. \
             Campos disponíveis: cd_uf, tot_ocupados, tot_ocup_men14, \
             perc_tot_14, men_14_parente, part_com_parentesco, \
-            men_14_sem_parente e part_sem_parentesco. \
-            Para renomear campos do dataset de retorno, após o campo de \
-            consulta, adicionar o novo nome, separado por '-' (ex: \
-            campo-campo_novo)."}
+            men_14_sem_parente e part_sem_parentesco. " + BaseResource.CAT_DETAIL}
     ]
-
-    def __init__(self):
-        ''' Construtor'''
-        self.domain = Thematic()
 
     @swagger.doc({
         'tags':['censo_agro'],
@@ -34,10 +26,4 @@ class CensoAgroBrasilResource(BaseResource):
         ''' Obtém os registros de Censo Rural, conforme parâmetros informados '''
         options = self.build_options(request.args)
         options['theme'] = 'censoagronacional'
-        return self.__get_domain().find_dataset(options)
-
-    def __get_domain(self):
-        ''' Carrega o modelo de domínio, se não o encontrar '''
-        if self.domain is None:
-            self.domain = Thematic()
-        return self.domain
+        return self.get_domain().find_dataset(options)

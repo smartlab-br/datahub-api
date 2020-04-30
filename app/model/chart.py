@@ -142,6 +142,7 @@ class Chart(BaseModel):
         chart_options = options.get('chart_options')
 
         # Gets the geojson
+        # TODO 1: Redirect to CDN
         quality = options.get('chart_options', {}).get('quality','4')
         if len(str(au)) > 2:
             cd_uf=str(au)[:2]
@@ -225,7 +226,7 @@ class Chart(BaseModel):
             marker_layer = folium.map.FeatureGroup(name = au_title)
             folium.map.Marker(
                 centroide,
-                icon=folium.Icon(color='red') # TODO 4 - create function to find contrasting color.
+                icon=folium.Icon(color='red') # TODO 2: Create function to find contrasting color.
             ).add_to(marker_layer)
             marker_layer.add_to(n)
         

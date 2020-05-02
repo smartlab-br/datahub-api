@@ -235,7 +235,7 @@ class BaseRepository():
         for calc in options['calcs']:
             # Always appends min and max when calc is not one of them
             if calc not in ['min_part', 'max_part']:
-                pattern = self.replace_partition('min_part')
+                pattern = self.replace_partition('min_part', options)
                 if str_res_partition is None:
                     pattern = pattern.replace('PARTITION BY {partition}', '')
                 arr_calcs.append(
@@ -246,7 +246,7 @@ class BaseRepository():
                     )
                 )
 
-                pattern = self.replace_partition('max_part')
+                pattern = self.replace_partition('max_part', options)
                 if str_res_partition is None:
                     pattern = pattern.replace('PARTITION BY {partition}', '')
                 arr_calcs.append(

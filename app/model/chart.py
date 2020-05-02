@@ -142,11 +142,11 @@ class Chart(BaseModel):
         chart_options = options.get('chart_options')
 
         # Gets the geojson
+        # TODO 1: Redirect to CDN
         quality = options.get('chart_options', {}).get('quality','4')
         if len(str(au)) > 2:
             cd_uf=str(au)[:2]
             res = 'municipio'
-            # state_geo = f'https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-{cd_uf}-mun.json'
             state_geo = f'https://raw.githubusercontent.com/smartlab-br/geodata/master/geojson/br/{visao}/{res}/{cd_uf}_q{quality}.json'
         elif len(str(au)) == 2 and options.get('chart_options', {}).get('topology') == 'uf':
             state_geo = f'https://raw.githubusercontent.com/smartlab-br/geodata/master/geojson/br/uf_q{quality}.json'
@@ -163,9 +163,14 @@ class Chart(BaseModel):
         # Runs dataframe modifiers from viewconf
         dataframe = ViewConfReader().generate_columns(dataframe, options)
 
-        dataframe = dataframe.set_index('idx')    
+        dataframe = dataframe.set_index('idx')
+        centroide = None  
         for each_au in state_geo.get('features'):
-            each_au.get('properties').update(json.loads(dataframe.loc[int(each_au.get('properties').get('codarea'))].to_json()), headers=options.get('headers'))
+            each_au.get('properties').update(json.loads(dataframe.loc[int(each_au.get('properties').get(chart_options.get('id_field')))].to_json()), headers=options.get('headers'))
+            if str(each_au.get('properties', {}).get(chart_options.get('id_field'))) == str(au):
+                centroide = each_au.get('properties', {}).get('centroide')
+                if centroide:
+                    centroide.reverse()
         state_geo = json.dumps(state_geo)
         
         # Creating map instance
@@ -207,17 +212,21 @@ class Chart(BaseModel):
         ).add_to(chart)
 
         # Adding marker to current analysis unit
+        if np.issubdtype(dataframe.index.dtype, np.number):
+            au = int(au)
+        au_row = dataframe.loc[au]
+        au_title = 'Analysis Unit'
+        if len(options.get('headers', [])) > 0:
+            au_title = au_row[options.get('headers', [])[0]['value']]
+
         if 'latitude' in list(dataframe.columns):
-            if np.issubdtype(dataframe.index.dtype, np.number):
-                au = int(au)
-            au_row = dataframe.loc[au]
-            au_title = 'Analysis Unit'
-            if len(options.get('headers', [])) > 0:
-                au_title = au_row[options.get('headers', [])[0]['value']]
+            centroide = [au_row['latitude'], au_row['longitude']]
+        
+        if centroide:
             marker_layer = folium.map.FeatureGroup(name = au_title)
             folium.map.Marker(
-                [au_row['latitude'], au_row['longitude']],
-                icon=folium.Icon(color='red') # TODO 4 - create function to find contrasting color.
+                centroide,
+                icon=folium.Icon(color='red') # TODO 2: Create function to find contrasting color.
             ).add_to(marker_layer)
             marker_layer.add_to(n)
         

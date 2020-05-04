@@ -143,7 +143,7 @@ class Chart(BaseModel):
         chart_options = options.get('chart_options')
 
         # Gets the geojson
-        # TODO 1: Redirect to CDN
+        # TODO 1 - Redirect to CDN
         quality = options.get('chart_options', {}).get('quality','4')
         if len(str(au)) > 2:
             cd_uf=str(au)[:2]
@@ -156,7 +156,7 @@ class Chart(BaseModel):
             state_geo = f'https://raw.githubusercontent.com/smartlab-br/geodata/master/geojson/br/{visao}/{au}_q{quality}.json'
         else:
             state_geo = f'https://raw.githubusercontent.com/smartlab-br/geodata/master/geojson/br/{visao}/{res}/{au}_q{quality}.json' 
-        # TODO 1 - Change the geo/topo json lookup address
+        # TODO 1.1 - Change the geo/topo json lookup address
         # state_geo = requests.get(state_geo).json()
         state_geo = requests.get('https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-29-mun.json').json()
         
@@ -172,13 +172,14 @@ class Chart(BaseModel):
         for each_au in state_geo.get('features'):
             # TODO 2 - Add a mechanism to know the identifying property in each geo/topo json
             # each_au.get('properties').update(json.loads(dataframe.loc[int(each_au.get('properties').get(chart_options.get('id_field')))].to_json()), headers=options.get('headers'))
-            df_row = json.loads(dataframe.loc[int(each_au.get('properties').get("id"))].to_json())
-            each_au.get('properties').update(df_row, headers=options.get('headers'))
+            df_row = dataframe.loc[int(each_au.get('properties').get("id"))]
+            each_au.get('properties').update(json.loads(df_row.to_json()), headers=options.get('headers'))
             if str(each_au.get('properties', {}).get(chart_options.get('id_field'))) == str(au):
                 centroide = each_au.get('properties', {}).get('centroide')
                 if centroide:
                     centroide.reverse()
-                marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{html.escape(hdr.get('text'))}</th><td style='padding: 4px;'>{html.escape(str(df_row[hdr.get('value')]))}</td></tr>" for hdr in options.get('headers')])
+                
+                marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(df_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in options.get('headers')])
                 marker_tooltip = f"<table>{marker_tooltip}</table>"
         state_geo = json.dumps(state_geo)
         

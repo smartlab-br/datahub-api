@@ -144,3 +144,7 @@ class ViewConfReader():
             vmin = vmin, 
             vmax = vmax
         )
+
+    @staticmethod
+    def get_marker_color(options):
+        return options.get('chart_options', {}).get('marker_color', 'red')

@@ -236,7 +236,7 @@ class Chart(BaseModel):
             folium.map.Marker(
                 centroide,
                 tooltip=marker_tooltip,
-                icon=folium.Icon(color='red') # TODO 3 - Create function to find contrasting color.
+                icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
             ).add_to(marker_layer)
             marker_layer.add_to(n)
         

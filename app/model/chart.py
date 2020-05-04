@@ -178,7 +178,7 @@ class Chart(BaseModel):
                 centroide = each_au.get('properties', {}).get('centroide')
                 if centroide:
                     centroide.reverse()
-                marker_tooltip = "".join([f"<tr><th>{html.escape(hdr.get('text'))}</th><td>{html.escape(str(df_row[hdr.get('value')]))}</td></tr>" for hdr in options.get('headers')])
+                marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{html.escape(hdr.get('text'))}</th><td style='padding: 4px;'>{html.escape(str(df_row[hdr.get('value')]))}</td></tr>" for hdr in options.get('headers')])
                 marker_tooltip = f"<table>{marker_tooltip}</table>"
         state_geo = json.dumps(state_geo)
         

@@ -150,5 +150,5 @@ class ViewConfReader():
         if options.get('type') == 'multiple-charts':
             for chart in options.get('charts'):
                 if chart.get('id') == options.get(chart_id):
-                    return chart.get('options', {}).get('marker_color', 'red'):
+                    return chart.get('options', {}).get('marker_color', 'red')
         return options.get('chart_options', {}).get('marker_color', 'red')

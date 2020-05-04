@@ -17,6 +17,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+import html
 
 class Chart(BaseModel):
     ''' Model for fetching dinamic and static charts '''
@@ -155,7 +156,9 @@ class Chart(BaseModel):
             state_geo = f'https://raw.githubusercontent.com/smartlab-br/geodata/master/geojson/br/{visao}/{au}_q{quality}.json'
         else:
             state_geo = f'https://raw.githubusercontent.com/smartlab-br/geodata/master/geojson/br/{visao}/{res}/{au}_q{quality}.json' 
-        state_geo = requests.get(state_geo).json()
+        # TODO 1 - Change the geo/topo json lookup address
+        # state_geo = requests.get(state_geo).json()
+        state_geo = requests.get('https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-29-mun.json').json()
         
         dataframe['str_id'] = dataframe[chart_options.get('id_field')].astype(str)
         dataframe['idx'] = dataframe[chart_options.get('id_field')]
@@ -165,12 +168,18 @@ class Chart(BaseModel):
 
         dataframe = dataframe.set_index('idx')
         centroide = None  
+        marker_tooltip = ''
         for each_au in state_geo.get('features'):
-            each_au.get('properties').update(json.loads(dataframe.loc[int(each_au.get('properties').get(chart_options.get('id_field')))].to_json()), headers=options.get('headers'))
+            # TODO 2 - Add a mechanism to know the identifying property in each geo/topo json
+            # each_au.get('properties').update(json.loads(dataframe.loc[int(each_au.get('properties').get(chart_options.get('id_field')))].to_json()), headers=options.get('headers'))
+            df_row = json.loads(dataframe.loc[int(each_au.get('properties').get("id"))].to_json())
+            each_au.get('properties').update(df_row, headers=options.get('headers'))
             if str(each_au.get('properties', {}).get(chart_options.get('id_field'))) == str(au):
                 centroide = each_au.get('properties', {}).get('centroide')
                 if centroide:
                     centroide.reverse()
+                marker_tooltip = "".join([f"<tr><th>{html.escape(hdr.get('text'))}</th><td>{html.escape(str(df_row[hdr.get('value')]))}</td></tr>" for hdr in options.get('headers')])
+                marker_tooltip = f"<table>{marker_tooltip}</table>"
         state_geo = json.dumps(state_geo)
         
         # Creating map instance
@@ -226,7 +235,8 @@ class Chart(BaseModel):
             marker_layer = folium.map.FeatureGroup(name = au_title)
             folium.map.Marker(
                 centroide,
-                icon=folium.Icon(color='red') # TODO 2: Create function to find contrasting color.
+                tooltip=marker_tooltip,
+                icon=folium.Icon(color='red') # TODO 3 - Create function to find contrasting color.
             ).add_to(marker_layer)
             marker_layer.add_to(n)
         

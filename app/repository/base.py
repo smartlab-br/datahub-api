@@ -225,6 +225,8 @@ class BaseRepository():
                     options['categorias'],
                     options['agregacao']
                 )
+        elif isinstance(val_field, list):
+            val_field = val_field[0]
 
         str_res_partition = res_partition
         if res_partition is not None and isinstance(res_partition, list):

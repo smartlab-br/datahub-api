@@ -1,4 +1,4 @@
-FROM smartlab/flask-dataviz:development
+FROM smartlab/flask-dataviz:latest
 LABEL maintainer="smartlab-dev@mpt.mp.br"
 
 USER root

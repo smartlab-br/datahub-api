@@ -161,10 +161,9 @@ class Chart(BaseModel):
         # state_geo = requests.get('https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-29-mun.json').json()
 
         ########## Testando com arquivo estático
-        f_au = open("topo.json", "r")
-        state_geo = json.loads(f_au.read())
-        f_au.close()
-        state_geo = json.loads(state_geo)
+        with open("topo.json", "r") as f_au:
+            state_geo = json.load(f_au)
+            # f_au.close()
         ########## Testando com arquivo estático
 
         dataframe['str_id'] = dataframe[chart_options.get('id_field')].astype(str)
@@ -183,9 +182,11 @@ class Chart(BaseModel):
             # df_row = dataframe.loc[int(each_au.get('properties').get("id"))]
             try:
                 df_row = dataframe.loc[int(each_au.get('properties').get("CodReg"))]
+                each_au.get('properties').update(json.loads(df_row.to_json()), headers=options.get('headers'))
             except KeyError:
-                continue
-            each_au.get('properties').update(json.loads(df_row.to_json()), headers=options.get('headers'))
+                df_row = {hdr.get('value'): 'N/A' for hdr in options.get('headers')}
+                df_row[options.get('headers')[0].get('value')] = each_au.get('properties').get('Nome_Reg')
+                each_au.get('properties').update(json.loads(json.dumps(df_row)), headers=options.get('headers'))
             if str(each_au.get('properties', {}).get(chart_options.get('id_field'))) == str(au):
                 centroide = each_au.get('properties', {}).get('centroide')
                 if centroide:
@@ -214,19 +215,6 @@ class Chart(BaseModel):
             else:
                 return color_scale(value)
 
-        # chart = folium.GeoJson(
-        #     data = json.dumps(state_geo),
-        #     name = ViewConfReader.get_chart_title(options),
-        #     style_function = lambda feature: {
-        #         'fillColor': get_color(feature),
-        #         'fillOpacity': 0.8,
-        #         'color' : 'black',
-        #         'stroke' : 'black',
-        #         'lineOpacity': 0.2,
-        #         'weight' : 0.2,
-        #     }    
-        # )
-        
         chart = folium.TopoJson(
             state_geo,
             'objects.data',
@@ -241,15 +229,14 @@ class Chart(BaseModel):
             }
         )
 
-
         # Adding tooltip to choropleth
-        # folium.features.GeoJsonTooltip(
-        #     fields = [hdr.get('value') for hdr in options.get('headers')],
-        #     aliases = [hdr.get('text') for hdr in options.get('headers')],
-        #     localize=True,
-        #     sticky=False,
-        #     labels=True
-        # ).add_to(chart)
+        folium.features.GeoJsonTooltip(
+            fields = [hdr.get('value') for hdr in options.get('headers')],
+            aliases = [hdr.get('text') for hdr in options.get('headers')],
+            localize=True,
+            sticky=False,
+            labels=True
+        ).add_to(chart)
 
         # Adding marker to current analysis unit
         if np.issubdtype(dataframe.index.dtype, np.number):

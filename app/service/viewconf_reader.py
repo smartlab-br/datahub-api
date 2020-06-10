@@ -97,13 +97,13 @@ class ViewConfReader():
             )
         
         # Applying formatters
-        formatters = options.get('api',{}).get('options',{}).get('formatters')
+        formatters = options.get('api',{}).get('options',{}).get('formatters', [])
         for fmtr in formatters:
             dataframe['fmt_' + fmtr.get('id')] = dataframe[fmtr.get('id')].apply(
                 NumberFormatter.format,
                 options = fmtr
             )
-        
+    
         return dataframe
 
     @staticmethod

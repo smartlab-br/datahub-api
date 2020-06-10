@@ -138,7 +138,6 @@ class Heat():
         au_title = 'Analysis Unit'
         if len(options.get('headers', [])) > 0:
             au_title = au_row[options.get('headers', [])[0]['value']]
-            print(au_title)
 
         if chart_options.get('lat','latitude') in list(dataframe.columns):
             centroide = [au_row[chart_options.get('lat','latitude')], au_row[chart_options.get('long','longitude')]]

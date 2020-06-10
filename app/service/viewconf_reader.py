@@ -97,13 +97,13 @@ class ViewConfReader():
             )
         
         # Applying formatters
-        formatters = options.get('api',{}).get('options',{}).get('formatters')
+        formatters = options.get('api',{}).get('options',{}).get('formatters', [])
         for fmtr in formatters:
             dataframe['fmt_' + fmtr.get('id')] = dataframe[fmtr.get('id')].apply(
                 NumberFormatter.format,
                 options = fmtr
             )
-        
+    
         return dataframe
 
     @staticmethod
@@ -144,3 +144,11 @@ class ViewConfReader():
             vmin = vmin, 
             vmax = vmax
         )
+
+    @staticmethod
+    def get_marker_color(options):
+        if options.get('type') == 'multiple-charts':
+            for chart in options.get('charts'):
+                if chart.get('id') == options.get(chart_id):
+                    return chart.get('options', {}).get('marker_color', 'red')
+        return options.get('chart_options', {}).get('marker_color', 'red')

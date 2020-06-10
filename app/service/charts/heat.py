@@ -74,7 +74,7 @@ class Heat():
         dataframe = ViewConfReader().generate_columns(dataframe, options)
 
         dataframe = dataframe.set_index('idx')
-        # centroide = None  
+        centroide = None  
         marker_tooltip = ''
         # for each_au in state_geo.get('features'):
         # for each_au in state_geo.get('objects',{}).get('data',{}).get('geometries',[]):
@@ -102,36 +102,61 @@ class Heat():
         if 'value_field' in chart_options:
             cols.append(chart_options.get('value_field'))
 
+        if 'headers' not in options:
+            options['headers'] = ViewConfReader.get_headers_from_options_descriptor(
+                options.get('description'),
+                [{
+                    'text': 'Analysis Unit',
+                    'value': chart_options.get('name_field', 'nm_municipio')
+                }]
+            )
+            
+        # Get group names from headers
+        group_names = { hdr.get('layer_id'): hdr.get('text') for hdr in options.get('headers') }
+
         grouped = dataframe.groupby(chart_options.get('layer_id','cd_indicador'))
         show = True # Shows only the first
         for group_id, group in grouped:
             chart = HeatMap(
                 group[cols].values.tolist(),
-                name = group_id,
+                name = group_names.get(group_id),
                 show = show
             )
             show = False
             chart.add_to(n)
-
+            
         # Adding marker to current analysis unit
-        # if np.issubdtype(dataframe.index.dtype, np.number):
-        #     au = int(au)
-        # au_row = dataframe.loc[au]
-        # au_title = 'Analysis Unit'
-        # if len(options.get('headers', [])) > 0:
-        #     au_title = au_row[options.get('headers', [])[0]['value']]
+        if np.issubdtype(dataframe.index.dtype, np.number):
+            au = int(au)
 
-        # if 'latitude' in list(dataframe.columns):
-        #     centroide = [au_row['latitude'], au_row['longitude']]
+        au_row = dataframe.loc[au].pivot_table(
+            index=[chart_options.get('id_field','cd_mun_ibge'), chart_options.get('name_field', 'nm_municipio'), chart_options.get('lat','latitude'), chart_options.get('long','longitude')],
+            columns='cd_indicador',
+            values=chart_options.get('value_field','vl_indicador')
+        ).reset_index().iloc[0]
         
-        # if centroide:
-        #     marker_layer = folium.map.FeatureGroup(name = au_title)
-        #     folium.map.Marker(
-        #         centroide,
-        #         tooltip=marker_tooltip,
-        #         icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
-        #     ).add_to(marker_layer)
-        #     marker_layer.add_to(n)
+        au_title = 'Analysis Unit'
+        if len(options.get('headers', [])) > 0:
+            au_title = au_row[options.get('headers', [])[0]['value']]
+            print(au_title)
+
+        if chart_options.get('lat','latitude') in list(dataframe.columns):
+            centroide = [au_row[chart_options.get('lat','latitude')], au_row[chart_options.get('long','longitude')]]
+        
+        if 'headers' in options:
+            marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in options.get('headers')])
+            marker_tooltip = f"<table>{marker_tooltip}</table>"
+        else:
+            marker_tooltip = "Tooltip!"
+
+        if centroide:
+            marker_layer = folium.map.FeatureGroup(name = au_title)
+            folium.map.Marker(
+                centroide,
+                tooltip=marker_tooltip,
+                icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
+            ).add_to(marker_layer)
+            marker_layer.add_to(n)
         
         folium.LayerControl().add_to(n)
 
@@ -141,11 +166,11 @@ class Heat():
         n.fit_bounds([
             [
                 dataframe[chart_options.get('lat','latitude')].min(),
-                dataframe[chart_options.get('long','long')].min()
+                dataframe[chart_options.get('long','longitude')].min()
             ],
             [
                 dataframe[chart_options.get('lat','latitude')].max(),
-                dataframe[chart_options.get('long','long')].max()
+                dataframe[chart_options.get('long','longitude')].max()
             ]
         ])
 

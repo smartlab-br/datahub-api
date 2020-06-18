@@ -152,3 +152,15 @@ class ViewConfReader():
                 if chart.get('id') == options.get(chart_id):
                     return chart.get('options', {}).get('marker_color', 'red')
         return options.get('chart_options', {}).get('marker_color', 'red')
+
+    @staticmethod
+    def get_headers_from_options_descriptor(description, initial):
+        for descriptor in description:
+            if descriptor.get('id') in ['selectlayer']:
+                for layer in descriptor.get('items'):
+                    initial.append({
+                        'text': layer.get('label'),
+                        'layer_id': layer.get('value'),
+                        'value': layer.get('id')
+                    })
+        return initial

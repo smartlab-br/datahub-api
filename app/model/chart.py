@@ -20,11 +20,12 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import html
 from service.charts.choropleth import Choropleth
 from service.charts.heat import Heat
+from service.charts.cluster import Cluster
 
 class Chart(BaseModel):
     ''' Model for fetching dinamic and static charts '''
     CHART_LIB_DEF = {
-        'FOLIUM': ['MAP_TOPOJSON', 'MAP_HEAT']
+        'FOLIUM': ['MAP_TOPOJSON', 'MAP_HEAT', 'MAP_CLUSTER']
     } # Defaults to BOKEH
     def get_chart(self, options):
         ''' Selects if the chart should be static or dynamic '''
@@ -40,7 +41,6 @@ class Chart(BaseModel):
                 options.get('dimension'),
                 options.get('card_id')
             )
-
             options = {**options, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options}), **struct}
             dataframe = Thematic().find_dataset({**{'as_pandas': True, 'no_wrap': True}, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options})})
         else:
@@ -65,6 +65,8 @@ class Chart(BaseModel):
             return Choropleth.draw(dataframe, options)
         if options.get('chart_type') == 'MAP_HEAT':
             return Heat.draw(dataframe, options)
+        if options.get('chart_type') == 'MAP_CLUSTER':
+            return Cluster.draw(dataframe, options)
         pass
         
     @staticmethod

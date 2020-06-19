@@ -1,7 +1,7 @@
 ''' Model for fetching chart '''
 import folium
 import numpy as np
-from folium.plugins import HeatMap
+from folium.plugins import HeatMap, HeatMapWithTime
 from service.viewconf_reader import ViewConfReader
 
 ##### With time series #####
@@ -76,24 +76,6 @@ class Heat():
         dataframe = dataframe.set_index('idx')
         centroide = None  
         marker_tooltip = ''
-        # for each_au in state_geo.get('features'):
-        # for each_au in state_geo.get('objects',{}).get('data',{}).get('geometries',[]):
-        #     # During topo conversion, all ID will be named smartlab_geo_id and
-        #     # all NAME will be in an attribute called smartlab_geo_name.
-        #     try:
-        #         df_row = dataframe.loc[int(each_au.get('properties').get("smartlab_geo_id"))]
-        #         each_au.get('properties').update(json.loads(df_row.to_json()), headers=options.get('headers'))
-        #     except KeyError:
-        #         df_row = {hdr.get('value'): 'N/A' for hdr in options.get('headers')}
-        #         df_row[options.get('headers')[0].get('value')] = each_au.get('properties').get('smartlab_geo_name')
-        #         each_au.get('properties').update(json.loads(json.dumps(df_row)), headers=options.get('headers'))
-        #     if str(each_au.get('properties', {}).get(chart_options.get('id_field'))) == str(au):
-        #         centroide = each_au.get('properties', {}).get('centroide')
-        #         if centroide:
-        #             centroide.reverse()
-                
-        #         marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(df_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in options.get('headers')])
-        #         marker_tooltip = f"<table>{marker_tooltip}</table>"
         
         # Creating map instance
         n = folium.Map(tiles=tiles_url, attr = tiles_attribution, control_scale = True)
@@ -117,13 +99,28 @@ class Heat():
         grouped = dataframe.groupby(chart_options.get('layer_id','cd_indicador'))
         show = True # Shows only the first
         for group_id, group in grouped:
-            chart = HeatMap(
-                group[cols].values.tolist(),
-                name = group_names.get(group_id),
-                show = show
-            )
-            show = False
+            if 'timeseries' not in chart_options:
+                chart = HeatMap(
+                    group[cols].values.tolist(),
+                    name = group_names.get(group_id),
+                    show = show
+                )
+            else:
+                t_grouped = group.groupby(chart_options.get('timeseries'))
+                t_data = []
+                t_index = []
+                for t_group_id, t_group in t_grouped:
+                    t_data.append(t_group[cols].values.tolist())
+                    t_index.append(t_group_id)
+                chart = HeatMapWithTime(
+                    t_data,
+                    index = t_index,
+                    auto_play=True,
+                    name = group_names.get(group_id),
+                    show = show
+                )
             chart.add_to(n)
+            show = False
             
         # Adding marker to current analysis unit
         if np.issubdtype(dataframe.index.dtype, np.number):

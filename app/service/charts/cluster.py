@@ -1,6 +1,7 @@
 ''' Model for fetching chart '''
 import folium
 import numpy as np
+import pandas as pd
 from folium.plugins import MarkerCluster
 from service.viewconf_reader import ViewConfReader
 
@@ -20,13 +21,18 @@ class Cluster():
         style_statement = "<link href='https://fonts.googleapis.com/css2?family=Pathway+Gothic+One&display=swap' rel='stylesheet'>\
             <style>\
                 .legend.leaflet-control{display:none}\
-                .leaflet-tooltip table tbody tr:first-child th{display:none;}\
-                .leaflet-tooltip table tbody tr:first-child td{\
+                .leaflet-tooltip table tbody tr:first-child th, \
+                .leaflet-popup table tbody tr:first-child th{\
+                    display:none;\
+                }\
+                .leaflet-tooltip table tbody tr:first-child td, \
+                .leaflet-popup table tbody tr:first-child td{\
                     font-family: 'Pathway Gothic One', Calibri, sans-serif;\
                     font-size: 2.5em;\
                     font-weight: 700;\
                 }\
-                .leaflet-tooltip table tbody tr:nth-child(2){\
+                .leaflet-tooltip table tbody tr:nth-child(2), \
+                .leaflet-popup table tbody tr:nth-child(2){\
                     border-top: 1px solid black;\
                 }\
                 path.leaflet-interactive:hover {\
@@ -45,25 +51,6 @@ class Cluster():
 
         dataframe = dataframe.set_index('idx')
         centroide = None  
-        marker_tooltip = ''
-        # for each_au in state_geo.get('features'):
-        # for each_au in state_geo.get('objects',{}).get('data',{}).get('geometries',[]):
-        #     # During topo conversion, all ID will be named smartlab_geo_id and
-        #     # all NAME will be in an attribute called smartlab_geo_name.
-        #     try:
-        #         df_row = dataframe.loc[int(each_au.get('properties').get("smartlab_geo_id"))]
-        #         each_au.get('properties').update(json.loads(df_row.to_json()), headers=options.get('headers'))
-        #     except KeyError:
-        #         df_row = {hdr.get('value'): 'N/A' for hdr in options.get('headers')}
-        #         df_row[options.get('headers')[0].get('value')] = each_au.get('properties').get('smartlab_geo_name')
-        #         each_au.get('properties').update(json.loads(json.dumps(df_row)), headers=options.get('headers'))
-        #     if str(each_au.get('properties', {}).get(chart_options.get('id_field'))) == str(au):
-        #         centroide = each_au.get('properties', {}).get('centroide')
-        #         if centroide:
-        #             centroide.reverse()
-                
-        #         marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(df_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in options.get('headers')])
-        #         marker_tooltip = f"<table>{marker_tooltip}</table>"
         
         # Creating map instance
         n = folium.Map(tiles=tiles_url, attr = tiles_attribution, control_scale = True)
@@ -81,18 +68,71 @@ class Cluster():
                 }]
             )
         
-        print(options['headers'])
         # Get group names from headers
         group_names = { hdr.get('layer_id'): hdr.get('text') for hdr in options.get('headers') }
 
+        # Get pivoted dataframe for tooltip list creation
+        df_tooltip = dataframe.copy().pivot_table(
+            index=[chart_options.get('id_field','cd_mun_ibge'), chart_options.get('name_field', 'nm_municipio'), chart_options.get('lat','latitude'), chart_options.get('long','longitude')],
+            columns='cd_indicador',
+            fill_value=0
+        )
+        df_tooltip.columns = ['_'.join(reversed(col)).strip() for col in df_tooltip.columns.values]
+        df_tooltip = df_tooltip.reset_index()
+        
+        # Tooltip gen function
+        # TODO - [REMOVE] Used just for debugging
+        # options["headers"] = [
+        #     {'text': 'nm_municipio', "value": 'nm_municipio'},
+
+        #     {'text': 'te_rgt_agr_sum_vl_indicador', "value": 'te_rgt_agr_sum_vl_indicador'},
+        #     {'text': 'te_rgt_api_calc_min_part', "value": 'te_rgt_api_calc_min_part'},
+        #     {'text': 'te_rgt_api_calc_max_part', "value": 'te_rgt_api_calc_max_part'},
+        #     {'text': 'te_rgt_api_calc_ln_norm_pos_part', "value": 'te_rgt_api_calc_ln_norm_pos_part'},
+            
+        #     {'text': 'te_res_agr_sum_vl_indicador', "value": 'te_res_agr_sum_vl_indicador'},
+        #     {'text': 'te_res_api_calc_min_part', "value": 'te_res_api_calc_min_part'},
+        #     {'text': 'te_res_api_calc_max_part', "value": 'te_res_api_calc_max_part'},
+        #     {'text': 'te_res_api_calc_ln_norm_pos_part', "value": 'te_rgt_api_calc_ln_norm_pos_part'},
+            
+        #     {'text': 'te_nat_agr_sum_vl_indicador', "value": 'te_nat_agr_sum_vl_indicador'},
+        #     {'text': 'te_nat_api_calc_min_part', "value": 'te_nat_api_calc_min_part'},
+        #     {'text': 'te_nat_api_calc_max_part', "value": 'te_nat_api_calc_max_part'},
+        #     {'text': 'te_nat_api_calc_ln_norm_pos_part', "value": 'te_nat_api_calc_ln_norm_pos_part'}
+        # ]
+        def tooltip_gen(au_row, **kwargs):
+            if 'headers' in options:
+                marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in kwargs.get('headers')])
+                return f"<table>{marker_tooltip}</table>"
+            return "Tooltip!"
+        
+        # Merge dataframe and pivoted dataframe
+        df_tooltip['tooltip'] = df_tooltip.apply(
+            tooltip_gen,
+            headers= options.get("headers"),
+            axis=1
+        )
+        df_tooltip = df_tooltip[[chart_options.get('id_field', 'cd_mun_ibge'), 'tooltip']]
+        
+        # Adding tooltips to detailed dataframe
+        dataframe = pd.merge(
+            dataframe,
+            df_tooltip,
+            left_on = chart_options.get('id_field', 'cd_mun_ibge'),
+            right_on = chart_options.get('id_field', 'cd_mun_ibge'),
+            how = "left"
+        )
+        dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
+        dataframe = dataframe.set_index('idx')
+        
         grouped = dataframe.groupby(chart_options.get('layer_id','cd_indicador'))
-        show = True # Shows only the first
+        show = True # Shows only the first layer
         for group_id, group in grouped:
-            print(group[cols].values.tolist())
             chart = MarkerCluster(
                 locations = group[cols].values.tolist(),
                 name = group_names.get(group_id),
-                show = show
+                show = show,
+                popups = group['tooltip'].tolist()
             )
 
             show = False
@@ -102,31 +142,20 @@ class Cluster():
         if np.issubdtype(dataframe.index.dtype, np.number):
             au = int(au)
 
-        au_row = dataframe.loc[au].pivot_table(
-            index=[chart_options.get('id_field','cd_mun_ibge'), chart_options.get('name_field', 'nm_municipio'), chart_options.get('lat','latitude'), chart_options.get('long','longitude')],
-            columns='cd_indicador',
-            values=chart_options.get('value_field','agr_sum_vl_indicador')
-            # values=chart_options.get('value_field','vl_indicador')
-        ).reset_index().iloc[0]
+        au_row = dataframe.loc[au].reset_index().iloc[0]
         
         au_title = 'Analysis Unit'
         if len(options.get('headers', [])) > 0:
             au_title = au_row[options.get('headers', [])[0]['value']]
 
         if chart_options.get('lat','latitude') in list(dataframe.columns):
-            centroide = [au_row[chart_options.get('lat','latitude')], au_row[chart_options.get('long','longitude')]]
-        
-        if 'headers' in options:
-            marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in options.get('headers')])
-            marker_tooltip = f"<table>{marker_tooltip}</table>"
-        else:
-            marker_tooltip = "Tooltip!"
-
+            centroide = [au_row[chart_options.get('lat','latitude')].item(), au_row[chart_options.get('long','longitude')].item()]
+            
         if centroide:
             marker_layer = folium.map.FeatureGroup(name = au_title)
             folium.map.Marker(
                 centroide,
-                tooltip=marker_tooltip,
+                tooltip=au_row.get('tooltip', "Tooltip!"),
                 icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
             ).add_to(marker_layer)
             marker_layer.add_to(n)

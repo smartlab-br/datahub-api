@@ -1,0 +1,181 @@
+''' Model for fetching chart '''
+import folium
+import numpy as np
+import pandas as pd
+from folium.plugins import MarkerCluster
+from service.viewconf_reader import ViewConfReader
+
+class Cluster():
+    ''' Heatmap building class '''
+    @staticmethod
+    def draw(dataframe, options):
+        ''' Gera um mapa topojson a partir das opções enviadas '''
+        # http://localhost:5000/charts/cluster?from_viewconf=S&au=2927408&card_id=mapa_prev_estado_cluster&observatory=te&dimension=prevalencia&as_image=N
+        # Check testing options.headers below!!!!
+
+        # Default values
+        # tiles_url = 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png'
+        tiles_url = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+        # tiles_attribution = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        tiles_attribution = 'Esri, USGS | Esri, HERE | Esri, Garmin, FAO, NOAA'
+        visao = options.get('visao', 'uf')
+
+        style_statement = "<link href='https://fonts.googleapis.com/css2?family=Pathway+Gothic+One&display=swap' rel='stylesheet'>\
+            <style>\
+                .legend.leaflet-control{display:none}\
+                .leaflet-tooltip table tbody tr:first-child th, \
+                .leaflet-popup table tbody tr:first-child th{\
+                    display:none;\
+                }\
+                .leaflet-tooltip table tbody tr:first-child td, \
+                .leaflet-popup table tbody tr:first-child td{\
+                    font-family: 'Pathway Gothic One', Calibri, sans-serif;\
+                    font-size: 2.5em;\
+                    font-weight: 700;\
+                }\
+                .leaflet-tooltip table tbody tr:nth-child(2), \
+                .leaflet-popup table tbody tr:nth-child(2){\
+                    border-top: 1px solid black;\
+                }\
+                path.leaflet-interactive:hover {\
+                    fill-opacity: 1;\
+                }\
+            </style>"
+
+        au = options.get('au')
+        chart_options = options.get('chart_options')
+
+        dataframe['str_id'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')].astype(str)
+        dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
+        
+        # Runs dataframe modifiers from viewconf
+        dataframe = ViewConfReader().generate_columns(dataframe, options)
+
+        dataframe = dataframe.set_index('idx')
+        centroide = None  
+        
+        # Creating map instance
+        n = folium.Map(tiles=tiles_url, attr = tiles_attribution, control_scale = True)
+
+        cols = [chart_options.get('lat','lat'), chart_options.get('long','long')]
+        if 'value_field' in chart_options:
+            cols.append(chart_options.get('value_field'))
+
+        if 'headers' not in options:
+            options['headers'] = ViewConfReader.get_headers_from_options_descriptor(
+                options.get('description'),
+                [{
+                    'text': 'Analysis Unit',
+                    'value': chart_options.get('name_field', 'nm_municipio')
+                }]
+            )
+        
+        # Get group names from headers
+        group_names = { hdr.get('layer_id'): hdr.get('text') for hdr in options.get('headers') }
+
+        # Get pivoted dataframe for tooltip list creation
+        df_tooltip = dataframe.copy().pivot_table(
+            index=[chart_options.get('id_field','cd_mun_ibge'), chart_options.get('name_field', 'nm_municipio'), chart_options.get('lat','latitude'), chart_options.get('long','longitude')],
+            columns='cd_indicador',
+            fill_value=0
+        )
+        df_tooltip.columns = ['_'.join(reversed(col)).strip() for col in df_tooltip.columns.values]
+        df_tooltip = df_tooltip.reset_index()
+        
+        # Tooltip gen function
+        # TODO - [REMOVE] Used just for debugging
+        # options["headers"] = [
+        #     {'text': 'nm_municipio', "value": 'nm_municipio'},
+
+        #     {'text': 'te_rgt_agr_sum_vl_indicador', "value": 'te_rgt_agr_sum_vl_indicador'},
+        #     {'text': 'te_rgt_api_calc_min_part', "value": 'te_rgt_api_calc_min_part'},
+        #     {'text': 'te_rgt_api_calc_max_part', "value": 'te_rgt_api_calc_max_part'},
+        #     {'text': 'te_rgt_api_calc_ln_norm_pos_part', "value": 'te_rgt_api_calc_ln_norm_pos_part'},
+            
+        #     {'text': 'te_res_agr_sum_vl_indicador', "value": 'te_res_agr_sum_vl_indicador'},
+        #     {'text': 'te_res_api_calc_min_part', "value": 'te_res_api_calc_min_part'},
+        #     {'text': 'te_res_api_calc_max_part', "value": 'te_res_api_calc_max_part'},
+        #     {'text': 'te_res_api_calc_ln_norm_pos_part', "value": 'te_rgt_api_calc_ln_norm_pos_part'},
+            
+        #     {'text': 'te_nat_agr_sum_vl_indicador', "value": 'te_nat_agr_sum_vl_indicador'},
+        #     {'text': 'te_nat_api_calc_min_part', "value": 'te_nat_api_calc_min_part'},
+        #     {'text': 'te_nat_api_calc_max_part', "value": 'te_nat_api_calc_max_part'},
+        #     {'text': 'te_nat_api_calc_ln_norm_pos_part', "value": 'te_nat_api_calc_ln_norm_pos_part'}
+        # ]
+        def tooltip_gen(au_row, **kwargs):
+            if 'headers' in options:
+                marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in kwargs.get('headers')])
+                return f"<table>{marker_tooltip}</table>"
+            return "Tooltip!"
+        
+        # Merge dataframe and pivoted dataframe
+        df_tooltip['tooltip'] = df_tooltip.apply(
+            tooltip_gen,
+            headers= options.get("headers"),
+            axis=1
+        )
+        df_tooltip = df_tooltip[[chart_options.get('id_field', 'cd_mun_ibge'), 'tooltip']]
+        
+        # Adding tooltips to detailed dataframe
+        dataframe = pd.merge(
+            dataframe,
+            df_tooltip,
+            left_on = chart_options.get('id_field', 'cd_mun_ibge'),
+            right_on = chart_options.get('id_field', 'cd_mun_ibge'),
+            how = "left"
+        )
+        dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
+        dataframe = dataframe.set_index('idx')
+        
+        grouped = dataframe.groupby(chart_options.get('layer_id','cd_indicador'))
+        show = True # Shows only the first layer
+        for group_id, group in grouped:
+            chart = MarkerCluster(
+                locations = group[cols].values.tolist(),
+                name = group_names.get(group_id),
+                show = show,
+                popups = group['tooltip'].tolist()
+            )
+
+            show = False
+            chart.add_to(n)
+            
+        # Adding marker to current analysis unit
+        if np.issubdtype(dataframe.index.dtype, np.number):
+            au = int(au)
+
+        au_row = dataframe.loc[au].reset_index().iloc[0]
+        
+        au_title = 'Analysis Unit'
+        if len(options.get('headers', [])) > 0:
+            au_title = au_row[options.get('headers', [])[0]['value']]
+
+        if chart_options.get('lat','latitude') in list(dataframe.columns):
+            centroide = [au_row[chart_options.get('lat','latitude')].item(), au_row[chart_options.get('long','longitude')].item()]
+            
+        if centroide:
+            marker_layer = folium.map.FeatureGroup(name = au_title)
+            folium.map.Marker(
+                centroide,
+                tooltip=au_row.get('tooltip', "Tooltip!"),
+                icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
+            ).add_to(marker_layer)
+            marker_layer.add_to(n)
+        
+        folium.LayerControl().add_to(n)
+
+        n.get_root().header.add_child(folium.Element(style_statement))
+
+        # Getting bounds from dataframe
+        n.fit_bounds([
+            [
+                dataframe[chart_options.get('lat','latitude')].min(),
+                dataframe[chart_options.get('long','longitude')].min()
+            ],
+            [
+                dataframe[chart_options.get('lat','latitude')].max(),
+                dataframe[chart_options.get('long','longitude')].max()
+            ]
+        ])
+
+        return n

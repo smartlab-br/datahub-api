@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from service.charts.maps.base import BaseMap
 from folium import CircleMarker
-from folium.plugins import MarkerCluster
+from folium.plugins import TimestampedGeoJson
 from folium.map import FeatureGroup
 from service.viewconf_reader import ViewConfReader
 
@@ -120,34 +120,68 @@ class Bubbles(BaseMap):
         grouped = dataframe.groupby(chart_options.get('layer_id','cd_indicador'))
         show = True # Shows only the first layer
         for group_id, group in grouped:
-            # TODO - Get the color of the bubble according to layer definitions
+            # Get the color of the bubble according to layer definitions
             color = 'blue'
             for ind_index in range(len(chart_options.get('indicadores', []))):
                 if chart_options.get('indicadores')[ind_index] == group_id:
                     color = chart_options.get('colorArray')[ind_index]
                     break
             
-            # Creating a layer for the group
-            layer = FeatureGroup(
-                name = group_names.get(group_id),
-                show = show
-            )
-            show = False
+            if 'timeseries' not in chart_options:
+                # Creating a layer for the group
+                layer = FeatureGroup(
+                    name = group_names.get(group_id),
+                    show = show
+                )
+                show = False
 
-            # Generating circles
-            for row_index, row in group.iterrows():
-                CircleMarker(
-                    location=[row[chart_options.get('lat','latitude')], row[chart_options.get('long','longitude')]],
-                    radius=row['radius'],
-                    popup=row['tooltip'],
-                    color=color,
-                    fill=True,
-                    fill_color=color
-                ).add_to(layer)
-            
-            # Adding layer to map
-            layer.add_to(n)
-            
+                # Generating circles
+                for row_index, row in group.iterrows():
+                    CircleMarker(
+                        location=[row[chart_options.get('lat','latitude')], row[chart_options.get('long','longitude')]],
+                        radius=row['radius'],
+                        popup=row['tooltip'],
+                        color=color,
+                        fill=True,
+                        fill_color=color
+                    ).add_to(layer)
+                
+                # Adding layer to map
+                layer.add_to(n)
+            else:
+                features = []
+                for row_index, row in group.iterrows():
+                    features.append({
+                        'type': 'Feature',
+                        'geometry': {
+                            'type':'Point', 
+                            'coordinates':[row[chart_options.get('long','longitude')], row[chart_options.get('lat','latitude')]]
+                        },
+                        'properties': {
+                            'time': pd.to_datetime(row[chart_options.get('timeseries', 'nu_competencia')], format='%Y').__str__(),
+                            'style': {'color' : color},
+                            'icon': 'circle',
+                            'iconstyle':{
+                                'fillColor': color,
+                                'fillOpacity': 0.8,
+                                'stroke': 'true',
+                                'radius': row['radius']
+                            }
+                        }
+                    })
+                    
+                TimestampedGeoJson(
+                    features,
+                    # name = group_names.get(group_id),
+                    # show = show,
+                    period = 'P1Y',
+                    duration = 'P1Y',
+                    date_options='YYYY',
+                    transition_time = 1000,
+                    auto_play = True).add_to(n)
+                    
+                show = False
+
         # Adding marker to current analysis unit
         if np.issubdtype(dataframe.index.dtype, np.number):
             au = int(au)

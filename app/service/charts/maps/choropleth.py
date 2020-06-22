@@ -6,13 +6,9 @@ import folium
 import json
 import requests
 from service.viewconf_reader import ViewConfReader
-import os
-import time
+import pandas as pd
 from service.charts.maps.base import BaseMap
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-import html
+from folium.plugins import TimestampedGeoJson
 
 class Choropleth(BaseMap):
     ''' Choropleth building class '''
@@ -65,25 +61,7 @@ class Choropleth(BaseMap):
         dataframe = dataframe.set_index('idx')
         centroide = None  
         marker_tooltip = ''
-        # for each_au in state_geo.get('features'):
-        for each_au in state_geo.get('objects',{}).get('data',{}).get('geometries',[]):
-            # During topo conversion, all ID will be named smartlab_geo_id and
-            # all NAME will be in an attribute called smartlab_geo_name.
-            try:
-                df_row = dataframe.loc[int(each_au.get('properties').get("smartlab_geo_id"))]
-                each_au.get('properties').update(json.loads(df_row.to_json()), headers=options.get('headers'))
-            except KeyError:
-                df_row = {hdr.get('value'): 'N/A' for hdr in options.get('headers')}
-                df_row[options.get('headers')[0].get('value')] = each_au.get('properties').get('smartlab_geo_name')
-                each_au.get('properties').update(json.loads(json.dumps(df_row)), headers=options.get('headers'))
-            if str(each_au.get('properties', {}).get(chart_options.get('id_field'))) == str(au):
-                centroide = each_au.get('properties', {}).get('centroide')
-                if centroide:
-                    centroide.reverse()
-                
-                marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(df_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in options.get('headers')])
-                marker_tooltip = f"<table>{marker_tooltip}</table>"
-        
+
         # Creating map instance
         n = folium.Map(tiles=self.TILES_URL, attr = self.TILES_ATTRIBUTION, control_scale = True)
 
@@ -104,54 +82,108 @@ class Choropleth(BaseMap):
             else:
                 return color_scale(value)
 
-        chart = folium.TopoJson(
-            state_geo,
-            'objects.data',
-            name=ViewConfReader.get_chart_title(options),
-            style_function = lambda feature: {
-                'fillColor': get_color(feature),
-                'fillOpacity': 0.8,
-                'color' : 'black',
-                'stroke' : 'black',
-                'lineOpacity': 0.2,
-                'weight' : 0.2,
-            }
-        )
+        if 'timeseries' not in chart_options:
+            # for each_au in state_geo.get('features'):
+            for each_au in state_geo.get('objects',{}).get('data',{}).get('geometries',[]):
+                # During topo conversion, all ID will be named smartlab_geo_id and
+                # all NAME will be in an attribute called smartlab_geo_name.
+                try:
+                    df_row = dataframe.loc[int(each_au.get('properties').get("smartlab_geo_id"))]
+                    each_au.get('properties').update(json.loads(df_row.to_json()), headers=options.get('headers'))
+                except KeyError:
+                    df_row = {hdr.get('value'): 'N/A' for hdr in options.get('headers')}
+                    df_row[options.get('headers')[0].get('value')] = each_au.get('properties').get('smartlab_geo_name')
+                    each_au.get('properties').update(json.loads(json.dumps(df_row)), headers=options.get('headers'))
+                if str(each_au.get('properties', {}).get(chart_options.get('id_field'))) == str(au):
+                    centroide = each_au.get('properties', {}).get('centroide')
+                    if centroide:
+                        centroide.reverse()
+                    
+                    marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(df_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in options.get('headers')])
+                    marker_tooltip = f"<table>{marker_tooltip}</table>"
+            
+            chart = folium.TopoJson(
+                state_geo,
+                'objects.data',
+                name=ViewConfReader.get_chart_title(options),
+                style_function = lambda feature: {
+                    'fillColor': get_color(feature),
+                    'fillOpacity': 0.8,
+                    'color' : 'black',
+                    'stroke' : 'black',
+                    'lineOpacity': 0.2,
+                    'weight' : 0.2,
+                }
+            )
 
-        # Adding tooltip to choropleth
-        folium.features.GeoJsonTooltip(
-            fields = [hdr.get('value') for hdr in options.get('headers')],
-            aliases = [hdr.get('text') for hdr in options.get('headers')],
-            localize=True,
-            sticky=False,
-            labels=True
-        ).add_to(chart)
+            # Adding tooltip to choropleth
+            folium.features.GeoJsonTooltip(
+                fields = [hdr.get('value') for hdr in options.get('headers')],
+                aliases = [hdr.get('text') for hdr in options.get('headers')],
+                localize=True,
+                sticky=False,
+                labels=True
+            ).add_to(chart)
+
+            chart.add_to(n)
+        else:
+            # Get feature from topojson and add to dataset
+            def get_feature(row, state_geo, chart_options):
+                for each_au in state_geo.get('objects',{}).get('data',{}).get('geometries',[]):
+                    # During topo conversion, all ID will be named smartlab_geo_id and
+                    # all NAME will be in an attribute called smartlab_geo_name.
+                    if row[chart_options.get('id_field')] == int(each_au.get('properties').get("smartlab_geo_id")):
+                        result = each_au.copy()
+                        result.get('properties').update(json.loads(row.to_json()), headers=chart_options.get('headers'))
+                        result.get('properties')['time'] = pd.to_datetime(row[chart_options.get('timeseries', 'nu_competencia')], format='%Y').__str__(),
+                        result.get('properties')['style'] = {'color' : get_color(result)}
+                        return result
+                return None
+            
+            dataframe['feature'] = dataframe.apply(
+                get_feature,
+                state_geo = state_geo,
+                chart_options = chart_options,
+                axis=1
+            )
+            
+            TimestampedGeoJson(
+                dataframe['feature'].to_json(orient="records"),
+                # name = group_names.get(group_id),
+                # show = show,
+                period = 'P1Y',
+                duration = 'P1Y',
+                date_options='YYYY',
+                transition_time = 1000,
+                auto_play = True
+            ).add_to(n)
 
         # Adding marker to current analysis unit
         if np.issubdtype(dataframe.index.dtype, np.number):
             au = int(au)
-        au_row = dataframe.loc[au]
+
+        au_row = dataframe.loc[au].reset_index().iloc[0]
+        
         au_title = 'Analysis Unit'
         if len(options.get('headers', [])) > 0:
             au_title = au_row[options.get('headers', [])[0]['value']]
 
-        if 'latitude' in list(dataframe.columns):
-            centroide = [au_row['latitude'], au_row['longitude']]
-        
+        if chart_options.get('lat','latitude') in list(dataframe.columns):
+            centroide = [au_row[chart_options.get('lat','latitude')].item(), au_row[chart_options.get('long','longitude')].item()]
+            
         if centroide:
             marker_layer = folium.map.FeatureGroup(name = au_title)
             folium.map.Marker(
                 centroide,
-                tooltip=marker_tooltip,
+                tooltip=au_row.get('tooltip', "Tooltip!"),
                 icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
             ).add_to(marker_layer)
             marker_layer.add_to(n)
         
-        chart.add_to(n)
         folium.LayerControl().add_to(n)
 
         n.get_root().header.add_child(folium.Element(self.STYLE_STATEMENT))
-
+        
         # Getting bounds from topojson
         lower_left = state_geo.get('bbox')[:2]
         lower_left.reverse()

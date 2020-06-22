@@ -178,7 +178,8 @@ class Bubbles(BaseMap):
                     duration = 'P1Y',
                     date_options='YYYY',
                     transition_time = 1000,
-                    auto_play = True).add_to(n)
+                    auto_play = True
+                ).add_to(n)
                     
                 show = False
 

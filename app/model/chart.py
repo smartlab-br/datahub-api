@@ -50,6 +50,10 @@ class Chart(BaseModel):
             # struct['api']['template'] = "/te/indicadoresmunicipais?categorias=latitude,longitude,cd_mun_ibge,nm_municipio,nu_competencia,cd_indicador&valor=vl_indicador&agregacao=sum&filtros=nn-vl_indicador,and,in-cd_indicador-'te_rgt'-'te_nat'-'te_res',and,eq-cd_uf-{0}&calcs=ln_norm_pos_part"
             # struct['chart_options']['timeseries'] = 'nu_competencia'
             
+            # TODO - [REMOVE] Testing choropleth with time series
+            struct['api']['template'] = "/indicadoresmunicipais?categorias=cd_mun_ibge,nm_municipio,cd_dimensao,ds_indicador_radical,ds_indicador_curto,ds_indicador_prefixo,cd_indicador,nu_competencia,ds_fonte,vl_indicador,media_uf,pct_uf,rank_uf,rank_br,latitude,longitude&filtros=eq-cd_uf-{0},and,eq-cd_indicador-'01_16_01_00'"
+            struct['chart_options']['timeseries'] = 'nu_competencia'
+            
             options = {**options, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options}), **struct}
             dataframe = Thematic().find_dataset({**{'as_pandas': True, 'no_wrap': True}, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options})})
         else:

@@ -17,16 +17,18 @@ class ViewConfReader():
         ''' Read API url formation '''
         if api_call_obj is None:
             return None
-
         api_url = api_call_obj.get('fixed')
         if api_call_obj.get('template'):
             api_url = api_call_obj.get('template')
             for arg_i, arg in enumerate(api_call_obj.get('args')):
                 rplc = arg.get('fixed')
                 if arg.get('named_prop'):
-                    rplc = custom_args[arg.get('named_prop')]
+                    if arg.get('named_prop') in ['idLocalidade']: # Analysis Unit ID mnemonics
+                        rplc = custom_args.get('au')
+                    else: 
+                        rplc = custom_args.get(arg.get('named_prop'), custom_args.get('au'))
                 api_url = api_url.replace(f'{{{arg_i}}}', rplc)
-
+        
         return api_url
 
     @staticmethod

@@ -8,22 +8,17 @@ import requests
 from service.viewconf_reader import ViewConfReader
 import os
 import time
+from service.charts.maps.base import BaseMap
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import html
 
-class Choropleth():
+class Choropleth(BaseMap):
     ''' Choropleth building class '''
-    @staticmethod
-    def draw(dataframe, options):
+    def draw(self, dataframe, options):
         ''' Gera um mapa topojson a partir das opções enviadas '''
         # http://localhost:5000/charts/choropleth?from_viewconf=S&au=2927408&card_id=mapa_pib_brasil&dimension=socialeconomico&as_image=S
-        # Default values
-        # tiles_url = 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png'
-        tiles_url = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
-        # tiles_attribution = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        tiles_attribution = 'Esri, USGS | Esri, HERE | Esri, Garmin, FAO, NOAA'
         visao = options.get('visao', 'uf')
 
         style_statement = "<link href='https://fonts.googleapis.com/css2?family=Pathway+Gothic+One&display=swap' rel='stylesheet'>\
@@ -90,7 +85,7 @@ class Choropleth():
                 marker_tooltip = f"<table>{marker_tooltip}</table>"
         
         # Creating map instance
-        n = folium.Map(tiles=tiles_url, attr = tiles_attribution, control_scale = True)
+        n = folium.Map(tiles=self.TILES_URL, attr = self.TILES_ATTRIBUTION, control_scale = True)
 
         # Creating the choropleth layer
         color_scale = ViewConfReader.get_color_scale(
@@ -155,7 +150,7 @@ class Choropleth():
         chart.add_to(n)
         folium.LayerControl().add_to(n)
 
-        n.get_root().header.add_child(folium.Element(style_statement))
+        n.get_root().header.add_child(folium.Element(self.STYLE_STATEMENT))
 
         # Getting bounds from topojson
         lower_left = state_geo.get('bbox')[:2]

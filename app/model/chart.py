@@ -18,14 +18,15 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import html
-from service.charts.choropleth import Choropleth
-from service.charts.heat import Heat
-from service.charts.cluster import Cluster
+from service.charts.maps.choropleth import Choropleth
+from service.charts.maps.heat import Heat
+from service.charts.maps.cluster import Cluster
+from service.charts.maps.bubbles import Bubbles
 
 class Chart(BaseModel):
     ''' Model for fetching dinamic and static charts '''
     CHART_LIB_DEF = {
-        'FOLIUM': ['MAP_TOPOJSON', 'MAP_HEAT', 'MAP_CLUSTER']
+        'FOLIUM': ['MAP_TOPOJSON', 'MAP_HEAT', 'MAP_CLUSTER', 'MAP_BUBBLES']
     } # Defaults to BOKEH
     def get_chart(self, options):
         ''' Selects if the chart should be static or dynamic '''
@@ -65,11 +66,13 @@ class Chart(BaseModel):
         if options.get('chart_type') == 'scatter':
             return self.draw_scatter(dataframe, options)
         if options.get('chart_type') == 'MAP_TOPOJSON':
-            return Choropleth.draw(dataframe, options)
+            return Choropleth().draw(dataframe, options)
         if options.get('chart_type') == 'MAP_HEAT':
-            return Heat.draw(dataframe, options)
+            return Heat().draw(dataframe, options)
         if options.get('chart_type') == 'MAP_CLUSTER':
-            return Cluster.draw(dataframe, options)
+            return Cluster().draw(dataframe, options)
+        if options.get('chart_type') == 'MAP_BUBBLES':
+            return Bubbles().draw(dataframe, options)
         pass
         
     @staticmethod

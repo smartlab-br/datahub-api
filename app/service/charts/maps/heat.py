@@ -1,68 +1,16 @@
 ''' Model for fetching chart '''
 import folium
 import numpy as np
+from service.charts.maps.base import BaseMap
 from folium.plugins import HeatMap, HeatMapWithTime
 from service.viewconf_reader import ViewConfReader
 
-##### With time series #####
-# from folium import plugins
-
-# map_hooray = folium.Map(location=[51.5074, 0.1278],
-#                     zoom_start = 13) 
-
-# # Ensure you're handing it floats
-# df_acc['Latitude'] = df_acc['Latitude'].astype(float)
-# df_acc['Longitude'] = df_acc['Longitude'].astype(float)
-
-# # Filter the DF for rows, then columns, then remove NaNs
-# heat_df = df_acc[df_acc['Speed_limit']=='40'] # Reducing data size so it runs faster
-# heat_df = df_acc[df_acc['Year']=='2007'] # Reducing data size so it runs faster
-# heat_df = heat_df[['Latitude', 'Longitude']]
-
-# # Create weight column, using date
-# heat_df['Weight'] = df_acc['Date'].str[3:5]
-# heat_df['Weight'] = heat_df['Weight'].astype(float)
-# heat_df = heat_df.dropna(axis=0, subset=['Latitude','Longitude', 'Weight'])
-
-# # List comprehension to make out list of lists
-# heat_data = [[[row['Latitude'],row['Longitude']] for index, row in heat_df[heat_df['Weight'] == i].iterrows()] for i in range(0,13)]
-
-# # Plot it on the map
-# hm = plugins.HeatMapWithTime(heat_data,auto_play=True,max_opacity=0.8)
-# hm.add_to(map_hooray)
-# # Display the map
-# map_hooray
-##### #####
-
-class Heat():
+class Heat(BaseMap):
     ''' Heatmap building class '''
-    @staticmethod
-    def draw(dataframe, options):
-        ''' Gera um mapa topojson a partir das opções enviadas '''
+    def draw(self, dataframe, options):
+        ''' Gera um mapa de calor a partir das opções enviadas '''
         # http://localhost:5000/charts/choropleth?from_viewconf=S&au=2927408&card_id=mapa_pib_brasil&dimension=socialeconomico&as_image=S
-        # Default values
-        # tiles_url = 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png'
-        tiles_url = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
-        # tiles_attribution = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        tiles_attribution = 'Esri, USGS | Esri, HERE | Esri, Garmin, FAO, NOAA'
         visao = options.get('visao', 'uf')
-
-        style_statement = "<link href='https://fonts.googleapis.com/css2?family=Pathway+Gothic+One&display=swap' rel='stylesheet'>\
-            <style>\
-                .legend.leaflet-control{display:none}\
-                .leaflet-tooltip table tbody tr:first-child th{display:none;}\
-                .leaflet-tooltip table tbody tr:first-child td{\
-                    font-family: 'Pathway Gothic One', Calibri, sans-serif;\
-                    font-size: 2.5em;\
-                    font-weight: 700;\
-                }\
-                .leaflet-tooltip table tbody tr:nth-child(2){\
-                    border-top: 1px solid black;\
-                }\
-                path.leaflet-interactive:hover {\
-                    fill-opacity: 1;\
-                }\
-            </style>"
 
         au = options.get('au')
         chart_options = options.get('chart_options')
@@ -78,7 +26,7 @@ class Heat():
         marker_tooltip = ''
         
         # Creating map instance
-        n = folium.Map(tiles=tiles_url, attr = tiles_attribution, control_scale = True)
+        n = folium.Map(tiles=self.TILES_URL, attr = self.TILES_ATTRIBUTION, control_scale = True)
 
         cols = [chart_options.get('lat','lat'), chart_options.get('long','long')]
         if 'value_field' in chart_options:
@@ -94,7 +42,7 @@ class Heat():
             )
             
         # Get group names from headers
-        group_names = { hdr.get('layer_id'): hdr.get('text') for hdr in options.get('headers') }
+        group_names = { hdr.get('layer_id'): hdr.get('text') for hdr in options.get('headers') if hdr.get('layer_id') }
 
         grouped = dataframe.groupby(chart_options.get('layer_id','cd_indicador'))
         show = True # Shows only the first
@@ -156,7 +104,7 @@ class Heat():
         
         folium.LayerControl().add_to(n)
 
-        n.get_root().header.add_child(folium.Element(style_statement))
+        n.get_root().header.add_child(folium.Element(self.STYLE_STATEMENT))
 
         # Getting bounds from dataframe
         n.fit_bounds([

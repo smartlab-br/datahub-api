@@ -18,14 +18,15 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import html
-from service.charts.choropleth import Choropleth
-from service.charts.heat import Heat
-from service.charts.cluster import Cluster
+from service.charts.maps.choropleth import Choropleth
+from service.charts.maps.heat import Heat
+from service.charts.maps.cluster import Cluster
+from service.charts.maps.bubbles import Bubbles
 
 class Chart(BaseModel):
     ''' Model for fetching dinamic and static charts '''
     CHART_LIB_DEF = {
-        'FOLIUM': ['MAP_TOPOJSON', 'MAP_HEAT', 'MAP_CLUSTER']
+        'FOLIUM': ['MAP_TOPOJSON', 'MAP_HEAT', 'MAP_CLUSTER', 'MAP_BUBBLES']
     } # Defaults to BOKEH
     def get_chart(self, options):
         ''' Selects if the chart should be static or dynamic '''
@@ -44,6 +45,11 @@ class Chart(BaseModel):
             # TODO - [REMOVE] Testing heatmap with time series
             # struct['api']['template'] = "/te/indicadoresmunicipais?categorias=latitude,nu_competencia,longitude,cd_mun_ibge,nm_municipio,cd_indicador&valor=vl_indicador&agregacao=sum&filtros=nn-vl_indicador,and,in-cd_indicador-'te_rgt'-'te_nat'-'te_res',and,eq-cd_uf-{0}&calcs=ln_norm_pos_part"
             # struct['chart_options']['timeseries'] = 'nu_competencia'
+            
+            # TODO - [REMOVE] Testing bubbles with time series
+            # struct['api']['template'] = "/te/indicadoresmunicipais?categorias=latitude,longitude,cd_mun_ibge,nm_municipio,nu_competencia,cd_indicador&valor=vl_indicador&agregacao=sum&filtros=nn-vl_indicador,and,in-cd_indicador-'te_rgt'-'te_nat'-'te_res',and,eq-cd_uf-{0}&calcs=ln_norm_pos_part"
+            # struct['chart_options']['timeseries'] = 'nu_competencia'
+            
             options = {**options, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options}), **struct}
             dataframe = Thematic().find_dataset({**{'as_pandas': True, 'no_wrap': True}, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options})})
         else:
@@ -65,11 +71,13 @@ class Chart(BaseModel):
         if options.get('chart_type') == 'scatter':
             return self.draw_scatter(dataframe, options)
         if options.get('chart_type') == 'MAP_TOPOJSON':
-            return Choropleth.draw(dataframe, options)
+            return Choropleth().draw(dataframe, options)
         if options.get('chart_type') == 'MAP_HEAT':
-            return Heat.draw(dataframe, options)
+            return Heat().draw(dataframe, options)
         if options.get('chart_type') == 'MAP_CLUSTER':
-            return Cluster.draw(dataframe, options)
+            return Cluster().draw(dataframe, options)
+        if options.get('chart_type') == 'MAP_BUBBLES':
+            return Bubbles().draw(dataframe, options)
         pass
         
     @staticmethod

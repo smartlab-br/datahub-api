@@ -157,7 +157,7 @@ class ViewConfReader():
     def get_headers_from_options_descriptor(description, initial):
         for descriptor in description:
             if descriptor.get('id') in ['selectlayer']:
-                for layer in descriptor.get('items'):
+                for layer in descriptor.get('items',[]):
                     initial.append({
                         'text': layer.get('label'),
                         'layer_id': layer.get('value'),

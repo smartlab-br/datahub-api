@@ -3,6 +3,7 @@ from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, FactorRange, VBar
 from bokeh.transform import factor_cmap
 import pandas as pd
+from service.viewconf_reader import ViewConfReader
 
 class Bar():
     ''' Class for drawing bar charts '''
@@ -12,20 +13,21 @@ class Bar():
         ''' Draw a bar chart according to given options '''
         # http://localhost:5000/charts/bar?from_viewconf=S&au=2927408&card_id=bar_serie_resgate&dimension=prevalencia&observatory=te&as_image=N
         print(options)
-        # TODO 1 - Add Colors
         # TODO 1 - Add text to bar
         # TODO 1 - Add CSS
 
-        # TODO 2 - Time series
+        # TODO 2 - Time series (moving bars)
         # TODO 3 - Horizontal
         # TODO 4 - Stacked
         # TODO 5 - Population pyramid
+
+        # TODO Final - Responsivity
 
         # TODO - [REMOVE] Options for color testing
         options.get('chart_options')["colorArray"] = ["#FF0000", "blue", "green"]
         series = None
         if options.get('chart_options', {}).get('id'):
-            series = dataframe[options.get('chart_options', {}).get('id')].unique()
+            series = sorted(dataframe[options.get('chart_options', {}).get('id')].unique())
 
         if options.get('chart_options', {}).get('id'):
             x = [(str(row[options.get('chart_options', {}).get('x')]), row[options.get('chart_options', {}).get('id')]) for _row_id, row in dataframe.iterrows()]
@@ -41,12 +43,10 @@ class Bar():
 
         # General config
         chart.y_range.start = 0
-        chart.xaxis.major_tick_line_color = None  # turn off x-axis major ticks
-        chart.xaxis.minor_tick_line_color = None  # turn off x-axis minor ticks
-        chart.yaxis.major_tick_line_color = None  # turn off y-axis major ticks
-        chart.yaxis.minor_tick_line_color = None  # turn off y-axis minor ticks
-        chart.xaxis.major_label_text_font_size = '0pt'  # turn off x-axis tick labels
-        chart.yaxis.major_label_text_font_size = '0pt'  # turn off y-axis tick labels
+        chart.axis.major_tick_line_color = None
+        chart.axis.minor_tick_line_color = None
+        chart.axis.major_label_text_font_size = '0pt'  # turn off x-axis tick labels
+        chart.axis.major_label_text_font_size = '0pt'  # turn off y-axis tick labels
         
         # Removing grid lines
         chart.xgrid.grid_line_color = None
@@ -67,16 +67,17 @@ class Bar():
         # )
 
         if list(series):
+            palette = ViewConfReader.get_color_scale(options)
             glyph = VBar(
                 x="x",
                 top="vals",
                 width = self.BAR_WIDTH,
                 fill_color = factor_cmap(
                     'x',
-                    palette=self.get_palette(options.get('chart_options')),
+                    palette=palette,
                     factors=series,
-                    # start=1,
-                    end=3
+                    start=1,
+                    end=len(palette)
                 )
             )
         else:
@@ -144,5 +145,3 @@ class Bar():
         #     source:
         #       desc: "Bancos de dados do Seguro-Desemprego do Trabalhador Resgatado, do Sistema de Acompanhamento do Trabalho Escravo (SISACTE) e do Sistema COETE (Controle de Erradicação do Trabalho Escravo), referentes ao período iniciado em 2003 (Primeiro Plano Nacional de Erradicação do Trabalho Escravo). Os dados brutos foram fornecidos pelo Ministério da Economia do Brasil."
         #       link: ""
-    def get_palette(self, options):
-        return tuple(options.get('colorArray'))

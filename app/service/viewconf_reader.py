@@ -122,7 +122,7 @@ class ViewConfReader():
         return options.get('title', {}).get('fixed', 'background')
 
     @staticmethod
-    def get_color_scale(options, vmin, vmax):
+    def get_color_scale(options, vmin=None, vmax=None):
         # Check if color list is given, escaping if true
         if options.get('chart_options', {}).get('colorArray'):
             return options.get('chart_options', {}).get('colorArray')

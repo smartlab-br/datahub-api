@@ -23,6 +23,7 @@ from service.charts.maps.heat import Heat
 from service.charts.maps.cluster import Cluster
 from service.charts.maps.bubbles import Bubbles
 from service.charts.bar import Bar
+from html.parser import HTMLParser
 
 class Chart(BaseModel):
     ''' Model for fetching dinamic and static charts '''
@@ -112,7 +113,10 @@ class Chart(BaseModel):
         # /charts?theme=teindicadoresmunicipais&categorias=ds_agreg_primaria&valor=vl_indicador&agregacao=SUM&filtros=eq-cd_mun_ibge-2927408,and,eq-cd_indicador-%27te_nat_ocup_atual%27
         if lib == 'BOKEH':
             (script, div) = components(chart)
-            return {'script': script, 'div': div}
+            return {
+                'script': HTMLParser().unescape(script),
+                'div': HTMLParser().unescape(div)
+            }
         elif lib == 'FOLIUM':
             return {'div': chart._repr_html_(), 'mime': 'text/html'}
         pass

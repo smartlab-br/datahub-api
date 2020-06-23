@@ -1,13 +1,13 @@
 ''' Class for drawing bar charts '''
 from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource, FactorRange, VBar
+from bokeh.models import ColumnDataSource, FactorRange, VBar, HBar
 from bokeh.transform import factor_cmap
 import pandas as pd
 from service.viewconf_reader import ViewConfReader
 
 class Bar():
     ''' Class for drawing bar charts '''
-    BAR_WIDTH = 0.8
+    BAR_SIZE = 0.8
 
     def draw(self, dataframe, options):
         ''' Draw a bar chart according to given options '''
@@ -17,7 +17,6 @@ class Bar():
         # TODO 1 - Add CSS
 
         # TODO 2 - Time series (moving bars)
-        # TODO 3 - Horizontal
         # TODO 4 - Stacked
         # TODO 5 - Population pyramid
 
@@ -25,24 +24,82 @@ class Bar():
 
         # TODO - [REMOVE] Options for color testing
         options.get('chart_options')["colorArray"] = ["#FF0000", "blue", "green"]
+
+        # TODO - [REMOVE] Options for horizontal bars
+        options.get('chart_options')['y'] = "nu_competencia"
+        options.get('chart_options')['x'] = "vl_indicador"
+        options.get('chart_options')['orientation'] = "horizontal"                         
+        options.get('chart_options')['show_x_axis'] = False
+        options.get('chart_options')['show_y_axis'] = True
+
+        # TODO - [REMOVE] Options for stacked bars
+        options.get('chart_options')['stacked'] = True
+
         series = None
         if options.get('chart_options', {}).get('id'):
             series = sorted(dataframe[options.get('chart_options', {}).get('id')].unique())
+    
+        (source, chart) = self.get_figure(dataframe, options)
 
-        if options.get('chart_options', {}).get('id'):
-            x = [(str(row[options.get('chart_options', {}).get('x')]), row[options.get('chart_options', {}).get('id')]) for _row_id, row in dataframe.iterrows()]
+        if list(series):
+            palette = ViewConfReader.get_color_scale(options)
+            if options.get('chart_options', {}).get('orientation', 'horizontal') == 'vertical':
+                glyph = VBar(
+                    x="axis",
+                    top="vals",
+                    width = self.BAR_SIZE,
+                    fill_color = factor_cmap(
+                        'axis',
+                        palette=palette,
+                        factors=series,
+                        start=1,
+                        end=len(palette)
+                    )
+                )
+            else:
+                glyph = HBar(
+                    y="axis",
+                    right="vals",
+                    left=0,
+                    height = self.BAR_SIZE,
+                    fill_color = factor_cmap(
+                        'axis',
+                        palette=palette,
+                        factors=series,
+                        start=1,
+                        end=len(palette)
+                    )
+                )
         else:
-            x = [str(row[options.get('chart_options', {}).get('x')]) for _row_id, row in dataframe.iterrows()]
-            
-        source = ColumnDataSource(data=dict(
-            x=x,
-            vals=list(dataframe['vl_indicador'])
-        ))
-        
-        chart = figure(x_range=FactorRange(*x))
+            glyph = VBar(x="axis", top="vals", width = self.BAR_SIZE)
 
+        chart.add_glyph(source, glyph)
+
+        return chart
+
+    def get_figure(self, dataframe, options):
+        if options.get('chart_options', {}).get('orientation', 'horizontal') == 'vertical':
+            if options.get('chart_options', {}).get('id'):
+                axis = [(str(row[options.get('chart_options', {}).get('x')]), row[options.get('chart_options', {}).get('id')]) for _row_id, row in dataframe.iterrows()]
+            else:
+                axis = [str(row[options.get('chart_options', {}).get('x')]) for _row_id, row in dataframe.iterrows()]
+            chart = figure(x_range=FactorRange(*axis))
+            chart.y_range.start = 0
+        else:
+            if options.get('chart_options', {}).get('id'):
+                axis = [(str(row[options.get('chart_options', {}).get('y')]), row[options.get('chart_options', {}).get('id')]) for _row_id, row in dataframe.iterrows()]
+            else:
+                axis = [str(row[options.get('chart_options', {}).get('y')]) for _row_id, row in dataframe.iterrows()]    
+            chart = figure(y_range=FactorRange(*axis))
+        
+        source = ColumnDataSource(
+            data=dict(
+                axis=axis,
+                vals=list(dataframe['vl_indicador'])
+            )
+        )
+        
         # General config
-        chart.y_range.start = 0
         chart.axis.major_tick_line_color = None
         chart.axis.minor_tick_line_color = None
         chart.axis.major_label_text_font_size = '0pt'  # turn off x-axis tick labels
@@ -58,38 +115,7 @@ class Bar():
         if not options.get('chart_options', {}).get('show_y_axis', False):
             chart.yaxis.visible = False
 
-        # chart.vbar(
-        #     x='x', 
-        #     top='vals', 
-        #     width=0.9, 
-        #     source=source
-        #     # fill_color=self.get_palette(options.get('chart_options'))
-        # )
-
-        if list(series):
-            palette = ViewConfReader.get_color_scale(options)
-            glyph = VBar(
-                x="x",
-                top="vals",
-                width = self.BAR_WIDTH,
-                fill_color = factor_cmap(
-                    'x',
-                    palette=palette,
-                    factors=series,
-                    start=1,
-                    end=len(palette)
-                )
-            )
-        else:
-            glyph = VBar(
-                x="x",
-                top="vals",
-                width = self.BAR_WIDTH
-            )
-
-        chart.add_glyph(source, glyph)
-
-        return chart
+        return (source, chart)
 
         # - id: "bar_serie_resgate"
         #     chart_type: "BAR"

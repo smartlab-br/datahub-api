@@ -5,6 +5,23 @@ from bokeh.transform import factor_cmap
 import pandas as pd
 from service.viewconf_reader import ViewConfReader
 
+class BarFactory():
+    ''' Factory to instantiate the correct bar implementation '''
+    @staticmethod
+    def create(options):
+        ''' Factory method '''
+        orientation = options.get('chart_options', {}).get('orientation', 'horizontal')
+        is_stacked = options.get('chart_options', {}).get('stacked', False)
+        if is_stacked:
+            if orientation == 'vertical':
+                # return BarVerticalStacked()
+                pass
+            # return BarHorizontalStacked()
+            pass
+        elif orientation == 'vertical':
+            return BarVertical()
+        return BarHorizontal()
+
 class Bar():
     ''' Class for drawing bar charts '''
     BAR_SIZE = 0.8
@@ -15,8 +32,9 @@ class Bar():
         print(options)
         # TODO 1 - Add text to bar
         # TODO 1 - Add CSS
-
-        # TODO 2 - Time series (moving bars)
+        
+        # TODO 2 - Horizontal
+        # TODO 3 - Time series (moving bars)
         # TODO 4 - Stacked
         # TODO 5 - Population pyramid
 
@@ -26,14 +44,14 @@ class Bar():
         options.get('chart_options')["colorArray"] = ["#FF0000", "blue", "green"]
 
         # TODO - [REMOVE] Options for horizontal bars
-        options.get('chart_options')['y'] = "nu_competencia"
-        options.get('chart_options')['x'] = "vl_indicador"
-        options.get('chart_options')['orientation'] = "horizontal"                         
-        options.get('chart_options')['show_x_axis'] = False
-        options.get('chart_options')['show_y_axis'] = True
+        options['chart_options']['y'] = "nu_competencia"
+        options['chart_options']['x'] = "vl_indicador"
+        options['chart_options']['orientation'] = "horizontal"                         
+        options['chart_options']['show_x_axis'] = False
+        options['chart_options']['show_y_axis'] = True
 
         # TODO - [REMOVE] Options for stacked bars
-        options.get('chart_options')['stacked'] = True
+        # options.get('chart_options')['stacked'] = True
 
         series = None
         if options.get('chart_options', {}).get('id'):
@@ -41,64 +59,9 @@ class Bar():
     
         (source, chart) = self.get_figure(dataframe, options)
 
-        if list(series):
-            palette = ViewConfReader.get_color_scale(options)
-            if options.get('chart_options', {}).get('orientation', 'horizontal') == 'vertical':
-                glyph = VBar(
-                    x="axis",
-                    top="vals",
-                    width = self.BAR_SIZE,
-                    fill_color = factor_cmap(
-                        'axis',
-                        palette=palette,
-                        factors=series,
-                        start=1,
-                        end=len(palette)
-                    )
-                )
-            else:
-                glyph = HBar(
-                    y="axis",
-                    right="vals",
-                    left=0,
-                    height = self.BAR_SIZE,
-                    fill_color = factor_cmap(
-                        'axis',
-                        palette=palette,
-                        factors=series,
-                        start=1,
-                        end=len(palette)
-                    )
-                )
-        else:
-            glyph = VBar(x="axis", top="vals", width = self.BAR_SIZE)
-
-        chart.add_glyph(source, glyph)
-
-        return chart
-
-    def get_figure(self, dataframe, options):
-        if options.get('chart_options', {}).get('orientation', 'horizontal') == 'vertical':
-            if options.get('chart_options', {}).get('id'):
-                axis = [(str(row[options.get('chart_options', {}).get('x')]), row[options.get('chart_options', {}).get('id')]) for _row_id, row in dataframe.iterrows()]
-            else:
-                axis = [str(row[options.get('chart_options', {}).get('x')]) for _row_id, row in dataframe.iterrows()]
-            chart = figure(x_range=FactorRange(*axis))
-            chart.y_range.start = 0
-        else:
-            if options.get('chart_options', {}).get('id'):
-                axis = [(str(row[options.get('chart_options', {}).get('y')]), row[options.get('chart_options', {}).get('id')]) for _row_id, row in dataframe.iterrows()]
-            else:
-                axis = [str(row[options.get('chart_options', {}).get('y')]) for _row_id, row in dataframe.iterrows()]    
-            chart = figure(y_range=FactorRange(*axis))
-        
-        source = ColumnDataSource(
-            data=dict(
-                axis=axis,
-                vals=list(dataframe['vl_indicador'])
-            )
-        )
-        
+        return self.append_chart(source, chart, series, options)
+    
+    def chart_config(self, chart, options):
         # General config
         chart.axis.major_tick_line_color = None
         chart.axis.minor_tick_line_color = None
@@ -115,7 +78,93 @@ class Bar():
         if not options.get('chart_options', {}).get('show_y_axis', False):
             chart.yaxis.visible = False
 
+        return chart
+    
+class BarVertical(Bar):
+    ''' Class for drawing bar charts '''
+    def get_figure(self, dataframe, options):
+        if options.get('chart_options', {}).get('id'):
+            axis = [(str(row[options.get('chart_options', {}).get('x')]), row[options.get('chart_options', {}).get('id')]) for _row_id, row in dataframe.iterrows()]
+        else:
+            axis = [str(row[options.get('chart_options', {}).get('x')]) for _row_id, row in dataframe.iterrows()]
+        chart = figure(x_range=FactorRange(*axis))
+        chart.y_range.start = 0
+        
+        source = ColumnDataSource(
+            data=dict(
+                axis=axis,
+                vals=list(dataframe['vl_indicador'])
+            )
+        )
+        
+        chart = self.chart_config(chart, options)    
         return (source, chart)
+
+    def append_chart(self, source, chart, series, options):
+        ''' Draw a bar chart according to given options '''
+        if list(series):
+            palette = ViewConfReader.get_color_scale(options)
+            glyph = VBar(
+                x="axis",
+                top="vals",
+                width = self.BAR_SIZE,
+                fill_color = factor_cmap(
+                    'axis',
+                    palette=palette,
+                    factors=series,
+                    start=1,
+                    end=len(palette)
+                )
+            )
+        else:
+            glyph = VBar(x="axis", top="vals", width = self.BAR_SIZE) 
+            
+        chart.add_glyph(source, glyph)
+        return chart
+
+class BarHorizontal(Bar):
+    ''' Class for drawing bar charts '''
+    def get_figure(self, dataframe, options):
+        if options.get('chart_options', {}).get('id'):
+            axis = [(str(row[options.get('chart_options', {}).get('y')]), row[options.get('chart_options', {}).get('id')]) for _row_id, row in dataframe.iterrows()]
+        else:
+            axis = [str(row[options.get('chart_options', {}).get('y')]) for _row_id, row in dataframe.iterrows()]    
+        print(axis)
+        chart = figure(y_range=FactorRange(*axis))
+    
+        source = ColumnDataSource(
+            data=dict(
+                axis=axis,
+                vals=list(dataframe['vl_indicador'])
+            )
+        )
+        
+        chart = self.chart_config(chart, options)
+        return (source, chart)
+
+    def append_chart(self, source, chart, series, options):
+        ''' Draw a bar chart according to given options '''
+        print(series)
+        if list(series):
+            palette = ViewConfReader.get_color_scale(options)
+            glyph = HBar(
+                y="axis",
+                right="vals",
+                left=0,
+                height = self.BAR_SIZE,
+                fill_color = factor_cmap(
+                    'axis',
+                    palette=palette,
+                    factors=series,
+                    start=1,
+                    end=len(palette)
+                )
+            )
+        else:
+            glyph = HBar(y="axis", right="vals", left=0, height = self.BAR_SIZE) 
+            
+        chart.add_glyph(source, glyph)
+        return chart
 
         # - id: "bar_serie_resgate"
         #     chart_type: "BAR"

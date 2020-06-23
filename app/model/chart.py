@@ -22,7 +22,7 @@ from service.charts.maps.choropleth import Choropleth
 from service.charts.maps.heat import Heat
 from service.charts.maps.cluster import Cluster
 from service.charts.maps.bubbles import Bubbles
-from service.charts.bar import Bar
+from service.charts.bar import BarFactory
 from html.parser import HTMLParser
 
 class Chart(BaseModel):
@@ -81,7 +81,7 @@ class Chart(BaseModel):
         if options.get('chart_type') == 'MAP_BUBBLES':
             return Bubbles().draw(dataframe, options)
         if options.get('chart_type') == 'BAR':
-            return Bar().draw(dataframe, options)
+            return BarFactory.create(options).draw(dataframe, options)
         pass
         
     @staticmethod

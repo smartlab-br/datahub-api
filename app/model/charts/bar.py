@@ -10,12 +10,16 @@ class Bar():
     ''' Class for drawing bar charts '''
     BAR_SIZE = 0.8
 
+    # TODO 1 - Population pyramid (uses stacked horizontal - check calcs to implement)
     # TODO 2 - Time series (moving bars)
-    # TODO 4 - Population pyramid
 
     # TODO Style 1 - Add text to bar
+    #     chart_options:
+    #       text: "vl_indicador"
+
     # TODO Style 2 - Set fonts
-    # TODO Style 5 - Add CSS
+    # TODO Style 3 - Light/Dark chart config
+    # TODO Style 4 - Add CSS
 
     # TODO Final - Responsivity
 
@@ -259,55 +263,49 @@ class BarHorizontalStacked(Bar):
             )
 
         return chart
-        # - id: "bar_serie_resgate"
-        #     chart_type: "BAR"
-        #     title:
-        #     fixed: "Trabalhadores resgatados - Série Histórica"
-        #     info:
-        #     - type: "text"
-        #         title: "Sobre a métrica"
-        #         content:
-        #         fixed: ""
-        #     title_comment:
-        #       template: "{0}, de {1} a {2}"
-        #     api: 
-        #         fixed: "/te/indicadoresnacionais?categorias=nu_competencia_min,nu_competencia_max&limit=1&filtros=eq-cd_indicador-'te_nat'"
-        #     args:
-        #       - base_object: "localidade"
-        #         named_prop: "nm_localidade"
-        #           - named_prop: "nu_competencia_min"
-        #           - named_prop: "nu_competencia_max"
-        #     description:
-        #       - type: "text"
-        #         title: ""
-        #         content:
-        #         fixed: "No gráfico ao lado, destaca-se a série histórica dos registros relacionados a resgates do trabalho escravo consoante três perspectivas: resgatados na localidade, em verde; nascidos na localidade e que foram resgatados, ainda que fora da localidade em destaque; e residentes na localidade que foram resgatados, ainda que em outros locais, após possível aliciamento onde residiam à época. Essas informações permitem identificar oportunidades de melhor alocação de recursos para aprimoramento do desenvolvimento humano (nos locais de naturalidade), da prevenção do aliciamento (nos locais de residência) e da repressão (nos locais de resgate)."
-        #     api:
-        #       template: "/te/indicadoresmunicipais?categorias=cd_indicador,cd_mun_ibge,nu_competencia,vl_indicador&filtros=eq-cd_mun_ibge-{0},and,in-cd_indicador-'te_nat'-'te_res'-'te_rgt'"
-        #       args:
-        #         - named_prop: "idLocalidade"
-        #     options:
-        #         calcs:
-        #         - id: "ds_indicador_radical"
-        #             function: "get_te_label"
-        #             fn_args:
-        #             - fixed: "cd_indicador"
-        #     headers:
-        #       - text: 'Indicador'
-        #         align: 'left'
-        #         value: 'calc_ds_indicador_radical'
-        #       - text: 'Ano'
-        #         align: 'left'
-        #         value: 'nu_competencia'
-        #       - text: 'Quantidade'
-        #         value: 'vl_indicador'
-        #     chart_options:
-        #       id: "cd_indicador"                              OK
-        #       x: "nu_competencia"                             OK
-        #       y: "vl_indicador"                               OK
-        #       text: "vl_indicador"
-        #       orientation: "vertical"                         OK                      
-        #       legend_field: "calc_ds_indicador_radical"       OK
-        #       show_x_axis: true                               OK    
-        #       show_y_axis: false                              OK
-        
+
+    # SST > perfilCasosAcidentes > cat_piramide_idade_sexo
+    #     api: 
+    #       template: "/sst/cats?categorias=idade_cat,cd_tipo_sexo_empregado_cat&agregacao=count&filtros=eq-cd_municipio_ibge_dv-{0},and,ne-cd_tipo_sexo_empregado_cat-'Não informado',and,ne-idade_cat-0"
+    #       args:
+    #         - named_prop: "idLocalidade"
+    #       options:
+    #         calcs:
+    #           - id: 'agr_count'
+    #             function: 'oppose' <-- code this function to get negative values
+    #             fn_args:
+    #               - fixed: 'cd_tipo_sexo_empregado_cat'
+    #               - fixed: 'Feminino'
+    #               - fixed: 'agr_count'
+    #           - id: 'agr_count_abs' <-- code this function to get absolute values
+    #             function: 'absolute'
+    #             fn_args:
+    #               - fixed: 'calc_agr_count'
+    #           - id: 'faixa_etaria' <-- code this function to bin the data
+    #             function: 'get_faixa_etaria'
+    #             fn_args:
+    #               - fixed: 'idade_cat'
+    #           - id: 'faixa_etaria_bin' <-- code this function to bin the data
+    #             function: 'get_bin_faixa_etaria'
+    #             fn_args:
+    #               - fixed: 'idade_cat'
+    #     headers:
+    #       - text: 'Sexo'
+    #         align: 'left'
+    #         value: 'cd_tipo_sexo_empregado_cat'
+    #       - text: 'Faixa etária'
+    #         align: 'left'
+    #         value: 'calc_faixa_etaria'
+    #       - text: 'Qtde'
+    #         value: 'calc_agr_count_abs'
+    #     chart_options:
+    #       id: "cd_tipo_sexo_empregado_cat"
+    #       x: "calc_agr_count"
+    #       y: "calc_faixa_etaria_bin"
+    #       text: "calc_faixa_etaria"
+    #       orientation: "horizontal"
+    #       hide_legend: false
+    #       legend_field: "cd_tipo_sexo_empregado_cat"
+    #       stacked: true
+    #       show_x_axis: false
+   

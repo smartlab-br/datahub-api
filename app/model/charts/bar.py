@@ -196,16 +196,7 @@ class BarVerticalStacked(Bar):
             chart = figure(x_range=data.get(options.get('chart_options').get('x')))
             chart.y_range.start = 0
             chart = self.chart_config(chart, options)
-
-            # Create bars
-            chart.vbar_stack(
-                series,
-                x=options.get('chart_options').get('x'),
-                width=self.BAR_SIZE, 
-                color=ViewConfReader.get_color_scale(options),
-                source=data,
-                legend_label=[v for _k, v in legend_names.items()]
-            )
+            chart = self.generate_stacks(chart, data, series, legend_names, options)
         else:
             chart = figure(x_range=sorted(list(dataframe[options.get('chart_options', {}).get('x')])))
             chart.y_range.start = 0
@@ -215,6 +206,18 @@ class BarVerticalStacked(Bar):
                 width=self.BAR_SIZE
             )
             
+        return chart
+    
+    def generate_stacks(self, chart, data, series, legend_names, options):
+        # Create bars
+        chart.vbar_stack(
+                series,
+                x=options.get('chart_options').get('x'),
+                width=self.BAR_SIZE, 
+                color=ViewConfReader.get_color_scale(options),
+                source=data,
+                legend_label=[v for _k, v in legend_names.items()]
+            )
         return chart
 
 class BarHorizontalStacked(Bar):
@@ -243,16 +246,7 @@ class BarHorizontalStacked(Bar):
             chart = figure(y_range=data.get(options.get('chart_options').get('y')))
             chart.x_range.start = 0
             chart = self.chart_config(chart, options)
-
-            # Create bars
-            chart.hbar_stack(
-                series,
-                y=options.get('chart_options').get('y'),
-                height=self.BAR_SIZE, 
-                color=ViewConfReader.get_color_scale(options),
-                source=data,
-                legend_label=[v for _k, v in legend_names.items()]
-            )
+            chart = self.generate_stacks(chart, data, series, legend_names, options)
         else:
             chart = figure(y_range=sorted(list(dataframe[options.get('chart_options', {}).get('x')])))
             chart.x_range.start = 0
@@ -261,6 +255,104 @@ class BarHorizontalStacked(Bar):
                 right=list(dataframe[options.get('chart_options', {}).get('x')]),
                 width=self.BAR_SIZE
             )
+
+        return chart
+
+    def generate_stacks(self, chart, data, series, legend_names, options):
+        # Create bars
+        chart.hbar_stack(
+            series,
+            y=options.get('chart_options').get('y'),
+            height=self.BAR_SIZE, 
+            color=ViewConfReader.get_color_scale(options),
+            source=data,
+            legend_label=[v for _k, v in legend_names.items()]
+        )
+        return chart
+
+class BarVerticalPyramid(BarVerticalStacked):
+    ''' Class for drawing bar charts '''
+    def generate_stacks(self, chart, data, series, legend_names, options):
+        # Create bars
+        d_series = [v for v in series if v in options.get('chart_options').get('left')]
+        u_series = [v for v in series if v not in options.get('chart_options').get('left')]
+
+        d_data = {k:[-v_item for v_item in v] for k, v in data.items() if k in d_series}
+        u_data = {k:v for k, v in data.items() if k in u_series}
+
+        # Getting minimum value
+        chart.y_range.start = min([min(v) for _k, v in d_data.items()])
+        
+        # Adding categories column
+        d_data[options.get('chart_options').get('y')] = data.get(options.get('chart_options').get('y'))
+        u_data[options.get('chart_options').get('y')] = data.get(options.get('chart_options').get('y'))
+
+        d_legend_labels = [v for _k, v in legend_names.items() if _k in options.get('chart_options').get('left')]
+        u_legend_labels = [v for _k, v in legend_names.items() if _k not in options.get('chart_options').get('left')]
+
+        d_color = ViewConfReader.get_color_scale(options)[:len(d_series)]
+        u_color = ViewConfReader.get_color_scale(options)[-len(u_series):]
+        
+        chart.vbar_stack(
+            d_series,
+            x=options.get('chart_options').get('x'),
+            height=self.BAR_SIZE, 
+            color=d_color,
+            source=d_data,
+            legend_label=d_legend_labels
+        )
+
+        chart.vbar_stack(
+            u_series,
+            x=options.get('chart_options').get('x'),
+            height=self.BAR_SIZE, 
+            color=u_color,
+            source=u_data,
+            legend_label=u_legend_labels
+        )
+
+        return chart
+
+class BarHorizontalPyramid(BarHorizontalStacked):
+    ''' Class for drawing bar charts '''
+    def generate_stacks(self, chart, data, series, legend_names, options):
+        # Left branches
+        l_series = [v for v in series if v in options.get('chart_options').get('left')]
+        r_series = [v for v in series if v not in options.get('chart_options').get('left')]
+
+        l_data = {k:[-v_item for v_item in v] for k, v in data.items() if k in l_series}
+        r_data = {k:v for k, v in data.items() if k in r_series}
+
+        # Getting minimum value
+        chart.x_range.start = min([min(v) for _k, v in l_data.items()])
+        
+        # Adding categories column
+        l_data[options.get('chart_options').get('y')] = data.get(options.get('chart_options').get('y'))
+        r_data[options.get('chart_options').get('y')] = data.get(options.get('chart_options').get('y'))
+
+        l_legend_labels = [v for _k, v in legend_names.items() if _k in options.get('chart_options').get('left')]
+        r_legend_labels = [v for _k, v in legend_names.items() if _k not in options.get('chart_options').get('left')]
+
+        l_color = ViewConfReader.get_color_scale(options)[:len(l_series)]
+        r_color = ViewConfReader.get_color_scale(options)[-len(r_series):]
+        
+        chart.hbar_stack(
+            l_series,
+            y=options.get('chart_options').get('y'),
+            height=self.BAR_SIZE, 
+            color=l_color,
+            source=l_data,
+            legend_label=l_legend_labels
+        )
+
+        chart.hbar_stack(
+            r_series,
+            y=options.get('chart_options').get('y'),
+            height=self.BAR_SIZE, 
+            color=r_color,
+            source=r_data,
+            legend_label=r_legend_labels
+        )
 
         return chart
 

@@ -20,6 +20,7 @@ class ThematicRepository(ImpalaRepository):
 
         'sisben': 'sst_beneficio',
         'catweb': 'sst_cat',
+        'sstcats': 'sst_cat',
         'sstindicadoresnacionais': 'sst_indicadores_br',
         'sstindicadoresmunicipais': 'sst_indicadores_mun',
         'sstindicadoresestaduais': 'sst_indicadores_mun',

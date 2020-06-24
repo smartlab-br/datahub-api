@@ -1,27 +1,29 @@
 ''' Class for drawing bar charts '''
 from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource, FactorRange, VBar, HBar
+from bokeh.models import ColumnDataSource, FactorRange
 from bokeh.transform import factor_cmap
 from bokeh.transform import dodge
 import pandas as pd
 from service.viewconf_reader import ViewConfReader
+from bokeh.themes import built_in_themes
+from bokeh.io import curdoc
 
 class Bar():
     ''' Class for drawing bar charts '''
     BAR_SIZE = 0.8
 
-    # TODO 1 - Population pyramid (uses stacked horizontal - check calcs to implement)
-    # TODO 2 - Time series (moving bars)
+    # TODO 1 - Time series (moving bars)
 
     # TODO Style 1 - Add text to bar
     #     chart_options:
     #       text: "vl_indicador"
 
     # TODO Style 2 - Set fonts
-    # TODO Style 3 - Light/Dark chart config
-    # TODO Style 4 - Add CSS
+    # TODO Style 3 - Add CSS
 
     # TODO Final - Responsivity
+    def __init__(self, style_theme):
+        curdoc().theme = style_theme # Dark = dark_minimal
 
     def draw(self, dataframe, options):
         ''' Abstract method - must be implemented '''

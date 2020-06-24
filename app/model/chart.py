@@ -49,7 +49,7 @@ class Chart(BaseModel):
             # struct['chart_options']['timeseries'] = 'nu_competencia'
 
             # TODO - [REMOVE] Testing pyramid with cut
-            struct['api']['template'] = "/sst/cats/cut-idade_cat?categorias=idade_cat,cd_tipo_sexo_empregado_cat&agregacao=count&filtros=eq-cd_municipio_ibge_dv-{0},and,ne-cd_tipo_sexo_empregado_cat-'Não informado',and,ne-idade_cat-0"
+            # struct['api']['template'] = "/sst/cats/cut-idade_cat?categorias=idade_cat,cd_tipo_sexo_empregado_cat&agregacao=count&filtros=eq-cd_municipio_ibge_dv-{0},and,ne-cd_tipo_sexo_empregado_cat-'Não informado',and,ne-idade_cat-0"
             
             options = {**options, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options}), **struct}
             if options.get('operation'):

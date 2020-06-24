@@ -8,7 +8,7 @@ import requests
 from service.viewconf_reader import ViewConfReader
 import os
 import time
-from service.charts.maps.base import BaseMap
+from model.charts.maps.base import BaseMap
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities

@@ -2,7 +2,7 @@
 import folium
 import numpy as np
 import pandas as pd
-from service.charts.maps.base import BaseMap
+from model.charts.maps.base import BaseMap
 from folium.plugins import MarkerCluster
 from service.viewconf_reader import ViewConfReader
 

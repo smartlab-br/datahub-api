@@ -1,7 +1,7 @@
 ''' Model for fetching chart '''
 import folium
 import numpy as np
-from service.charts.maps.base import BaseMap
+from model.charts.maps.base import BaseMap
 from folium.plugins import HeatMap, HeatMapWithTime
 from service.viewconf_reader import ViewConfReader
 

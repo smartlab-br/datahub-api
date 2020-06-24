@@ -18,11 +18,7 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import html
-from service.charts.maps.choropleth import Choropleth
-from service.charts.maps.heat import Heat
-from service.charts.maps.cluster import Cluster
-from service.charts.maps.bubbles import Bubbles
-from service.charts.bar import BarFactory
+from factory.chart import ChartFactory
 from html.parser import HTMLParser
 
 class Chart(BaseModel):
@@ -57,7 +53,7 @@ class Chart(BaseModel):
         else:
             dataframe = Thematic().find_dataset(options)
         
-        chart = self.get_raw_chart(dataframe, options)
+        chart = ChartFactory.create(options).draw(dataframe, options)
         
         chart_lib = 'BOKEH'
         for chart_key, chart_types in self.CHART_LIB_DEF.items():
@@ -67,23 +63,7 @@ class Chart(BaseModel):
         if options.get('as_image'):
             return self.get_image(chart, chart_lib)
         return self.get_dynamic_chart(chart, chart_lib)
-
-    def get_raw_chart(self, dataframe, options):
-        ''' Selects and loads the chart '''
-        if options.get('chart_type') == 'scatter':
-            return self.draw_scatter(dataframe, options)
-        if options.get('chart_type') == 'MAP_TOPOJSON':
-            return Choropleth().draw(dataframe, options)
-        if options.get('chart_type') == 'MAP_HEAT':
-            return Heat().draw(dataframe, options)
-        if options.get('chart_type') == 'MAP_CLUSTER':
-            return Cluster().draw(dataframe, options)
-        if options.get('chart_type') == 'MAP_BUBBLES':
-            return Bubbles().draw(dataframe, options)
-        if options.get('chart_type') == 'BAR':
-            return BarFactory.create(options).draw(dataframe, options)
-        pass
-        
+    
     @staticmethod
     def get_image(chart, lib):
         ''' Gets chart as image '''

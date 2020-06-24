@@ -47,9 +47,15 @@ class Chart(BaseModel):
             # TODO - [REMOVE] Testing bubbles with time series
             # struct['api']['template'] = "/te/indicadoresmunicipais?categorias=latitude,longitude,cd_mun_ibge,nm_municipio,nu_competencia,cd_indicador&valor=vl_indicador&agregacao=sum&filtros=nn-vl_indicador,and,in-cd_indicador-'te_rgt'-'te_nat'-'te_res',and,eq-cd_uf-{0}&calcs=ln_norm_pos_part"
             # struct['chart_options']['timeseries'] = 'nu_competencia'
+
+            # TODO - [REMOVE] Testing pyramid with cut
+            struct['api']['template'] = "/sst/cats/cut-idade_cat?categorias=idade_cat,cd_tipo_sexo_empregado_cat&agregacao=count&filtros=eq-cd_municipio_ibge_dv-{0},and,ne-cd_tipo_sexo_empregado_cat-'Não informado',and,ne-idade_cat-0"
             
             options = {**options, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options}), **struct}
-            dataframe = Thematic().find_dataset({**{'as_pandas': True, 'no_wrap': True}, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options})})
+            if options.get('operation'):
+                dataframe = Thematic().find_and_operate(options.get('operation'), {**{'as_pandas': True, 'no_wrap': True}, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options})})
+            else:
+                dataframe = Thematic().find_dataset({**{'as_pandas': True, 'no_wrap': True}, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options})})
         else:
             dataframe = Thematic().find_dataset(options)
         

@@ -37,7 +37,7 @@ class ChartFactory():
             # TODO - [REMOVE] Options for horizontal pyramid bars
             options.get('chart_options')['left'] = ['Feminino']
             options['chart_options']['orientation'] = "horizontal"                         
-            options['chart_options']['y'] = "idade_cat"
+            options['chart_options']['y'] = "cut"
             options['chart_options']['x'] = "agr_count"
             options['chart_options']['show_x_axis'] = False
             options['chart_options']['show_y_axis'] = True

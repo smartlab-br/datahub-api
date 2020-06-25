@@ -12,14 +12,9 @@ class Bar():
     ''' Class for drawing bar charts '''
     BAR_SIZE = 0.8
 
-    # TODO 1 - Time series (moving bars)
-
     # TODO Style 1 - Add text to bar
     #     chart_options:
     #       text: "vl_indicador"
-
-    # TODO Style 2 - Set fonts
-    # TODO Style 3 - Add CSS
 
     # TODO Final - Responsivity
     def __init__(self, style_theme):
@@ -31,6 +26,7 @@ class Bar():
     
     def chart_config(self, chart, options):
         # General config
+        chart.axis.major_label_text_font = 'Palanquin'
         chart.axis.major_tick_line_color = None
         chart.axis.minor_tick_line_color = None
         
@@ -45,6 +41,7 @@ class Bar():
             chart.yaxis.visible = False
 
         # Legend config
+        chart.legend.label_text_font = 'Palanquin'
         chart.legend.location = "top_right"
         chart.legend.orientation = "vertical"
 

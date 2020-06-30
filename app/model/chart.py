@@ -18,10 +18,8 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import html
-from service.charts.maps.choropleth import Choropleth
-from service.charts.maps.heat import Heat
-from service.charts.maps.cluster import Cluster
-from service.charts.maps.bubbles import Bubbles
+from factory.chart import ChartFactory
+from html.parser import HTMLParser
 
 class Chart(BaseModel):
     ''' Model for fetching dinamic and static charts '''
@@ -49,13 +47,19 @@ class Chart(BaseModel):
             # TODO - [REMOVE] Testing bubbles with time series
             # struct['api']['template'] = "/te/indicadoresmunicipais?categorias=latitude,longitude,cd_mun_ibge,nm_municipio,nu_competencia,cd_indicador&valor=vl_indicador&agregacao=sum&filtros=nn-vl_indicador,and,in-cd_indicador-'te_rgt'-'te_nat'-'te_res',and,eq-cd_uf-{0}&calcs=ln_norm_pos_part"
             # struct['chart_options']['timeseries'] = 'nu_competencia'
+
+            # TODO - [REMOVE] Testing pyramid with cut
+            # struct['api']['template'] = "/sst/cats/cut-idade_cat?categorias=idade_cat,cd_tipo_sexo_empregado_cat&agregacao=count&filtros=eq-cd_municipio_ibge_dv-{0},and,ne-cd_tipo_sexo_empregado_cat-'Não informado',and,ne-idade_cat-0"
             
             options = {**options, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options}), **struct}
-            dataframe = Thematic().find_dataset({**{'as_pandas': True, 'no_wrap': True}, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options})})
+            if options.get('operation'):
+                dataframe = Thematic().find_and_operate(options.get('operation'), {**{'as_pandas': True, 'no_wrap': True}, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options})})
+            else:
+                dataframe = Thematic().find_dataset({**{'as_pandas': True, 'no_wrap': True}, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options})})
         else:
             dataframe = Thematic().find_dataset(options)
         
-        chart = self.get_raw_chart(dataframe, options)
+        chart = ChartFactory.create(options).draw(dataframe, options)
         
         chart_lib = 'BOKEH'
         for chart_key, chart_types in self.CHART_LIB_DEF.items():
@@ -65,21 +69,7 @@ class Chart(BaseModel):
         if options.get('as_image'):
             return self.get_image(chart, chart_lib)
         return self.get_dynamic_chart(chart, chart_lib)
-
-    def get_raw_chart(self, dataframe, options):
-        ''' Selects and loads the chart '''
-        if options.get('chart_type') == 'scatter':
-            return self.draw_scatter(dataframe, options)
-        if options.get('chart_type') == 'MAP_TOPOJSON':
-            return Choropleth().draw(dataframe, options)
-        if options.get('chart_type') == 'MAP_HEAT':
-            return Heat().draw(dataframe, options)
-        if options.get('chart_type') == 'MAP_CLUSTER':
-            return Cluster().draw(dataframe, options)
-        if options.get('chart_type') == 'MAP_BUBBLES':
-            return Bubbles().draw(dataframe, options)
-        pass
-        
+    
     @staticmethod
     def get_image(chart, lib):
         ''' Gets chart as image '''
@@ -109,7 +99,10 @@ class Chart(BaseModel):
         # /charts?theme=teindicadoresmunicipais&categorias=ds_agreg_primaria&valor=vl_indicador&agregacao=SUM&filtros=eq-cd_mun_ibge-2927408,and,eq-cd_indicador-%27te_nat_ocup_atual%27
         if lib == 'BOKEH':
             (script, div) = components(chart)
-            return {'script': script, 'div': div}
+            return {
+                'script': HTMLParser().unescape(script),
+                'div': HTMLParser().unescape(div)
+            }
         elif lib == 'FOLIUM':
             return {'div': chart._repr_html_(), 'mime': 'text/html'}
         pass

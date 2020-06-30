@@ -8,7 +8,7 @@ from flask import current_app as app
 class PandasOperator():
     ''' Class for sequence of pandas datasets manipulations '''
     @classmethod
-    def operate(cls, dataset, operation):
+    def operate(cls, dataset, operation, categories):
         ''' Runs an aoperation, that functions as a macro for building additional columns in
             a dataset '''
         if operation == 'rerank':
@@ -24,7 +24,7 @@ class PandasOperator():
                 pattern_id = pattern[2]
             # Gets patterns from GIT
             location = app.config['GIT_VIEWCONF_BASE_URL'].format('options', 'cut', pattern_id)
-            return cls.cut(dataset, target, yaml.load(requests.get(location, verify=False).content))
+            return cls.cut(dataset, target, yaml.load(requests.get(location, verify=False).content), categories)
         return dataset
 
     @staticmethod
@@ -51,7 +51,7 @@ class PandasOperator():
         return dataset
 
     @staticmethod
-    def cut(dataset, target, options):
+    def cut(dataset, target, options, categories):
         ''' Cuts the dataset, placing items on bins, based on config '''
         # Gets the array of binned-data
         cut_vals = pd.cut(
@@ -64,7 +64,10 @@ class PandasOperator():
         dataset['cut'] = cut_vals
 
         # Reaggregates the dataset
-        dataset = dataset.groupby('cut').sum()
+        local_cats = categories.copy()
+        local_cats.remove(target)
+        local_cats.append('cut')
+        dataset = dataset.groupby(local_cats).sum()
         dataset = dataset.drop([target], axis=1)
         dataset.reset_index(level=0, inplace=True)
 

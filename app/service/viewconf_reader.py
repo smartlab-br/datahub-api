@@ -17,16 +17,18 @@ class ViewConfReader():
         ''' Read API url formation '''
         if api_call_obj is None:
             return None
-
         api_url = api_call_obj.get('fixed')
         if api_call_obj.get('template'):
             api_url = api_call_obj.get('template')
             for arg_i, arg in enumerate(api_call_obj.get('args')):
                 rplc = arg.get('fixed')
                 if arg.get('named_prop'):
-                    rplc = custom_args[arg.get('named_prop')]
+                    if arg.get('named_prop') in ['idLocalidade']: # Analysis Unit ID mnemonics
+                        rplc = custom_args.get('au')
+                    else: 
+                        rplc = custom_args.get(arg.get('named_prop'), custom_args.get('au'))
                 api_url = api_url.replace(f'{{{arg_i}}}', rplc)
-
+        
         return api_url
 
     @staticmethod
@@ -55,8 +57,11 @@ class ViewConfReader():
 
         if path_parts[0] == 'thematic':
             options['theme'] = path_parts[1]
+        elif '-' in path_parts[-1]:
+            options['theme'] = ''.join(path_parts[:-1])
+            options['operation'] = path_parts[-1]
         else:
-            options['theme'] = ''.join(path_parts)
+            options['theme'] = ''.join(path_parts)    
 
         return options
 
@@ -110,7 +115,7 @@ class ViewConfReader():
     def get_proportional_indicator_uf(row, **kwargs):
         ''' Custom function to get the data as a positive number based on moved log curve '''
         return np.log(((row.get(kwargs.get('campo', 'vl_indicador')) - row.get(kwargs.get('media', 'media_uf'))) / row.get(kwargs.get('media', 'media_uf'))) + 1.01)
-
+    
     @staticmethod
     def get_chart_title(options):
         if options.get('type') == 'multiple-charts':
@@ -120,7 +125,7 @@ class ViewConfReader():
         return options.get('title', {}).get('fixed', 'background')
 
     @staticmethod
-    def get_color_scale(options, vmin, vmax):
+    def get_color_scale(options, vmin=None, vmax=None):
         # Check if color list is given, escaping if true
         if options.get('chart_options', {}).get('colorArray'):
             return options.get('chart_options', {}).get('colorArray')

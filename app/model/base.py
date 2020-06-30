@@ -336,29 +336,32 @@ class BaseModel():
 
     def find_and_operate(self, operation, options=None):
         ''' Obtém um conjunto de dados e opera em cima deles '''
-        ejected_filters = options.pop('where')
+        local_options = options.copy()
+        ejected_filters = local_options.pop('where')
 
         # Convert filter strings to actionable list
         (reinserted_filters, ejected_filters) = self.reform_filters_for_pandas(ejected_filters)
 
-        options['as_pandas'] = True
-        options['no_wrap'] = True
-        options['where'] = reinserted_filters
+        local_options['as_pandas'] = True
+        local_options['no_wrap'] = True
+        local_options['where'] = reinserted_filters
 
         # Gets base dataset
-        base_dataset = self.find_dataset(options)
+        base_dataset = self.find_dataset(local_options)
 
         # Operates the dataset
-        base_dataset = PandasOperator.operate(base_dataset, operation)
+        base_dataset = PandasOperator.operate(base_dataset, operation, local_options.get('categorias'))
 
         # Apply ejected filters
         result = self.filter_pandas_dataset(base_dataset, ejected_filters)
 
         # Reapply sorting
-        if 'ordenacao' in options:
+        if 'ordenacao' in local_options:
             result = self.resort_dataset(result, options['ordenacao'])
 
-        return self.wrap_result(result)
+        if options.get('no_wrap'):
+            return result
+        return self.wrap_result(result, options)
 
     @staticmethod
     def reform_filters_for_pandas(filters):

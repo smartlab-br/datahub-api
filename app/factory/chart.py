@@ -22,14 +22,14 @@ class ChartFactory():
             return Bubbles()
         if options.get('chart_type') == 'BAR':
             # TODO - [REMOVE] Options for color testing
-            options.get('chart_options')["colorArray"] = ["#FF0000", "blue", "green"]
+            # options.get('chart_options')["colorArray"] = ["#FF0000", "blue", "green"]
 
             # TODO - [REMOVE] Options for horizontal bars
-            options['chart_options']['orientation'] = "horizontal"                         
-            options['chart_options']['y'] = "nu_competencia"
-            options['chart_options']['x'] = "vl_indicador"
-            options['chart_options']['show_x_axis'] = False
-            options['chart_options']['show_y_axis'] = True
+            # options['chart_options']['orientation'] = "horizontal"                         
+            # options['chart_options']['y'] = "nu_competencia"
+            # options['chart_options']['x'] = "vl_indicador"
+            # options['chart_options']['show_x_axis'] = False
+            # options['chart_options']['show_y_axis'] = True
 
             # TODO - [REMOVE] Options for stacked bars
             # options.get('chart_options')['stacked'] = True

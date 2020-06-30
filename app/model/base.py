@@ -14,7 +14,7 @@ from service.template_helper import TemplateHelper
 class BaseModel():
     ''' Definição do repo '''
     METADATA = {}
-
+    
     def find_dataset(self, options=None):
         ''' Obtém todos, sem tratamento '''
         result = self.get_repo().find_dataset(options)
@@ -108,6 +108,10 @@ class BaseModel():
 
         data_collection = {}
         any_nodata = False
+        
+        # Adding theme by datasource
+        options["theme"] = options.get('datasource', 'indicadores')
+
         # Fetches data collection from impala
         if 'api_obj_collection' in struct:
             (data_collection, any_nodata) = self.get_template_data_collection(
@@ -145,6 +149,8 @@ class BaseModel():
         any_nodata = False
         for each_obj_struct in structure:
             each_options = self.remove_templates(each_obj_struct['endpoint'], options)
+            if each_options.get('theme') is None:
+               each_options["theme"] = options.get("theme") 
 
             # Adds complimentary options
             each_options = QueryOptionsBuilder.build_options(each_options)
@@ -205,7 +211,7 @@ class BaseModel():
                     "type": "text",
                     "title": "",
                     "content": {
-                        "fixed": struct['msgNoData']['desc']
+                        "fixed": struct.get('msgNoData',{}).get('desc','no data')
                     }
                 }]
             elif isinstance(each_arg, list):
@@ -226,19 +232,19 @@ class BaseModel():
     def build_derivatives(cls, each_obj_struct, options, each_obj, data_collection):
         ''' Gets derivetive attributes from configs '''
         any_nodata = False
-        for each_inst in each_obj_struct['instances']:
+        for each_inst in each_obj_struct.get('instances'):
             try:
-                data_collection[each_inst['name']] = cls.get_collection_from_type(
-                    each_obj['dataset'],
-                    each_inst['type'],
-                    each_inst['named_prop'],
-                    options['cd_analysis_unit']
+                data_collection[each_inst.get('name')] = cls.get_collection_from_type(
+                    each_obj.get('dataset'),
+                    each_inst.get('type'),
+                    each_inst.get('named_prop'),
+                    options.get('cd_analysis_unit')
                 )
             except (ValueError, KeyError, TypeError, IndexError):
-                data_collection[each_inst['name']] = None
+                data_collection[each_inst.get('name')] = None
                 any_nodata = True
-            if each_inst['name'] not in data_collection:
-                data_collection[each_inst['name']] = None
+            if each_inst.get('name') not in data_collection:
+                data_collection[each_inst.get('name')] = None
                 any_nodata = True
         return (data_collection, any_nodata)
 

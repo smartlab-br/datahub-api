@@ -88,7 +88,7 @@ class ViewConfReader():
     def generate_columns(cls, dataframe, options):
         ''' Create new columns by applying calcs and formatters '''
         # Applying calcs
-        calcs = options.get('api',{}).get('options',{}).get('calcs')
+        calcs = options.get('api',{}).get('options',{}).get('calcs',[])
         for calc in calcs:
             dataframe['calc_' + calc.get('id')] = dataframe.apply(
                 getattr(cls, calc.get('function')),

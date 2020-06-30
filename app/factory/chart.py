@@ -6,6 +6,7 @@ from model.charts.maps.bubbles import Bubbles
 from model.charts.bar import BarHorizontal, BarVertical, \
     BarHorizontalStacked, BarVerticalStacked, \
     BarHorizontalPyramid, BarVerticalPyramid
+from model.charts.line import Line#, LineArea
 
 class ChartFactory():
     ''' Factory to instantiate the correct chart implementation '''
@@ -57,6 +58,9 @@ class ChartFactory():
             if orientation == 'vertical':
                 return BarVertical(options.get('style_theme', 'light_minimal'))
             return BarHorizontal(options.get('style_theme', 'light_minimal'))
+        if options.get('chart_type') == 'LINE':
+            return Line(options.get('style_theme', 'light_minimal'))
+
         pass
     
         

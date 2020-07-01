@@ -19,7 +19,7 @@ class Heat(BaseMap):
         dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
         
         # Runs dataframe modifiers from viewconf
-        dataframe = ViewConfReader().generate_columns(dataframe, options)
+        # dataframe = ViewConfReader().generate_columns(dataframe, options)
 
         dataframe = dataframe.set_index('idx')
         centroide = None  

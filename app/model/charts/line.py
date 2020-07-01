@@ -1,6 +1,6 @@
 ''' Class for drawing bar charts '''
 from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource, FactorRange, NumeralTickFormatter
+from bokeh.models import ColumnDataSource, NumeralTickFormatter, HoverTool
 from bokeh.transform import factor_cmap
 from bokeh.transform import dodge
 import pandas as pd
@@ -20,34 +20,25 @@ class Line():
         if list(series):
             legend_names = self.get_legend_names(dataframe, options)
             
-            # Pivot dataframe
-            src = dataframe.copy()
-            src = pd.pivot_table(
-                src,
-                values=[options.get('chart_options').get('y')],
-                columns=options.get('chart_options').get('id'),
-                index=options.get('chart_options').get('x'),
-                aggfunc="sum",
-                fill_value=0
-            )
-            src.columns = src.columns.droplevel()
-            src = src.reset_index()
-            # src[options.get('chart_options').get('x')] = src[options.get('chart_options').get('x')].astype(str)
-            # data = {col:list(src[col]) for col in src.columns}
-            
             # Chart initial setup
-            chart = figure()
+            chart = figure(tooltips = self.build_tooltip(options))
+            #chart = figure()
             chart.y_range.start = dataframe[options.get('chart_options').get('y')].min()
             chart = self.chart_config(chart, options)
-
-            for index, serie in enumerate(series):
+            
+            grouped = dataframe.groupby(options.get('chart_options').get('id'))
+            serie_index = 0
+            for group_id, group in grouped:
                 chart.line(
-                    list(src[options.get('chart_options').get('x')]),
-                    list(src[serie]),
+                    options.get('chart_options').get('x'),
+                    options.get('chart_options').get('y'),
+                    source=ColumnDataSource(data=group.to_dict(orient='list')),
                     line_width=self.LINE_WIDTH,
-                    line_color=self.get_fill_color(index, options),
-                    legend_label=legend_names.get(serie)
+                    line_color=self.get_fill_color(serie_index, options),
+                    legend_label=legend_names.get(group_id)
                 )
+                serie_index = serie_index + 1
+            # chart.add_tools(HoverTool(tooltips=[(hdr.get('text'), f"@{hdr.get('value')}") for hdr in options.get('headers')]))
         else:
             chart = figure()
             chart.y_range.start = dataframe[options.get('chart_options').get('y')].min()
@@ -94,6 +85,10 @@ class Line():
             tmp = dataframe[[options.get('chart_options').get('id'), options.get('chart_options').get('legend_field')]].drop_duplicates().set_index(options.get('chart_options').get('id')).to_dict()
             return tmp.get(options.get('chart_options').get('legend_field'))
         return {i: i for i in dataframe[options.get('chart_options').get('id')].unique()}
+    
+    def build_tooltip(self, options):
+        rows = [f'<tr style="text-align: left;"><th style="padding: 4px; padding-right: 10px;">{hdr.get("text")}</th><td style="padding: 4px;">@{hdr.get("value")}</td></tr>' for hdr in options.get('headers')]
+        return f"<table>{''.join(rows)}</table>"
     
 class LineArea(Line):
     ''' Class for drawing bar charts '''

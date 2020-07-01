@@ -60,7 +60,7 @@ class Choropleth(BaseMap):
         dataframe['idx'] = dataframe[chart_options.get('id_field')]
         
         # Runs dataframe modifiers from viewconf
-        dataframe = ViewConfReader().generate_columns(dataframe, options)
+        # dataframe = ViewConfReader().generate_columns(dataframe, options)
 
         dataframe = dataframe.set_index('idx')
         centroide = None  

@@ -1,6 +1,6 @@
 ''' Class for drawing bar charts '''
 from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource, FactorRange
+from bokeh.models import ColumnDataSource, FactorRange, NumeralTickFormatter
 from bokeh.transform import factor_cmap
 from bokeh.transform import dodge
 import pandas as pd
@@ -37,7 +37,7 @@ class Line():
             
             # Chart initial setup
             chart = figure()
-            # chart.y_range.start = 0
+            chart.y_range.start = dataframe[options.get('chart_options').get('y')].min()
             chart = self.chart_config(chart, options)
 
             for index, serie in enumerate(series):
@@ -50,7 +50,7 @@ class Line():
                 )
         else:
             chart = figure()
-            chart.y_range.start = 0
+            chart.y_range.start = dataframe[options.get('chart_options').get('y')].min()
             chart.line(
                 list(dataframe[options.get('chart_options').get('x')]),
                 list(dataframe[options.get('chart_options', {}).get('y')]),
@@ -64,6 +64,7 @@ class Line():
         chart.axis.major_label_text_font = 'Palanquin'
         chart.axis.major_tick_line_color = None
         chart.axis.minor_tick_line_color = None
+        chart.x_range.range_padding = 0.0
         
         # Removing grid lines
         chart.xgrid.grid_line_color = None
@@ -79,6 +80,9 @@ class Line():
         chart.legend.label_text_font = 'Palanquin'
         chart.legend.location = "top_right"
         chart.legend.orientation = "vertical"
+
+        # Ticks formatting
+        chart.yaxis.formatter = NumeralTickFormatter(format="0.00a")
 
         return chart
     
@@ -98,37 +102,43 @@ class LineArea(Line):
         if list(series):
             # Get legend names dictionary
             legend_names = self.get_legend_names(dataframe, options)
+            
             # Pivot dataframe
             src = dataframe.copy()
             src = pd.pivot_table(
                 src,
-                values=[options.get('chart_options').get('x')],
+                values=[options.get('chart_options').get('y')],
                 columns=options.get('chart_options').get('id'),
-                index=options.get('chart_options').get('y'),
+                index=options.get('chart_options').get('x'),
                 aggfunc="sum",
                 fill_value=0
             )
             src.columns = src.columns.droplevel()
             src = src.reset_index()
-            src[options.get('chart_options').get('y')] = src[options.get('chart_options').get('y')].astype(str)
+            src[options.get('chart_options').get('x')] = src[options.get('chart_options').get('x')].astype(str)
             data = {col:list(src[col]) for col in src.columns}
             
             # Chart initial setup
-            chart = figure(y_range=data.get(options.get('chart_options').get('y')))
-            chart.x_range.start = 0
+            chart = figure()
+            chart.y_range.start = dataframe[options.get('chart_options').get('y')].min()
             chart = self.chart_config(chart, options)
-            chart = self.generate_stacks(chart, data, series, legend_names, options)
+
+            chart.varea_stack(
+                series,
+                x = options.get('chart_options').get('x'),
+                color = ViewConfReader.get_color_scale(options),
+                source = data
+            )
         else:
-            chart = figure(y_range=sorted(list(dataframe[options.get('chart_options', {}).get('x')])))
-            chart.x_range.start = 0
-            chart.hbar(
-                y=list(dataframe[options.get('chart_options', {}).get('y')]),
-                right=list(dataframe[options.get('chart_options', {}).get('x')]),
-                width=self.BAR_SIZE
+            chart = figure()
+            chart.y_range.start = dataframe[options.get('chart_options').get('y')].min()
+            chart.line(
+                list(dataframe[options.get('chart_options').get('x')]),
+                list(dataframe[options.get('chart_options', {}).get('y')]),
+                line_width=self.LINE_WIDTH
             )
 
         return chart
-
 
 # chart_type: "LINE"
 #     # preloaded:

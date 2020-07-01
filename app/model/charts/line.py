@@ -40,11 +40,12 @@ class Line():
                 serie_index = serie_index + 1
             # chart.add_tools(HoverTool(tooltips=[(hdr.get('text'), f"@{hdr.get('value')}") for hdr in options.get('headers')]))
         else:
-            chart = figure()
+            chart = figure(tooltips = self.build_tooltip(options))
             chart.y_range.start = dataframe[options.get('chart_options').get('y')].min()
             chart.line(
-                list(dataframe[options.get('chart_options').get('x')]),
-                list(dataframe[options.get('chart_options', {}).get('y')]),
+                options.get('chart_options').get('x'),
+                options.get('chart_options').get('y'),
+                source=ColumnDataSource(data=dataframe.to_dict(orient='list')),
                 line_width=self.LINE_WIDTH
             )
             
@@ -98,6 +99,7 @@ class LineArea(Line):
             # Get legend names dictionary
             legend_names = self.get_legend_names(dataframe, options)
             
+            # TODO Avoid pivoting
             # Pivot dataframe
             src = dataframe.copy()
             src = pd.pivot_table(
@@ -134,33 +136,3 @@ class LineArea(Line):
             )
 
         return chart
-
-# chart_type: "LINE"
-#     # preloaded:
-#     #   prop: "centralindicadores"
-#     #   function: "slice"
-#     #   id: ["02_11_01_00", "02_11_02_00"]
-#     api:
-#         template: "/indicadoresmunicipais?categorias=cd_mun_ibge,nm_municipio,cd_dimensao,ds_indicador_radical,ds_indicador_curto,ds_agreg_primaria,cd_indicador,nu_competencia,ds_fonte,vl_indicador,media_uf,pct_uf,rank_uf,rank_br,latitude,longitude&filtros=eq-cd_mun_ibge-{0},and,in-cd_indicador-'02_11_01_00'-'02_11_02_00',and,le-nu_competencia-nu_competencia_max&ordenacao=cd_indicador"
-#         args:
-#           - named_prop: "idLocalidade"
-#         options:
-#         formatters:
-#             - id: "vl_indicador"
-#               format: 'inteiro'
-#     headers:
-#         - text: 'Indicador'
-#           align: 'left'
-#           value: 'ds_indicador_radical'
-#         - text: 'Ano'
-#           align: 'left'
-#           value: 'nu_competencia'
-#         - text: 'Quantidade'
-#           value: 'fmt_vl_indicador'
-#     chart_options:
-#         id: "cd_indicador"
-#         x: "nu_competencia"
-#         y: "vl_indicador"
-#         hide_legend: false
-#         legend_field: "ds_agreg_primaria"
-#         colorArray: ["#377EB8","#E41A1C"]  # blue / red

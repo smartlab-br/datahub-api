@@ -100,8 +100,8 @@ class BarVertical(Bar):
                 serie_index = serie_index + 1
         else:
             chart.vbar(
-                x=options.get('chart_options', {}).get('x')],
-                top=options.get('chart_options', {}).get('y')],
+                x=options.get('chart_options', {}).get('x'),
+                top=options.get('chart_options', {}).get('y'),
                 source=ColumnDataSource(data=dataframe.to_dict(orient='list')),
                 width=self.BAR_SIZE
             )

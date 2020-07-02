@@ -125,13 +125,14 @@ class LineArea(Line):
                 x = options.get('chart_options').get('x'),
                 color = ViewConfReader.get_color_scale(options),
                 source = data
-            )
+            )            
         else:
-            chart = figure()
+            chart = figure(tooltips = self.build_tooltip(options))
             chart.y_range.start = dataframe[options.get('chart_options').get('y')].min()
             chart.line(
-                list(dataframe[options.get('chart_options').get('x')]),
-                list(dataframe[options.get('chart_options', {}).get('y')]),
+                options.get('chart_options').get('x'),
+                options.get('chart_options').get('y'),
+                source=ColumnDataSource(data=dataframe.to_dict(orient='list')),
                 line_width=self.LINE_WIDTH
             )
 

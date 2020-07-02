@@ -95,11 +95,15 @@ class ViewConfReader():
         # Applying calcs
         calcs = options.get('api',{}).get('options',{}).get('calcs',[])
         for calc in calcs:
-            dataframe['calc_' + calc.get('id')] = dataframe.apply(
-                getattr(cls, calc.get('function')),
-                axis=1,
-                **calc
-            )
+            try:
+                dataframe['calc_' + calc.get('id')] = dataframe.apply(
+                    getattr(cls, calc.get('function')),
+                    axis=1,
+                    **calc
+                )
+            except AttributeError:
+                # Ignores non-existing functions
+                continue
         
         # Applying formatters
         formatters = options.get('api',{}).get('options',{}).get('formatters', [])

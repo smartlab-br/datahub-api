@@ -58,6 +58,9 @@ class Chart(BaseModel):
                 dataframe = Thematic().find_dataset({**{'as_pandas': True, 'no_wrap': True}, **ViewConfReader.api_to_options(struct.get('api'), {**options, **added_options})})
         else:
             dataframe = Thematic().find_dataset(options)
+
+        # Runs dataframe modifiers from viewconf
+        dataframe = ViewConfReader().generate_columns(dataframe, options)
         
         chart = ChartFactory.create(options).draw(dataframe, options)
         

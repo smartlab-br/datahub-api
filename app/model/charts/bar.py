@@ -57,57 +57,52 @@ class Bar():
             return tmp.get(options.get('chart_options').get('legend_field'))
         return {i: i for i in dataframe[options.get('chart_options').get('id')].unique()}
     
+    def build_tooltip(self, options):
+        rows = [f'<tr style="text-align: left;"><th style="padding: 4px; padding-right: 10px;">{hdr.get("text")}</th><td style="padding: 4px;">@{hdr.get("value")}</td></tr>' for hdr in options.get('headers')]
+        return f"<table>{''.join(rows)}</table>"
+    
 class BarVertical(Bar):
     ''' Class for drawing bar charts '''
     def draw(self, dataframe, options):
+        # Chart initial setup
+        dataframe[options.get('chart_options').get('x')] = dataframe[options.get('chart_options').get('x')].astype(str)
+        chart = figure(
+            tooltips = self.build_tooltip(options),
+            x_range = list(dataframe[options.get('chart_options').get('x')].sort_values().unique().astype(str))
+        )
+        chart.y_range.start = 0
+        chart = self.chart_config(chart, options)
+
         series = sorted(dataframe[options.get('chart_options', {}).get('id')].unique())
         if list(series):
             legend_names = self.get_legend_names(dataframe, options)
-
-            # Pivot dataframe
-            src = dataframe.copy()
-            src = pd.pivot_table(
-                src,
-                values=[options.get('chart_options').get('y')],
-                columns=options.get('chart_options').get('id'),
-                index=options.get('chart_options').get('x'),
-                aggfunc="sum",
-                fill_value=0
-            )
-            src.columns = src.columns.droplevel()
-            src = src.reset_index()
-            src[options.get('chart_options').get('x')] = src[options.get('chart_options').get('x')].astype(str)
-            data = {col:list(src[col]) for col in src.columns}
             
-            # Chart initial setup
-            chart = figure(x_range=data.get(options.get('chart_options').get('x')))
-            chart.y_range.start = 0
-            chart = self.chart_config(chart, options)
-
             # Create bars
             bar_width = self.BAR_SIZE / len(series)
             pos = -self.BAR_SIZE / 2
             
-            for index, serie in enumerate(series):
+            grouped = dataframe.groupby(options.get('chart_options').get('id'))
+            serie_index = 0
+            for group_id, group in grouped:
                 chart.vbar(
                     x=dodge(
                         options.get('chart_options').get('x'),
                         pos,
                         range=chart.x_range
                     ),
-                    top=serie, 
+                    top=options.get('chart_options').get('y'),
                     width=bar_width - 0.05,
-                    source=ColumnDataSource(data=data),
-                    color=self.get_fill_color(index, options),
-                    legend_label=legend_names.get(serie)
+                    source=ColumnDataSource(data=group.to_dict(orient='list')),
+                    color=self.get_fill_color(serie_index, options),
+                    legend_label=legend_names.get(group_id)
                 )
                 pos = pos + bar_width
+                serie_index = serie_index + 1
         else:
-            chart = figure(x_range=sorted(list(dataframe[options.get('chart_options', {}).get('x')])))
-            chart.y_range.start = 0
             chart.vbar(
-                x=list(dataframe[options.get('chart_options', {}).get('x')]),
-                top=list(dataframe[options.get('chart_options', {}).get('y')]),
+                x=options.get('chart_options', {}).get('x'),
+                top=options.get('chart_options', {}).get('y'),
+                source=ColumnDataSource(data=dataframe.to_dict(orient='list')),
                 width=self.BAR_SIZE
             )
             
@@ -116,54 +111,46 @@ class BarVertical(Bar):
 class BarHorizontal(Bar):
     ''' Class for drawing bar charts '''
     def draw(self, dataframe, options):
+        # Chart initial setup
+        dataframe[options.get('chart_options').get('x')] = dataframe[options.get('chart_options').get('x')].astype(str)
+        chart = figure(
+            tooltips = self.build_tooltip(options),
+            x_range = list(dataframe[options.get('chart_options').get('x')].sort_values().unique().astype(str))
+        )
+        chart.x_range.start = 0
+        chart = self.chart_config(chart, options)
+
         series = sorted(dataframe[options.get('chart_options', {}).get('id')].unique())
         if list(series):
-            # Get legend names dictionary
             legend_names = self.get_legend_names(dataframe, options)
-            # Pivot dataframe
-            src = dataframe.copy()
-            src = pd.pivot_table(
-                src,
-                values=[options.get('chart_options').get('x')],
-                columns=options.get('chart_options').get('id'),
-                index=options.get('chart_options').get('y'),
-                aggfunc="sum",
-                fill_value=0
-            )
-            src.columns = src.columns.droplevel()
-            src = src.reset_index()
-            src[options.get('chart_options').get('y')] = src[options.get('chart_options').get('y')].astype(str)
-            data = {col:list(src[col]) for col in src.columns}
             
-            # Chart initial setup
-            chart = figure(y_range=data.get(options.get('chart_options').get('y')))
-            chart.x_range.start = 0
-            chart = self.chart_config(chart, options)
-
             # Create bars
             bar_width = self.BAR_SIZE / len(series)
             pos = -self.BAR_SIZE / 2
-
-            for index, serie in enumerate(series):
+            
+            grouped = dataframe.groupby(options.get('chart_options').get('id'))
+            serie_index = 0
+            for group_id, group in grouped:
                 chart.hbar(
                     y=dodge(
                         options.get('chart_options').get('y'),
                         pos,
                         range=chart.y_range
                     ),
-                    right=serie, 
+                    right=options.get('chart_options').get('x'),
                     height=bar_width - 0.05,
-                    source=ColumnDataSource(data=data),
-                    color=self.get_fill_color(index, options),
-                    legend_label=legend_names.get(serie)
+                    source=ColumnDataSource(data=group.to_dict(orient='list')),
+                    color=self.get_fill_color(serie_index, options),
+                    legend_label=legend_names.get(group_id)
                 )
+                
                 pos = pos + bar_width
+                serie_index = serie_index + 1
         else:
-            chart = figure(y_range=sorted(list(dataframe[options.get('chart_options', {}).get('x')])))
-            chart.x_range.start = 0
             chart.hbar(
                 y=list(dataframe[options.get('chart_options', {}).get('y')]),
                 right=list(dataframe[options.get('chart_options', {}).get('x')]),
+                source=ColumnDataSource(data=dataframe.to_dict(orient='list')),
                 width=self.BAR_SIZE
             )
 

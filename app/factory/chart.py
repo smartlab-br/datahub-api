@@ -23,7 +23,7 @@ class ChartFactory():
             return Bubbles()
         if options.get('chart_type') == 'BAR':
             # TODO - [REMOVE] Options for color testing
-            # options.get('chart_options')["colorArray"] = ["#FF0000", "blue", "green"]
+            options.get('chart_options')["colorArray"] = ["#FF0000", "blue", "green"]
 
             # TODO - [REMOVE] Options for horizontal bars
             # options['chart_options']['orientation'] = "horizontal"                         
@@ -47,7 +47,7 @@ class ChartFactory():
         if options.get('chart_type') == 'LINE':
             # TODO - [REMOVE] Options for stacked lines
             # options.get('chart_options')['stacked'] = True
-            return cls.select_bar_by_options(options)
+            return cls.select_line_by_options(options)
 
     @staticmethod
     def select_bar_by_options(options):

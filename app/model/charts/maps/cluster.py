@@ -18,6 +18,26 @@ class Cluster(BaseMap):
         n = folium.Map(tiles=self.TILES_URL, attr = self.TILES_ATTRIBUTION, control_scale = True)
         
         options['headers'] = self.get_headers(chart_options, options)
+
+        # TODO - [REMOVE] Used just for debugging
+        # options["headers"] = [
+        #     {'text': 'nm_municipio', "value": 'nm_municipio'},
+
+        #     {'text': 'te_rgt_agr_sum_vl_indicador', "value": 'te_rgt_agr_sum_vl_indicador'},
+        #     {'text': 'te_rgt_api_calc_min_part', "value": 'te_rgt_api_calc_min_part'},
+        #     {'text': 'te_rgt_api_calc_max_part', "value": 'te_rgt_api_calc_max_part'},
+        #     {'text': 'te_rgt_api_calc_ln_norm_pos_part', "value": 'te_rgt_api_calc_ln_norm_pos_part'},
+            
+        #     {'text': 'te_res_agr_sum_vl_indicador', "value": 'te_res_agr_sum_vl_indicador'},
+        #     {'text': 'te_res_api_calc_min_part', "value": 'te_res_api_calc_min_part'},
+        #     {'text': 'te_res_api_calc_max_part', "value": 'te_res_api_calc_max_part'},
+        #     {'text': 'te_res_api_calc_ln_norm_pos_part', "value": 'te_rgt_api_calc_ln_norm_pos_part'},
+            
+        #     {'text': 'te_nat_agr_sum_vl_indicador', "value": 'te_nat_agr_sum_vl_indicador'},
+        #     {'text': 'te_nat_api_calc_min_part', "value": 'te_nat_api_calc_min_part'},
+        #     {'text': 'te_nat_api_calc_max_part', "value": 'te_nat_api_calc_max_part'},
+        #     {'text': 'te_nat_api_calc_ln_norm_pos_part', "value": 'te_nat_api_calc_ln_norm_pos_part'}
+        # ]
         
         # Adding tooltips to detailed dataframe
         dataframe = pd.merge(

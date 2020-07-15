@@ -55,8 +55,7 @@ class BaseMap():
             marker_layer.add_to(map)
         return map
 
-    @staticmethod
-    def post_adjustments(map, dataframe, chart_options):
+    def post_adjustments(self, map, dataframe, chart_options):
         folium.LayerControl().add_to(map)
         map.get_root().header.add_child(folium.Element(self.STYLE_STATEMENT))
 
@@ -106,7 +105,7 @@ class BaseMap():
         # Merge dataframe and pivoted dataframe
         df_tooltip['tooltip'] = df_tooltip.apply(
             tooltip_gen,
-            headers= options.get("headers"),
+            headers=options.get("headers"),
             axis=1
         )
         return df_tooltip[[chart_options.get('id_field', 'cd_mun_ibge'), 'tooltip']]

@@ -1,0 +1,20 @@
+# action.yml
+name: 'Build image'
+description: 'Build the image to go through the pipeline'
+inputs:
+  check:
+    description: 'Type of check to perform'
+    required: true
+    default: 'lint'
+  dest:
+    description: 'Destination directory inside workspace to output build-artifacts.'
+    default: 'build'
+    required: false
+outputs:
+  time: # id of output
+    description: 'The time we greeted you'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.check }}

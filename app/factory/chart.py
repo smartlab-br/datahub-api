@@ -10,8 +10,8 @@ from model.charts.line import Line, LineArea
 
 class ChartFactory():
     ''' Factory to instantiate the correct chart implementation '''
-    @staticmethod
-    def create(options):
+    @classmethod
+    def create(cls, options):
         ''' Factory method '''
         if options.get('chart_type') == 'MAP_TOPOJSON':
             return Choropleth()
@@ -43,26 +43,32 @@ class ChartFactory():
             # options['chart_options']['show_x_axis'] = False
             # options['chart_options']['show_y_axis'] = True
             # del options['chart_options']['legend_field']
-
-            orientation = options.get('chart_options', {}).get('orientation', 'horizontal')
-            is_stacked = options.get('chart_options', {}).get('stacked', False)
-            is_pyramid = options.get('chart_options', {}).get('left', False)
-            if is_pyramid:
-                if orientation == 'vertical':
-                    return BarVerticalPyramid(options.get('style_theme', 'light_minimal'))
-                return BarHorizontalPyramid(options.get('style_theme', 'light_minimal'))
-            if is_stacked:
-                if orientation == 'vertical':
-                    return BarVerticalStacked(options.get('style_theme', 'light_minimal'))
-                return BarHorizontalStacked(options.get('style_theme', 'light_minimal'))
-            if orientation == 'vertical':
-                return BarVertical(options.get('style_theme', 'light_minimal'))
-            return BarHorizontal(options.get('style_theme', 'light_minimal'))
+            return cls.select_bar_by_options(options)
         if options.get('chart_type') == 'LINE':
             # TODO - [REMOVE] Options for stacked lines
             # options.get('chart_options')['stacked'] = True
+            return cls.select_bar_by_options(options)
 
-            is_stacked = options.get('chart_options', {}).get('stacked', False)
-            if is_stacked:
-                return LineArea(options.get('style_theme', 'light_minimal'))
-            return Line(options.get('style_theme', 'light_minimal'))        
+    @staticmethod
+    def select_bar_by_options(options):
+        orientation = options.get('chart_options', {}).get('orientation', 'horizontal')
+        is_stacked = options.get('chart_options', {}).get('stacked', False)
+        is_pyramid = options.get('chart_options', {}).get('left', False)
+        if is_pyramid:
+            if orientation == 'vertical':
+                return BarVerticalPyramid(options.get('style_theme', 'light_minimal'))
+            return BarHorizontalPyramid(options.get('style_theme', 'light_minimal'))
+        if is_stacked:
+            if orientation == 'vertical':
+                return BarVerticalStacked(options.get('style_theme', 'light_minimal'))
+            return BarHorizontalStacked(options.get('style_theme', 'light_minimal'))
+        if orientation == 'vertical':
+            return BarVertical(options.get('style_theme', 'light_minimal'))
+        return BarHorizontal(options.get('style_theme', 'light_minimal'))
+
+    @staticmethod
+    def select_line_by_options(options):
+        is_stacked = options.get('chart_options', {}).get('stacked', False)
+        if is_stacked:
+            return LineArea(options.get('style_theme', 'light_minimal'))
+        return Line(options.get('style_theme', 'light_minimal'))

@@ -62,7 +62,7 @@ class Chart(BaseModel):
         # Runs dataframe modifiers from viewconf
         dataframe = ViewConfReader().generate_columns(dataframe, options)
         
-        chart = ChartFactory.create(options).draw(dataframe, options)
+        chart = ChartFactory().create(options).draw(dataframe, options)
         
         chart_lib = 'BOKEH'
         for chart_key, chart_types in self.CHART_LIB_DEF.items():

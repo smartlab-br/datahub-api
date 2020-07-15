@@ -96,8 +96,6 @@ class LineArea(Line):
     def draw(self, dataframe, options):
         series = sorted(dataframe[options.get('chart_options', {}).get('id')].unique())
         if list(series):
-            # Get legend names dictionary
-            legend_names = self.get_legend_names(dataframe, options)
             data = self.pivot_dataframe(dataframe, options)
 
             # Chart initial setup

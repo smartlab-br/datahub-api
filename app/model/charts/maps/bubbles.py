@@ -169,8 +169,6 @@ class Bubbles(BaseMap):
                     
                 TimestampedGeoJson(
                     features,
-                    # name = group_names.get(group_id),
-                    # show = show,
                     period = 'P1Y',
                     duration = 'P1Y',
                     date_options='YYYY',

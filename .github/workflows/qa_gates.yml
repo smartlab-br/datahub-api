@@ -34,7 +34,12 @@ jobs:
     - name: Unit testing
       run: |
         pip install -Iv nose2==0.9.1
-        nose2 --config app/test/nose2.cfg --with-cov --coverage-report xml --coverage-config app/test/coverage/.coveragerc
+        nose2 --config app/test/nose2.cfg --with-cov --coverage-report xml --coverage-config app/test/coverage/.coveragerc > app/test/report.txt 2>&1
+    - name: Upload unit tests report to artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: unittests
+        path: ./app/test/report.txt
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
       env:

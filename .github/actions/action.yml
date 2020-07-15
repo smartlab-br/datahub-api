@@ -1,12 +1,5 @@
 # action.yml
 name: 'Build image'
-
-on: 
-  push:
-    refs/heads:
-      - master
-      - developement
-
 description: 'Build the image to go through the pipeline'
 inputs:
   check:

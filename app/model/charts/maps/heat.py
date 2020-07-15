@@ -10,8 +10,6 @@ class Heat(BaseMap):
     def draw(self, dataframe, options):
         ''' Gera um mapa de calor a partir das opções enviadas '''
         # http://localhost:5000/charts/choropleth?from_viewconf=S&au=2927408&card_id=mapa_pib_brasil&dimension=socialeconomico&as_image=S
-        visao = options.get('visao', 'uf')
-
         au = options.get('au')
         chart_options = options.get('chart_options')
 

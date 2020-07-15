@@ -65,8 +65,4 @@ class ChartFactory():
             is_stacked = options.get('chart_options', {}).get('stacked', False)
             if is_stacked:
                 return LineArea(options.get('style_theme', 'light_minimal'))
-            return Line(options.get('style_theme', 'light_minimal'))
-
-        pass
-    
-        
+            return Line(options.get('style_theme', 'light_minimal'))        

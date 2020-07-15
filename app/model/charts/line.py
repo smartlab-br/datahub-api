@@ -5,15 +5,16 @@ from bokeh.transform import factor_cmap
 from bokeh.transform import dodge
 import pandas as pd
 from service.viewconf_reader import ViewConfReader
+from model.charts.base import BaseCartesianChart
 from bokeh.themes import built_in_themes
 from bokeh.io import curdoc
 
-class Line():
+class Line(BaseCartesianChart):
     ''' Class for drawing bar charts '''
     LINE_WIDTH = 4
 
     def __init__(self, style_theme):
-        curdoc().theme = style_theme # Dark = dark_minimal
+        curdoc().theme = style_theme
 
     def draw(self, dataframe, options):
         series = sorted(dataframe[options.get('chart_options', {}).get('id')].unique())
@@ -22,7 +23,6 @@ class Line():
             
             # Chart initial setup
             chart = figure(tooltips = self.build_tooltip(options))
-            #chart = figure()
             chart.y_range.start = dataframe[options.get('chart_options').get('y')].min()
             chart = self.chart_config(chart, options)
             
@@ -98,23 +98,8 @@ class LineArea(Line):
         if list(series):
             # Get legend names dictionary
             legend_names = self.get_legend_names(dataframe, options)
-            
-            # TODO Avoid pivoting
-            # Pivot dataframe
-            src = dataframe.copy()
-            src = pd.pivot_table(
-                src,
-                values=[options.get('chart_options').get('y')],
-                columns=options.get('chart_options').get('id'),
-                index=options.get('chart_options').get('x'),
-                aggfunc="sum",
-                fill_value=0
-            )
-            src.columns = src.columns.droplevel()
-            src = src.reset_index()
-            src[options.get('chart_options').get('x')] = src[options.get('chart_options').get('x')].astype(str)
-            data = {col:list(src[col]) for col in src.columns}
-            
+            data = self.pivot_dataframe(dataframe, options)
+
             # Chart initial setup
             chart = figure()
             chart.y_range.start = dataframe[options.get('chart_options').get('y')].min()

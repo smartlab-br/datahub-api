@@ -78,11 +78,11 @@ class Chart(BaseModel):
         ''' Gets chart as image '''
         if lib == 'BOKEH':
             img = get_screenshot_as_png(chart)
-            roiImg = img.crop()
-            imgByteArr = io.BytesIO()
+            roi_img = img.crop()
+            img_byte_array = io.BytesIO()
             
-            roiImg.save(imgByteArr, format='PNG')
-            return imgByteArr.getvalue()
+            roi_img.save(img_byte_array, format='PNG')
+            return img_byte_array.getvalue()
         elif lib == 'FOLIUM':
             ff_options = Options()
             ff_options.set_headless(headless=True)
@@ -94,7 +94,6 @@ class Chart(BaseModel):
             driver.get("data:text/html;charset=utf-8,{html_content}".format(html_content=chart._repr_html_()))
             
             return driver.get_screenshot_as_png()
-        pass
 
     @staticmethod
     def get_dynamic_chart(chart, lib):
@@ -108,7 +107,6 @@ class Chart(BaseModel):
             }
         elif lib == 'FOLIUM':
             return {'div': chart._repr_html_(), 'mime': 'text/html'}
-        pass
 
     @staticmethod
     def draw_scatter(dataframe, options):

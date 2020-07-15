@@ -23,9 +23,6 @@ class QueryOptionsBuilder():
             options['where'] = filtros
             del options['filtros']
 
-        if r_args.get('theme') is None and rules in ['query']:
-            theme = 'MAIN'
-
         for k in r_args:
             if k in ["valor", "agregacao", "ordenacao", "pivot", "calcs", "partition"]:
                 options[k] = cls.extract_qry_param(r_args, k)

@@ -17,8 +17,6 @@ class Bubbles(BaseMap):
         ''' Gera um mapa topojson a partir das opções enviadas '''
         # http://localhost:5000/charts/cluster?from_viewconf=S&au=2927408&card_id=mapa_prev_estado&observatory=te&dimension=prevalencia&as_image=N
         # Check testing options.headers below!!!!
-        visao = options.get('visao', 'uf')
-
         au = options.get('au')
         chart_options = options.get('chart_options')
 
@@ -182,27 +180,7 @@ class Bubbles(BaseMap):
                     
                 show = False
 
-        # Adding marker to current analysis unit
-        if np.issubdtype(dataframe.index.dtype, np.number):
-            au = int(au)
-
-        au_row = dataframe.loc[au].reset_index().iloc[0]
-        
-        au_title = 'Analysis Unit'
-        if len(options.get('headers', [])) > 0:
-            au_title = au_row[options.get('headers', [])[0]['value']]
-
-        if chart_options.get('lat','latitude') in list(dataframe.columns):
-            centroide = [au_row[chart_options.get('lat','latitude')].item(), au_row[chart_options.get('long','longitude')].item()]
-            
-        if centroide:
-            marker_layer = folium.map.FeatureGroup(name = au_title)
-            folium.map.Marker(
-                centroide,
-                tooltip=au_row.get('tooltip', "Tooltip!"),
-                icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
-            ).add_to(marker_layer)
-            marker_layer.add_to(n)
+        n = self.add_au_marker(n, dataframe, au, options, chart_options)    
         
         folium.LayerControl().add_to(n)
 

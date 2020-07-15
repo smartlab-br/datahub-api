@@ -21,23 +21,6 @@ class Choropleth(BaseMap):
         # http://localhost:5000/charts/choropleth?from_viewconf=S&au=2927408&card_id=mapa_pib_brasil&dimension=socialeconomico&as_image=S
         visao = options.get('visao', 'uf')
 
-        style_statement = "<link href='https://fonts.googleapis.com/css2?family=Pathway+Gothic+One&display=swap' rel='stylesheet'>\
-            <style>\
-                .legend.leaflet-control{display:none}\
-                .leaflet-tooltip table tbody tr:first-child th{display:none;}\
-                .leaflet-tooltip table tbody tr:first-child td{\
-                    font-family: 'Pathway Gothic One', Calibri, sans-serif;\
-                    font-size: 2.5em;\
-                    font-weight: 700;\
-                }\
-                .leaflet-tooltip table tbody tr:nth-child(2){\
-                    border-top: 1px solid black;\
-                }\
-                path.leaflet-interactive:hover {\
-                    fill-opacity: 1;\
-                }\
-            </style>"
-
         au = options.get('au')
         chart_options = options.get('chart_options')
 

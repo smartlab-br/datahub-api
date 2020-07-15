@@ -1,9 +1,12 @@
 ''' Base class for maps '''
+import folium
+import numpy as np
+import pandas as pd
+from service.viewconf_reader import ViewConfReader
+
 class BaseMap():
     ''' Base class for maps '''
-    # TILES_URL = 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png'
-    # TILES_ATTRIBUTION = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    TILES_URL = tiles_url = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+    TILES_URL = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
     TILES_ATTRIBUTION = 'Esri, USGS | Esri, HERE | Esri, Garmin, FAO, NOAA'
 
     STYLE_STATEMENT = "<link href='https://fonts.googleapis.com/css2?family=Pathway+Gothic+One&display=swap' rel='stylesheet'>\
@@ -25,4 +28,27 @@ class BaseMap():
                 fill-opacity: 1;\
             }\
         </style>"
+
+    def add_au_marker(self, map, dataframe, au, options, chart_options):
+        # Adding marker to current analysis unit
+        if np.issubdtype(dataframe.index.dtype, np.number):
+            au = int(au)
+
+        au_row = dataframe.loc[au].reset_index().iloc[0]
         
+        au_title = 'Analysis Unit'
+        if len(options.get('headers', [])) > 0:
+            au_title = au_row[options.get('headers', [])[0]['value']]
+
+        if chart_options.get('lat','latitude') in list(dataframe.columns):
+            centroide = [au_row[chart_options.get('lat','latitude')].item(), au_row[chart_options.get('long','longitude')].item()]
+            
+        if centroide:
+            marker_layer = folium.map.FeatureGroup(name = au_title)
+            folium.map.Marker(
+                centroide,
+                tooltip=au_row.get('tooltip', "Tooltip!"),
+                icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
+            ).add_to(marker_layer)
+            marker_layer.add_to(map)
+        return map

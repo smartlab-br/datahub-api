@@ -1,11 +1,10 @@
-''' Class for drawing bar charts '''
+''' Class for drawing barcharts '''
 from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource, FactorRange
-from bokeh.transform import factor_cmap, dodge
+from bokeh.models import ColumnDataSource
+from bokeh.transform import dodge
 import pandas as pd
 from model.charts.base import BaseCartesianChart
 from service.viewconf_reader import ViewConfReader
-from bokeh.themes import built_in_themes
 from bokeh.io import curdoc
 
 class Bar(BaseCartesianChart):
@@ -183,7 +182,7 @@ class BarVerticalStacked(Bar):
         chart.vbar_stack(
             series,
             x=options.get('chart_options').get('x'),
-            width=self.BAR_SIZE, 
+            width=self.BAR_SIZE,
             color=ViewConfReader.get_color_scale(options),
             source=data,
             legend_label=[v for _k, v in legend_names.items()]

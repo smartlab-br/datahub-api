@@ -1,7 +1,6 @@
 ''' Base class for maps '''
 import folium
 import numpy as np
-import pandas as pd
 from service.viewconf_reader import ViewConfReader
 
 class BaseMap():
@@ -30,12 +29,13 @@ class BaseMap():
         </style>"
 
     @staticmethod
-    def add_au_marker(folium_map, dataframe, au, options, chart_options):
+    def add_au_marker(folium_map, dataframe, analysis_unit, options, chart_options):
+        ''' Adds a marker for current analysis unit in the map '''
         # Adding marker to current analysis unit
         if np.issubdtype(dataframe.index.dtype, np.number):
-            au = int(au)
+            analysis_unit = int(analysis_unit)
 
-        au_row = dataframe.loc[au].reset_index().iloc[0]
+        au_row = dataframe.loc[analysis_unit].reset_index().iloc[0]
 
         au_title = 'Analysis Unit'
         if len(options.get('headers', [])) > 0:
@@ -43,7 +43,10 @@ class BaseMap():
 
         centroide = None
         if chart_options.get('lat', 'latitude') in list(dataframe.columns):
-            centroide = [au_row[chart_options.get('lat', 'latitude')].item(), au_row[chart_options.get('long', 'longitude')].item()]
+            centroide = [
+                au_row[chart_options.get('lat', 'latitude')].item(),
+                au_row[chart_options.get('long', 'longitude')].item()
+            ]
 
         if centroide:
             marker_layer = folium.map.FeatureGroup(name=au_title)
@@ -56,6 +59,7 @@ class BaseMap():
         return folium_map
 
     def post_adjustments(self, folium_map, dataframe, chart_options):
+        ''' Adds final configurations to map, such as bounds and layer control '''
         folium.LayerControl().add_to(folium_map)
         folium_map.get_root().header.add_child(folium.Element(self.STYLE_STATEMENT))
 
@@ -74,6 +78,7 @@ class BaseMap():
 
     @staticmethod
     def get_headers(chart_options, options):
+        ''' Chooses whether to use given headers config or infer from options '''
         if 'headers' in options:
             return options.get('headers')
         return ViewConfReader.get_headers_from_options_descriptor(
@@ -86,9 +91,15 @@ class BaseMap():
 
     @staticmethod
     def get_tooltip_data(dataframe, chart_options, options):
+        ''' Creates tooltip content series from given options and dataframe '''
         # Get pivoted dataframe for tooltip list creation
         df_tooltip = dataframe.copy().pivot_table(
-            index=[chart_options.get('id_field', 'cd_mun_ibge'), chart_options.get('name_field', 'nm_municipio'), chart_options.get('lat', 'latitude'), chart_options.get('long', 'longitude')],
+            index=[
+                chart_options.get('id_field', 'cd_mun_ibge'),
+                chart_options.get('name_field', 'nm_municipio'),
+                chart_options.get('lat', 'latitude'),
+                chart_options.get('long', 'longitude')
+            ],
             columns='cd_indicador',
             fill_value=0
         )
@@ -112,6 +123,7 @@ class BaseMap():
 
     @staticmethod
     def get_location_columns(chart_options):
+        ''' Get the column names to use as reference to location and value in the dataframe '''
         cols = [chart_options.get('lat', 'lat'), chart_options.get('long', 'long')]
         if 'value_field' in chart_options:
             cols.append(chart_options.get('value_field'))
@@ -119,6 +131,7 @@ class BaseMap():
 
     @staticmethod
     def prepare_dataframe(dataframe, chart_options):
+        ''' Creates a standard index for the dataframes '''
         dataframe['str_id'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')].astype(str)
         dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
         return dataframe.set_index('idx')

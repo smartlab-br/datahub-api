@@ -150,7 +150,7 @@ class BaseModel():
         for each_obj_struct in structure:
             each_options = self.remove_templates(each_obj_struct['endpoint'], options)
             if each_options.get('theme') is None:
-               each_options["theme"] = options.get("theme")
+                each_options["theme"] = options.get("theme")
 
             # Adds complimentary options
             each_options = QueryOptionsBuilder.build_options(each_options)

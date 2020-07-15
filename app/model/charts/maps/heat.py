@@ -66,17 +66,25 @@ class Heat(BaseMap):
             analysis_unit = int(analysis_unit)
 
         au_row = dataframe.loc[analysis_unit].pivot_table(
-            index=[chart_options.get('id_field', 'cd_mun_ibge'), chart_options.get('name_field', 'nm_municipio'), chart_options.get('lat', 'latitude'), chart_options.get('long', 'longitude')],
+            index=[
+                chart_options.get('id_field', 'cd_mun_ibge'),
+                chart_options.get('name_field', 'nm_municipio'),
+                chart_options.get('lat', 'latitude'),
+                chart_options.get('long', 'longitude')
+            ],
             columns='cd_indicador',
             values=chart_options.get('value_field', 'vl_indicador')
         ).reset_index().iloc[0]
-        
+
         au_title = 'Analysis Unit'
         if len(options.get('headers', [])) > 0:
             au_title = au_row[options.get('headers', [])[0]['value']]
 
         if chart_options.get('lat', 'latitude') in list(dataframe.columns):
-            centroide = [au_row[chart_options.get('lat', 'latitude')], au_row[chart_options.get('long', 'longitude')]]
+            centroide = [
+                au_row[chart_options.get('lat', 'latitude')],
+                au_row[chart_options.get('long', 'longitude')]
+            ]
 
         if 'headers' in options:
             marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in options.get('headers')])

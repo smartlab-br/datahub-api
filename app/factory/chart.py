@@ -48,7 +48,6 @@ class ChartFactory():
             # TODO - [REMOVE] Options for stacked lines
             # options.get('chart_options')['stacked'] = True
             return cls.select_line_by_options(options)
-        return
 
     @staticmethod
     def select_bar_by_options(options):

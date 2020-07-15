@@ -1,6 +1,6 @@
 ''' Model for fetching chart '''
-import folium
 import pandas as pd
+import folium
 from model.charts.maps.base import BaseMap
 from folium.plugins import MarkerCluster
 
@@ -14,7 +14,7 @@ class Cluster(BaseMap):
 
         # Creating map instance
         result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
-        
+
         options['headers'] = self.get_headers(chart_options, options)
 
         # TODO - [REMOVE] Used just for debugging
@@ -25,12 +25,12 @@ class Cluster(BaseMap):
         #     {'text': 'te_rgt_api_calc_min_part', "value": 'te_rgt_api_calc_min_part'},
         #     {'text': 'te_rgt_api_calc_max_part', "value": 'te_rgt_api_calc_max_part'},
         #     {'text': 'te_rgt_api_calc_ln_norm_pos_part', "value": 'te_rgt_api_calc_ln_norm_pos_part'},
-            
+
         #     {'text': 'te_res_agr_sum_vl_indicador', "value": 'te_res_agr_sum_vl_indicador'},
         #     {'text': 'te_res_api_calc_min_part', "value": 'te_res_api_calc_min_part'},
         #     {'text': 'te_res_api_calc_max_part', "value": 'te_res_api_calc_max_part'},
         #     {'text': 'te_res_api_calc_ln_norm_pos_part', "value": 'te_rgt_api_calc_ln_norm_pos_part'},
-            
+
         #     {'text': 'te_nat_agr_sum_vl_indicador', "value": 'te_nat_agr_sum_vl_indicador'},
         #     {'text': 'te_nat_api_calc_min_part', "value": 'te_nat_api_calc_min_part'},
         #     {'text': 'te_nat_api_calc_max_part', "value": 'te_nat_api_calc_max_part'},

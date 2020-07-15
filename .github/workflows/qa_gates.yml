@@ -26,6 +26,11 @@ jobs:
       run: |
         pip install -Iv pylint==2.4.4
         python ./lint/run_linter.py
+    - name: Upload lint report to artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: lint
+        path: ./lint/report.txt
     - name: Unit testing
       run: |
         pip install -Iv nose2==0.9.1

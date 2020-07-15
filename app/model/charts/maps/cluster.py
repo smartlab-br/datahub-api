@@ -29,66 +29,16 @@ class Cluster(BaseMap):
         cols = [chart_options.get('lat','lat'), chart_options.get('long','long')]
         if 'value_field' in chart_options:
             cols.append(chart_options.get('value_field'))
-
-        if 'headers' not in options:
-            options['headers'] = ViewConfReader.get_headers_from_options_descriptor(
-                options.get('description'),
-                [{
-                    'text': 'Analysis Unit',
-                    'value': chart_options.get('name_field', 'nm_municipio')
-                }]
-            )
+        
+        options['headers'] = self.get_headers(chart_options, options)
         
         # Get group names from headers
         group_names = { hdr.get('layer_id'): hdr.get('text') for hdr in options.get('headers') if hdr.get('layer_id') }
 
-        # Get pivoted dataframe for tooltip list creation
-        df_tooltip = dataframe.copy().pivot_table(
-            index=[chart_options.get('id_field','cd_mun_ibge'), chart_options.get('name_field', 'nm_municipio'), chart_options.get('lat','latitude'), chart_options.get('long','longitude')],
-            columns='cd_indicador',
-            fill_value=0
-        )
-        df_tooltip.columns = ['_'.join(reversed(col)).strip() for col in df_tooltip.columns.values]
-        df_tooltip = df_tooltip.reset_index()
-        
-        # Tooltip gen function
-        # TODO - [REMOVE] Used just for debugging
-        # options["headers"] = [
-        #     {'text': 'nm_municipio', "value": 'nm_municipio'},
-
-        #     {'text': 'te_rgt_agr_sum_vl_indicador', "value": 'te_rgt_agr_sum_vl_indicador'},
-        #     {'text': 'te_rgt_api_calc_min_part', "value": 'te_rgt_api_calc_min_part'},
-        #     {'text': 'te_rgt_api_calc_max_part', "value": 'te_rgt_api_calc_max_part'},
-        #     {'text': 'te_rgt_api_calc_ln_norm_pos_part', "value": 'te_rgt_api_calc_ln_norm_pos_part'},
-            
-        #     {'text': 'te_res_agr_sum_vl_indicador', "value": 'te_res_agr_sum_vl_indicador'},
-        #     {'text': 'te_res_api_calc_min_part', "value": 'te_res_api_calc_min_part'},
-        #     {'text': 'te_res_api_calc_max_part', "value": 'te_res_api_calc_max_part'},
-        #     {'text': 'te_res_api_calc_ln_norm_pos_part', "value": 'te_rgt_api_calc_ln_norm_pos_part'},
-            
-        #     {'text': 'te_nat_agr_sum_vl_indicador', "value": 'te_nat_agr_sum_vl_indicador'},
-        #     {'text': 'te_nat_api_calc_min_part', "value": 'te_nat_api_calc_min_part'},
-        #     {'text': 'te_nat_api_calc_max_part', "value": 'te_nat_api_calc_max_part'},
-        #     {'text': 'te_nat_api_calc_ln_norm_pos_part', "value": 'te_nat_api_calc_ln_norm_pos_part'}
-        # ]
-        def tooltip_gen(au_row, **kwargs):
-            if 'headers' in options:
-                marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in kwargs.get('headers')])
-                return f"<table>{marker_tooltip}</table>"
-            return "Tooltip!"
-        
-        # Merge dataframe and pivoted dataframe
-        df_tooltip['tooltip'] = df_tooltip.apply(
-            tooltip_gen,
-            headers= options.get("headers"),
-            axis=1
-        )
-        df_tooltip = df_tooltip[[chart_options.get('id_field', 'cd_mun_ibge'), 'tooltip']]
-        
         # Adding tooltips to detailed dataframe
         dataframe = pd.merge(
             dataframe,
-            df_tooltip,
+            self.get_tooltip_data(dataframe, chart_options, options),
             left_on = chart_options.get('id_field', 'cd_mun_ibge'),
             right_on = chart_options.get('id_field', 'cd_mun_ibge'),
             how = "left"

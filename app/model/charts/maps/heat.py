@@ -30,14 +30,7 @@ class Heat(BaseMap):
         if 'value_field' in chart_options:
             cols.append(chart_options.get('value_field'))
 
-        if 'headers' not in options:
-            options['headers'] = ViewConfReader.get_headers_from_options_descriptor(
-                options.get('description'),
-                [{
-                    'text': 'Analysis Unit',
-                    'value': chart_options.get('name_field', 'nm_municipio')
-                }]
-            )
+        options['headers'] = self.get_headers(chart_options, options)
             
         # Get group names from headers
         group_names = { hdr.get('layer_id'): hdr.get('text') for hdr in options.get('headers') if hdr.get('layer_id') }

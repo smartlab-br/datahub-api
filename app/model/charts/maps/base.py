@@ -69,3 +69,39 @@ class BaseMap():
                 dataframe[chart_options.get('long','longitude')].max()
             ]
         ])
+
+    def get_headers(self, chart_options, options):
+        if 'headers' in options:
+            return options.get('headers')
+        return ViewConfReader.get_headers_from_options_descriptor(
+            options.get('description'),
+            [{
+                'text': 'Analysis Unit',
+                'value': chart_options.get('name_field', 'nm_municipio')
+            }]
+        )
+
+    def get_tooltip_data(self, dataframe, chart_options, options):
+        # Get pivoted dataframe for tooltip list creation
+        df_tooltip = dataframe.copy().pivot_table(
+            index=[chart_options.get('id_field','cd_mun_ibge'), chart_options.get('name_field', 'nm_municipio'), chart_options.get('lat','latitude'), chart_options.get('long','longitude')],
+            columns='cd_indicador',
+            fill_value=0
+        )
+        df_tooltip.columns = ['_'.join(reversed(col)).strip() for col in df_tooltip.columns.values]
+        df_tooltip = df_tooltip.reset_index()
+        
+        # Tooltip gen function
+        def tooltip_gen(au_row, **kwargs):
+            if 'headers' in options:
+                marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in kwargs.get('headers')])
+                return f"<table>{marker_tooltip}</table>"
+            return "Tooltip!"
+        
+        # Merge dataframe and pivoted dataframe
+        df_tooltip['tooltip'] = df_tooltip.apply(
+            tooltip_gen,
+            headers= options.get("headers"),
+            axis=1
+        )
+        df_tooltip = df_tooltip[[chart_options.get('id_field', 'cd_mun_ibge'), 'tooltip']]

@@ -4,10 +4,8 @@ on:
   push:
     refs/heads:
       - master
-      - staging
       - developement
-      - contrib
-
+      
 jobs:
   test:
     name: Run tests

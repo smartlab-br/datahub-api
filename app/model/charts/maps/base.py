@@ -29,7 +29,8 @@ class BaseMap():
             }\
         </style>"
 
-    def add_au_marker(self, map, dataframe, au, options, chart_options):
+    @staticmethod
+    def add_au_marker(map, dataframe, au, options, chart_options):
         # Adding marker to current analysis unit
         if np.issubdtype(dataframe.index.dtype, np.number):
             au = int(au)
@@ -54,7 +55,8 @@ class BaseMap():
             marker_layer.add_to(map)
         return map
 
-    def post_adjustments(self, map, dataframe, chart_options):
+    @staticmethod
+    def post_adjustments(map, dataframe, chart_options):
         folium.LayerControl().add_to(map)
         map.get_root().header.add_child(folium.Element(self.STYLE_STATEMENT))
 
@@ -69,8 +71,10 @@ class BaseMap():
                 dataframe[chart_options.get('long','longitude')].max()
             ]
         ])
+        return map
 
-    def get_headers(self, chart_options, options):
+    @staticmethod
+    def get_headers(chart_options, options):
         if 'headers' in options:
             return options.get('headers')
         return ViewConfReader.get_headers_from_options_descriptor(
@@ -81,7 +85,8 @@ class BaseMap():
             }]
         )
 
-    def get_tooltip_data(self, dataframe, chart_options, options):
+    @staticmethod
+    def get_tooltip_data(dataframe, chart_options, options):
         # Get pivoted dataframe for tooltip list creation
         df_tooltip = dataframe.copy().pivot_table(
             index=[chart_options.get('id_field','cd_mun_ibge'), chart_options.get('name_field', 'nm_municipio'), chart_options.get('lat','latitude'), chart_options.get('long','longitude')],
@@ -104,4 +109,18 @@ class BaseMap():
             headers= options.get("headers"),
             axis=1
         )
-        df_tooltip = df_tooltip[[chart_options.get('id_field', 'cd_mun_ibge'), 'tooltip']]
+        return df_tooltip[[chart_options.get('id_field', 'cd_mun_ibge'), 'tooltip']]
+
+    @staticmethod
+    def get_location_columns(chart_options):
+        cols = [chart_options.get('lat','lat'), chart_options.get('long','long')]
+        if 'value_field' in chart_options:
+            cols.append(chart_options.get('value_field'))
+        return cols
+
+    @staticmethod
+    def prepare_dataframe(dataframe, chart_options):
+        dataframe['str_id'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')].astype(str)
+        dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
+        return dataframe.set_index('idx')
+        

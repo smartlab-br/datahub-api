@@ -16,29 +16,13 @@ class Bubbles(BaseMap):
     def draw(self, dataframe, options):
         ''' Gera um mapa topojson a partir das opções enviadas '''
         # http://localhost:5000/charts/cluster?from_viewconf=S&au=2927408&card_id=mapa_prev_estado&observatory=te&dimension=prevalencia&as_image=N
-        # Check testing options.headers below!!!!
-        au = options.get('au')
         chart_options = options.get('chart_options')
-
-        dataframe['str_id'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')].astype(str)
-        dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
-        
-        # Runs dataframe modifiers from viewconf
-        # dataframe = ViewConfReader().generate_columns(dataframe, options)
-
-        dataframe = dataframe.set_index('idx')
+        dataframe = self.prepare_dataframe(dataframe, chart_options)
         
         # Creating map instance
         n = folium.Map(tiles=self.TILES_URL, attr = self.TILES_ATTRIBUTION, control_scale = True)
 
-        cols = [chart_options.get('lat','lat'), chart_options.get('long','long')]
-        if 'value_field' in chart_options:
-            cols.append(chart_options.get('value_field'))
-
         options['headers'] = self.get_headers(chart_options, options)
-        
-        # Get group names from headers
-        group_names = { hdr.get('layer_id'): hdr.get('text') for hdr in options.get('headers') if hdr.get('layer_id') }
         
         # Adding circle radius to dataset
         chart_options['base_radius'] = chart_options.get('base_radius', self.BASE_RADIUS)
@@ -75,7 +59,7 @@ class Bubbles(BaseMap):
             if 'timeseries' not in chart_options:
                 # Creating a layer for the group
                 layer = FeatureGroup(
-                    name = group_names.get(group_id),
+                    name = {hdr.get('layer_id'): hdr.get('text') for hdr in options.get('headers') if hdr.get('layer_id')}.get(group_id),
                     show = show
                 )
                 show = False
@@ -125,6 +109,6 @@ class Bubbles(BaseMap):
                     
                 show = False
 
-        n = self.add_au_marker(n, dataframe, au, options, chart_options)    
+        n = self.add_au_marker(n, dataframe, options.get('au'), options, chart_options)    
         n = self.post_adjustments(n, dataframe, chart_options)
         return n

@@ -1,16 +1,16 @@
 ''' Model for fetching chart '''
+import io
+from html.parser import HTMLParser
 from model.base import BaseModel
 from model.thematic import Thematic
 from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.io.export import get_screenshot_as_png
-import io
 from service.viewconf_reader import ViewConfReader
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from factory.chart import ChartFactory
-from html.parser import HTMLParser
 
 class Chart(BaseModel):
     ''' Model for fetching dinamic and static charts '''
@@ -113,7 +113,6 @@ class Chart(BaseModel):
             )
 
             return driver.get_screenshot_as_png()
-        return
 
     @staticmethod
     def get_dynamic_chart(chart, lib):
@@ -127,10 +126,9 @@ class Chart(BaseModel):
             }
         if lib == 'FOLIUM':
             return {'div': chart._repr_html_(), 'mime': 'text/html'}
-        return
 
     @staticmethod
-    def draw_scatter(dataframe, options):
+    def draw_scatter(dataframe, _options):
         ''' Draws the scatterplot '''
         # http://localhost:5000/charts/scatter?theme=sstindicadoresestaduais&categorias=ds_agreg_primaria-v,ds_agreg_secundaria-x,vl_indicador-y&filtros=eq-nu_competencia-2017,and,eq-cd_indicador-%27sst_bene_sexo_idade_dias_perdidos%27&as_image=S
         colormap = {'Feminino': 'red', 'Masculino': 'blue', 'Indefinido': 'pink'}

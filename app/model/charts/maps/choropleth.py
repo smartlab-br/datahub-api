@@ -28,17 +28,17 @@ class Choropleth(BaseMap):
         elif res == visao:
             state_geo = f'https://raw.githubusercontent.com/smartlab-br/geodata/master/topojson/br/{visao}/{analysis_unit}_q{quality}.json'
         else:
-            state_geo = f'https://raw.githubusercontent.com/smartlab-br/geodata/master/topojson/br/{visao}/{res}/{analysis_unit}_q{quality}.json' 
+            state_geo = f'https://raw.githubusercontent.com/smartlab-br/geodata/master/topojson/br/{visao}/{res}/{analysis_unit}_q{quality}.json'
         state_geo = requests.get(state_geo).json()
-        
+
         dataframe['str_id'] = dataframe[chart_options.get('id_field')].astype(str)
         dataframe['idx'] = dataframe[chart_options.get('id_field')]
-        
+
         # Runs dataframe modifiers from viewconf
         # dataframe = ViewConfReader().generate_columns(dataframe, options)
 
         dataframe = dataframe.set_index('idx')
-        centroide = None  
+        centroide = None
         marker_tooltip = ''
         # for each_au in state_geo.get('features'):
         for each_au in state_geo.get('objects', {}).get('data', {}).get('geometries', []):
@@ -55,17 +55,17 @@ class Choropleth(BaseMap):
                 centroide = each_au.get('properties', {}).get('centroide')
                 if centroide:
                     centroide.reverse()
-                
+
                 marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(df_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in options.get('headers')])
                 marker_tooltip = f"<table>{marker_tooltip}</table>"
-        
+
         # Creating map instance
         result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
 
         # Creating the choropleth layer
         color_scale = ViewConfReader.get_color_scale(
             options,
-            dataframe[chart_options['value_field']].min(), 
+            dataframe[chart_options['value_field']].min(),
             dataframe[chart_options['value_field']].max()
         )
         def get_color(feature):
@@ -111,7 +111,7 @@ class Choropleth(BaseMap):
 
         if 'latitude' in list(dataframe.columns):
             centroide = [au_row['latitude'], au_row['longitude']]
-        
+
         if centroide:
             marker_layer = folium.map.FeatureGroup(name=au_title)
             folium.map.Marker(
@@ -120,7 +120,7 @@ class Choropleth(BaseMap):
                 icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
             ).add_to(marker_layer)
             marker_layer.add_to(result)
-        
+
         chart.add_to(result)
         folium.LayerControl().add_to(result)
 

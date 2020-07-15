@@ -6,8 +6,9 @@ class BaseChart():
 
 class BaseCartesianChart(BaseChart):
     ''' Base Cartesian Chart class '''
-    def pivot_dataframe(self, dataframe, options):
-        # Pivot dataframe
+    @staticmethod
+    def pivot_dataframe(dataframe, options):
+        ''' Pivot dataframe to create series in charts '''
         src = dataframe.copy()
         src = pd.pivot_table(
             src,

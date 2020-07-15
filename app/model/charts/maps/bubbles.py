@@ -1,12 +1,10 @@
 ''' Model for fetching chart '''
 import folium
-import numpy as np
 import pandas as pd
 from model.charts.maps.base import BaseMap
 from folium import CircleMarker
 from folium.plugins import TimestampedGeoJson
 from folium.map import FeatureGroup
-from service.viewconf_reader import ViewConfReader
 
 class Bubbles(BaseMap):
     ''' Heatmap building class '''
@@ -20,7 +18,7 @@ class Bubbles(BaseMap):
         dataframe = self.prepare_dataframe(dataframe, chart_options)
 
         # Creating map instance
-        n = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
+        result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
 
         options['headers'] = self.get_headers(chart_options, options)
 
@@ -65,9 +63,12 @@ class Bubbles(BaseMap):
                 show = False
 
                 # Generating circles
-                for row_index, row in group.iterrows():
+                for _row_index, row in group.iterrows():
                     CircleMarker(
-                        location=[row[chart_options.get('lat', 'latitude')], row[chart_options.get('long', 'longitude')]],
+                        location=[
+                            row[chart_options.get('lat', 'latitude')],
+                            row[chart_options.get('long', 'longitude')]
+                        ],
                         radius=row['radius'],
                         popup=row['tooltip'],
                         color=color,
@@ -76,7 +77,7 @@ class Bubbles(BaseMap):
                     ).add_to(layer)
 
                 # Adding layer to map
-                layer.add_to(n)
+                layer.add_to(result)
             else:
                 features = []
                 for row_index, row in group.iterrows():
@@ -84,10 +85,16 @@ class Bubbles(BaseMap):
                         'type': 'Feature',
                         'geometry': {
                             'type':'Point',
-                            'coordinates':[row[chart_options.get('long', 'longitude')], row[chart_options.get('lat', 'latitude')]]
+                            'coordinates':[
+                                row[chart_options.get('long', 'longitude')],
+                                row[chart_options.get('lat', 'latitude')]
+                            ]
                         },
                         'properties': {
-                            'time': pd.to_datetime(row[chart_options.get('timeseries', 'nu_competencia')], format='%Y').__str__(),
+                            'time': pd.to_datetime(
+                                row[chart_options.get('timeseries', 'nu_competencia')],
+                                format='%Y'
+                            ).__str__(),
                             'style': {'color' : color},
                             'icon': 'circle',
                             'iconstyle':{
@@ -98,7 +105,7 @@ class Bubbles(BaseMap):
                             }
                         }
                     })
-                    
+
                 TimestampedGeoJson(
                     features,
                     period='P1Y',
@@ -106,10 +113,10 @@ class Bubbles(BaseMap):
                     date_options='YYYY',
                     transition_time=1000,
                     auto_play=True
-                ).add_to(n)
+                ).add_to(result)
 
                 show = False
 
-        n = self.add_au_marker(n, dataframe, options.get('au'), options, chart_options)
-        n = self.post_adjustments(n, dataframe, chart_options)
-        return n
+        result = self.add_au_marker(result, dataframe, options.get('au'), options, chart_options)
+        result = self.post_adjustments(result, dataframe, chart_options)
+        return result

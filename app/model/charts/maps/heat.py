@@ -100,20 +100,5 @@ class Heat(BaseMap):
             ).add_to(marker_layer)
             marker_layer.add_to(n)
         
-        folium.LayerControl().add_to(n)
-
-        n.get_root().header.add_child(folium.Element(self.STYLE_STATEMENT))
-
-        # Getting bounds from dataframe
-        n.fit_bounds([
-            [
-                dataframe[chart_options.get('lat','latitude')].min(),
-                dataframe[chart_options.get('long','longitude')].min()
-            ],
-            [
-                dataframe[chart_options.get('lat','latitude')].max(),
-                dataframe[chart_options.get('long','longitude')].max()
-            ]
-        ])
-
+        n = self.post_adjustments(n, dataframe, chart_options)
         return n

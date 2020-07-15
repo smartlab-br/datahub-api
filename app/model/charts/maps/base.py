@@ -40,6 +40,7 @@ class BaseMap():
         if len(options.get('headers', [])) > 0:
             au_title = au_row[options.get('headers', [])[0]['value']]
 
+        centroide = None
         if chart_options.get('lat','latitude') in list(dataframe.columns):
             centroide = [au_row[chart_options.get('lat','latitude')].item(), au_row[chart_options.get('long','longitude')].item()]
             
@@ -52,3 +53,19 @@ class BaseMap():
             ).add_to(marker_layer)
             marker_layer.add_to(map)
         return map
+
+    def post_adjustments(self, map, dataframe, chart_options):
+        folium.LayerControl().add_to(map)
+        map.get_root().header.add_child(folium.Element(self.STYLE_STATEMENT))
+
+        # Getting bounds from dataframe
+        map.fit_bounds([
+            [
+                dataframe[chart_options.get('lat','latitude')].min(),
+                dataframe[chart_options.get('long','longitude')].min()
+            ],
+            [
+                dataframe[chart_options.get('lat','latitude')].max(),
+                dataframe[chart_options.get('long','longitude')].max()
+            ]
+        ])

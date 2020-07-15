@@ -22,7 +22,6 @@ class Cluster(BaseMap):
         # dataframe = ViewConfReader().generate_columns(dataframe, options)
 
         dataframe = dataframe.set_index('idx')
-        centroide = None  
         
         # Creating map instance
         n = folium.Map(tiles=self.TILES_URL, attr = self.TILES_ATTRIBUTION, control_scale = True)
@@ -111,21 +110,5 @@ class Cluster(BaseMap):
             chart.add_to(n)
 
         n = self.add_au_marker(n, dataframe, au, options, chart_options)    
-        
-        folium.LayerControl().add_to(n)
-
-        n.get_root().header.add_child(folium.Element(self.STYLE_STATEMENT))
-
-        # Getting bounds from dataframe
-        n.fit_bounds([
-            [
-                dataframe[chart_options.get('lat','latitude')].min(),
-                dataframe[chart_options.get('long','longitude')].min()
-            ],
-            [
-                dataframe[chart_options.get('lat','latitude')].max(),
-                dataframe[chart_options.get('long','longitude')].max()
-            ]
-        ])
-
+        n = self.post_adjustments(n, dataframe, chart_options)
         return n

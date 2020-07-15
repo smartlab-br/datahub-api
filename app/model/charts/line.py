@@ -1,8 +1,7 @@
 ''' Class for drawing bar charts '''
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, NumeralTickFormatter, HoverTool
-from bokeh.transform import factor_cmap
-from bokeh.transform import dodge
+from bokeh.transform import factor_cmap, dodge
 import pandas as pd
 from service.viewconf_reader import ViewConfReader
 from model.charts.base import BaseCartesianChart
@@ -20,12 +19,12 @@ class Line(BaseCartesianChart):
         series = sorted(dataframe[options.get('chart_options', {}).get('id')].unique())
         if list(series):
             legend_names = self.get_legend_names(dataframe, options)
-            
+
             # Chart initial setup
-            chart = figure(tooltips = self.build_tooltip(options))
+            chart = figure(tooltips=self.build_tooltip(options))
             chart.y_range.start = dataframe[options.get('chart_options').get('y')].min()
             chart = self.chart_config(chart, options)
-            
+
             grouped = dataframe.groupby(options.get('chart_options').get('id'))
             serie_index = 0
             for group_id, group in grouped:
@@ -40,7 +39,7 @@ class Line(BaseCartesianChart):
                 serie_index = serie_index + 1
             # chart.add_tools(HoverTool(tooltips=[(hdr.get('text'), f"@{hdr.get('value')}") for hdr in options.get('headers')]))
         else:
-            chart = figure(tooltips = self.build_tooltip(options))
+            chart = figure(tooltips=self.build_tooltip(options))
             chart.y_range.start = dataframe[options.get('chart_options').get('y')].min()
             chart.line(
                 options.get('chart_options').get('x'),
@@ -48,16 +47,16 @@ class Line(BaseCartesianChart):
                 source=ColumnDataSource(data=dataframe.to_dict(orient='list')),
                 line_width=self.LINE_WIDTH
             )
-            
+
         return chart
-    
+
     def chart_config(self, chart, options):
         # General config
         chart.axis.major_label_text_font = 'Palanquin'
         chart.axis.major_tick_line_color = None
         chart.axis.minor_tick_line_color = None
         chart.x_range.range_padding = 0.0
-        
+
         # Removing grid lines
         chart.xgrid.grid_line_color = None
         chart.ygrid.grid_line_color = None
@@ -77,16 +76,16 @@ class Line(BaseCartesianChart):
         chart.yaxis.formatter = NumeralTickFormatter(format="0.00a")
 
         return chart
-    
+
     def get_fill_color(self, index, options):
         return ViewConfReader.get_color_scale(options)[index]
-    
+
     def get_legend_names(self, dataframe, options):
-        if options.get('chart_options').get('legend_field') and options.get('chart_options').get('legend_field') in dataframe.columns:
+        if options.get('chart_options', {}).get('legend_field') in dataframe.columns:
             tmp = dataframe[[options.get('chart_options').get('id'), options.get('chart_options').get('legend_field')]].drop_duplicates().set_index(options.get('chart_options').get('id')).to_dict()
             return tmp.get(options.get('chart_options').get('legend_field'))
         return {i: i for i in dataframe[options.get('chart_options').get('id')].unique()}
-    
+
     def build_tooltip(self, options):
         rows = [f'<tr style="text-align: left;"><th style="padding: 4px; padding-right: 10px;">{hdr.get("text")}</th><td style="padding: 4px;">@{hdr.get("value")}</td></tr>' for hdr in options.get('headers')]
         return f"<table>{''.join(rows)}</table>"
@@ -105,12 +104,12 @@ class LineArea(Line):
 
             chart.varea_stack(
                 series,
-                x = options.get('chart_options').get('x'),
-                color = ViewConfReader.get_color_scale(options),
-                source = data
+                x=options.get('chart_options').get('x'),
+                color=ViewConfReader.get_color_scale(options),
+                source=data
             )            
         else:
-            chart = figure(tooltips = self.build_tooltip(options))
+            chart = figure(tooltips=self.build_tooltip(options))
             chart.y_range.start = dataframe[options.get('chart_options').get('y')].min()
             chart.line(
                 options.get('chart_options').get('x'),

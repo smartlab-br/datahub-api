@@ -212,7 +212,7 @@ class BaseRepository():
         if QueryBuilder.check_params(options, ['partition']):
             res_partition = options['partition']
         elif self.get_default_partitioning(options) != '':
-            res_partition = self.get_default_partitioning(options)    
+            res_partition = self.get_default_partitioning(options)
 
         # Transforma o campo de valor em campo agregado conforme query
         if QueryBuilder.check_params(options, ['agregacao']):

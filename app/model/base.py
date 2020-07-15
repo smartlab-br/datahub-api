@@ -14,7 +14,7 @@ from service.template_helper import TemplateHelper
 class BaseModel():
     ''' Definição do repo '''
     METADATA = {}
-    
+
     def find_dataset(self, options=None):
         ''' Obtém todos, sem tratamento '''
         result = self.get_repo().find_dataset(options)
@@ -108,7 +108,7 @@ class BaseModel():
 
         data_collection = {}
         any_nodata = False
-        
+
         # Adding theme by datasource
         options["theme"] = options.get('datasource', 'indicadores')
 
@@ -150,7 +150,7 @@ class BaseModel():
         for each_obj_struct in structure:
             each_options = self.remove_templates(each_obj_struct['endpoint'], options)
             if each_options.get('theme') is None:
-               each_options["theme"] = options.get("theme") 
+               each_options["theme"] = options.get("theme")
 
             # Adds complimentary options
             each_options = QueryOptionsBuilder.build_options(each_options)
@@ -211,7 +211,7 @@ class BaseModel():
                     "type": "text",
                     "title": "",
                     "content": {
-                        "fixed": struct.get('msgNoData',{}).get('desc','no data')
+                        "fixed": struct.get('msgNoData', {}).get('desc', 'no data')
                     }
                 }]
             elif isinstance(each_arg, list):
@@ -350,7 +350,11 @@ class BaseModel():
         base_dataset = self.find_dataset(local_options)
 
         # Operates the dataset
-        base_dataset = PandasOperator.operate(base_dataset, operation, local_options.get('categorias'))
+        base_dataset = PandasOperator.operate(
+            base_dataset,
+            operation,
+            local_options.get('categorias')
+        )
 
         # Apply ejected filters
         result = self.filter_pandas_dataset(base_dataset, ejected_filters)

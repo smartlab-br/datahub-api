@@ -26,7 +26,7 @@ class ChartFactory():
             options.get('chart_options')["colorArray"] = ["#FF0000", "blue", "green"]
 
             # TODO - [REMOVE] Options for horizontal bars
-            # options['chart_options']['orientation'] = "horizontal"                         
+            # options['chart_options']['orientation'] = "horizontal"
             # options['chart_options']['y'] = "nu_competencia"
             # options['chart_options']['x'] = "vl_indicador"
             # options['chart_options']['show_x_axis'] = False
@@ -34,10 +34,10 @@ class ChartFactory():
 
             # TODO - [REMOVE] Options for stacked bars
             # options.get('chart_options')['stacked'] = True
-        
+
             # TODO - [REMOVE] Options for horizontal pyramid bars
             # options.get('chart_options')['left'] = ['Feminino']
-            # options['chart_options']['orientation'] = "horizontal"                         
+            # options['chart_options']['orientation'] = "horizontal"
             # options['chart_options']['y'] = "cut"
             # options['chart_options']['x'] = "agr_count"
             # options['chart_options']['show_x_axis'] = False
@@ -48,9 +48,11 @@ class ChartFactory():
             # TODO - [REMOVE] Options for stacked lines
             # options.get('chart_options')['stacked'] = True
             return cls.select_line_by_options(options)
+        return
 
     @staticmethod
     def select_bar_by_options(options):
+        ''' Select the adequate BAR implementation, according to options '''
         orientation = options.get('chart_options', {}).get('orientation', 'horizontal')
         is_stacked = options.get('chart_options', {}).get('stacked', False)
         is_pyramid = options.get('chart_options', {}).get('left', False)
@@ -68,6 +70,7 @@ class ChartFactory():
 
     @staticmethod
     def select_line_by_options(options):
+        ''' Select the adequate LINE implementation, according to options '''
         is_stacked = options.get('chart_options', {}).get('stacked', False)
         if is_stacked:
             return LineArea(options.get('style_theme', 'light_minimal'))

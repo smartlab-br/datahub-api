@@ -1,5 +1,5 @@
 # action.yml
-name: 'Build image'
+name: 'Build image for tests'
 description: 'Build the image to go through the pipeline'
 inputs:
   check:
@@ -16,5 +16,6 @@ outputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
+  pre-entrypoint: '/app/tests/setup.sh'
   args:
     - ${{ inputs.check }}

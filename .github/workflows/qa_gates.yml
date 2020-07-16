@@ -19,7 +19,7 @@ jobs:
       - name: Lint (2)
         run: |
           pip3 install pylint  # -r requirements.txt
-          pylint **/*.py --report=y --score=y --output-format=parseable # --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"
+          pylint **/*.py --score=y --output-format=parseable # --reports=y --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"
       - name: Linting (pylint)
         uses: ./
         with:

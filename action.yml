@@ -15,8 +15,6 @@ outputs:
     description: 'The time we greeted you'
 runs:
   using: 'docker'
-  image: 'Dockerfile'
-  pre-entrypoint: '/app/tests/setup.sh'
-  entrypoint: "/start.sh"
+  image: 'Dockerfile_qa'
   args:
     - ${{ inputs.check }}

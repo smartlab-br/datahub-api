@@ -4,12 +4,9 @@ from pylint import epylint as lint
 
 (RESULT, ERROR) = lint.py_run(
     '. --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" \
-        --report=y --score=y --output-format=parseable',
+        --reports=n --score=n --output-format=parseable',
     return_std=True
 )
-
-while not RESULT.closed and not ERROR.closed:
-    pass
 
 DEST_DIR = f"{os.getenv('GITHUB_WORKSPACE')}/{os.getenv('INPUT_DEST')}"
 

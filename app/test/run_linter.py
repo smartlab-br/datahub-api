@@ -8,7 +8,16 @@ from pylint import epylint as lint
     return_std=True
 )
 print(os.path.abspath(__file__))
+print(RESULT)
+print("================================")
+print(ERROR)
+
 DEST_DIR = f"{os.getenv('GITHUB_WORKSPACE')}/{os.getenv('INPUT_DEST')}"
+
+if not os.path.exists(DEST_DIR):
+    print('não existe')
+    os.makedirs(DEST_DIR)
+
 FILE = open(f"{DEST_DIR}/lint.txt", "w+")
 FILE.write(RESULT.getvalue())
 FILE.close()

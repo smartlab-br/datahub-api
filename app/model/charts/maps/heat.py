@@ -33,7 +33,15 @@ class Heat(BaseMap):
         options['headers'] = self.get_headers(chart_options, options)
 
         # Get group names from headers
-        group_names = {hdr.get('layer_id'): hdr.get('text') for hdr in options.get('headers') if hdr.get('layer_id')}
+        group_names = {
+            hdr.get('layer_id'): hdr.get('text')
+            for
+            hdr
+            in
+            options.get('headers')
+            if
+            hdr.get('layer_id')
+        }
 
         grouped = dataframe.groupby(chart_options.get('layer_id', 'cd_indicador'))
         show = True # Shows only the first
@@ -87,7 +95,13 @@ class Heat(BaseMap):
             ]
 
         if 'headers' in options:
-            marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in options.get('headers')])
+            marker_tooltip = "".join([
+                f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>"
+                for
+                hdr
+                in
+                options.get('headers')
+            ])
             marker_tooltip = f"<table>{marker_tooltip}</table>"
         else:
             marker_tooltip = "Tooltip!"
@@ -101,5 +115,4 @@ class Heat(BaseMap):
             ).add_to(marker_layer)
             marker_layer.add_to(result)
 
-        result = self.post_adjustments(result, dataframe, chart_options)
-        return result
+        return self.post_adjustments(result, dataframe, chart_options)

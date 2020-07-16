@@ -8,7 +8,9 @@ class BaseMap():
     TILES_URL = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
     TILES_ATTRIBUTION = 'Esri, USGS | Esri, HERE | Esri, Garmin, FAO, NOAA'
 
-    STYLE_STATEMENT = "<link href='https://fonts.googleapis.com/css2?family=Pathway+Gothic+One&display=swap' rel='stylesheet'>\
+    STYLE_STATEMENT = "\
+        <link href='https://fonts.googleapis.com/css2?family=Pathway+Gothic+One&display=swap' \
+            rel='stylesheet'>\
         <style>\
             .legend.leaflet-control{display:none}\
             .leaflet-tooltip table tbody tr:first-child th, \
@@ -109,7 +111,13 @@ class BaseMap():
         # Tooltip gen function
         def tooltip_gen(au_row, **kwargs):
             if 'headers' in options:
-                marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in kwargs.get('headers')])
+                marker_tooltip = "".join([
+                    f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>"
+                    for
+                    hdr
+                    in
+                    kwargs.get('headers')
+                ])
                 return f"<table>{marker_tooltip}</table>"
             return "Tooltip!"
 

@@ -57,7 +57,15 @@ class Bubbles(BaseMap):
             if 'timeseries' not in chart_options:
                 # Creating a layer for the group
                 layer = FeatureGroup(
-                    name={hdr.get('layer_id'): hdr.get('text') for hdr in options.get('headers') if hdr.get('layer_id')}.get(group_id),
+                    name={
+                        hdr.get('layer_id'): hdr.get('text')
+                        for
+                        hdr
+                        in
+                        options.get('headers')
+                        if
+                        hdr.get('layer_id')
+                    }.get(group_id),
                     show=show
                 )
                 show = False

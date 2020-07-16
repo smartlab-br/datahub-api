@@ -6,7 +6,7 @@ from kazoo.client import KazooClient
 class ProductionConfig():
     ''' Config loader for production environment '''
     CORS_AUTOMATIC_OPTIONS = True
-    
+
     zk = KazooClient(hosts=os.getenv('ZOOKEEPER_HOST') + ':' + os.getenv('ZOOKEEPER_PORT'))
     zk.start()
 

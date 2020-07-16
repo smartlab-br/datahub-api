@@ -24,7 +24,12 @@ class PandasOperator():
                 pattern_id = pattern[2]
             # Gets patterns from GIT
             location = app.config['GIT_VIEWCONF_BASE_URL'].format('options', 'cut', pattern_id)
-            return cls.cut(dataset, target, yaml.load(requests.get(location, verify=False).content), categories)
+            return cls.cut(
+                dataset,
+                target,
+                yaml.load(requests.get(location, verify=False).content),
+                categories
+            )
         return dataset
 
     @staticmethod

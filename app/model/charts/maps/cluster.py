@@ -1,8 +1,8 @@
 ''' Model for fetching chart '''
 import pandas as pd
 import folium
-from model.charts.maps.base import BaseMap
 from folium.plugins import MarkerCluster
+from model.charts.maps.base import BaseMap
 
 class Cluster(BaseMap):
     ''' Heatmap building class '''
@@ -53,7 +53,15 @@ class Cluster(BaseMap):
         for group_id, group in grouped:
             chart = MarkerCluster(
                 locations=group[self.get_location_columns(chart_options)].values.tolist(),
-                name={hdr.get('layer_id'): hdr.get('text') for hdr in options.get('headers') if hdr.get('layer_id')}.get(group_id),
+                name={
+                    hdr.get('layer_id'): hdr.get('text')
+                    for
+                    hdr
+                    in
+                    options.get('headers')
+                    if
+                    hdr.get('layer_id')
+                }.get(group_id),
                 show=show,
                 popups=group['tooltip'].tolist()
             )

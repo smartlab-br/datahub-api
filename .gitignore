@@ -10,3 +10,5 @@ Dockerfile
 **/__pycache__
 setenv.sh
 app/.coverage
+**/lint.txt
+**/test.txt

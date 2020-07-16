@@ -13,14 +13,15 @@ class ChartFactory():
     @classmethod
     def create(cls, options):
         ''' Factory method '''
+        chart = None
         if options.get('chart_type') == 'MAP_TOPOJSON':
-            return Choropleth()
+            chart = Choropleth()
         if options.get('chart_type') == 'MAP_HEAT':
-            return Heat()
+            chart = Heat()
         if options.get('chart_type') == 'MAP_CLUSTER':
-            return Cluster()
+            chart = Cluster()
         if options.get('chart_type') == 'MAP_BUBBLES':
-            return Bubbles()
+            chart = Bubbles()
         if options.get('chart_type') == 'BAR':
             # TODO - [REMOVE] Options for color testing
             options.get('chart_options')["colorArray"] = ["#FF0000", "blue", "green"]
@@ -43,11 +44,12 @@ class ChartFactory():
             # options['chart_options']['show_x_axis'] = False
             # options['chart_options']['show_y_axis'] = True
             # del options['chart_options']['legend_field']
-            return cls.select_bar_by_options(options)
+            chart = cls.select_bar_by_options(options)
         if options.get('chart_type') == 'LINE':
             # TODO - [REMOVE] Options for stacked lines
             # options.get('chart_options')['stacked'] = True
-            return cls.select_line_by_options(options)
+            chart = cls.select_line_by_options(options)
+        return chart
 
     @staticmethod
     def select_bar_by_options(options):

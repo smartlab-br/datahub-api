@@ -8,12 +8,11 @@ from pylint import epylint as lint
     return_std=True
 )
 
-DEST_DIR = f"{os.getenv('GITHUB_WORKSPACE')}/{os.getenv('INPUT_DEST')}"
-print(DEST_DIR)
-# os.mkdir(DEST_DIR)
+# DEST_DIR = f"{os.getenv('GITHUB_WORKSPACE')}/{os.getenv('INPUT_DEST')}"
+DEST_DIR = "/app/test"
 FILE = open(f"{DEST_DIR}/lint.txt", "w+")
 FILE.write(RESULT.getvalue())
 FILE.close()
 
-with open(f"{DEST_DIR}/lint.txt", "r") as FILE:
-    print(FILE.read())
+# with open(f"{DEST_DIR}/lint.txt", "r") as FILE:
+#     print(FILE.read())

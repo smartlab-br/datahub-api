@@ -16,7 +16,7 @@ jobs:
         uses: ./
         with:
           check: 'lint'
-          dest: "app/test"
+          dest: "../../app/test"
       - name: Upload lint report to artifacts
         uses: actions/upload-artifact@v1
         with:

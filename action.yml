@@ -17,5 +17,6 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   pre-entrypoint: '/app/tests/setup.sh'
+  entrypoint: "/start.sh"
   args:
     - ${{ inputs.check }}

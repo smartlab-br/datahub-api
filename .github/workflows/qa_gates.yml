@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+      - uses: actions/setup-python3@v1
       - name: Lint (2)
-        uses: actions/setup-python3@v1
         run: |
           pip3 install pylint  # -r requirements.txt
-          pylint **/*.py
+          pylint **/*.py --report=y --score=y --output-format=parseable # --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"
       - name: Linting (pylint)
         uses: ./
         with:

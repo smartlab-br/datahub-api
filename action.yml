@@ -8,7 +8,7 @@ inputs:
     default: 'lint'
   dest:
     description: 'Destination directory inside workspace to output QA reports.'
-    default: 'report'
+    default: '/tmp'
     required: false
 outputs:
   time: # id of output

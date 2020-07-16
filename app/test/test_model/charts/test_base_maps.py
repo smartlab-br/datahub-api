@@ -72,3 +72,18 @@ class BaseMapGetHeadersTest(unittest.TestCase):
             BaseMap.get_headers({}, options),
             [{'text': 'Analysis Unit', 'value': 'nm_municipio'}].extend(self.BASE_EXPECT)
         )
+
+
+    # @staticmethod
+    # def get_location_columns(chart_options):
+    #     ''' Get the column names to use as reference to location and value in the dataframe '''
+    #     cols = [chart_options.get('lat', 'lat'), chart_options.get('long', 'long')]
+    #     if 'value_field' in chart_options:
+    #         cols.append(chart_options.get('value_field'))
+    #     return cols
+    # @staticmethod
+    # def prepare_dataframe(dataframe, chart_options):
+    #     ''' Creates a standard index for the dataframes '''
+    #     dataframe['str_id'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')].astype(str)
+    #     dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
+    #     return dataframe.set_index('idx')

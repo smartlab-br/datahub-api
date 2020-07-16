@@ -12,14 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Set up python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-      - name: Lint (2)
-        run: |
-          pip3 install pylint  # -r requirements.txt
-          pylint **/*.py --score=y --output-format=parseable # --reports=y --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"
       - name: Linting (pylint)
         uses: ./
         with:

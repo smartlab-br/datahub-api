@@ -14,7 +14,7 @@ RUN pip3 install -r /app/requirements.txt && \
     chown -R uwsgi:uwsgi /report && \
     chmod +x /start.sh
 
-USER uwsgi
+# USER uwsgi
 
 COPY app /app/
 # If you need to tune uwsgi, uncomment the following line

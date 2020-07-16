@@ -8,9 +8,11 @@ from pylint import epylint as lint
     return_std=True
 )
 
-FILE = open(f"{os.getenv('INPUT_DEST')}/lint.txt", "w+")
+FILE_DEST = f"{os.getenv('GITHUB_WORKSPACE')}/{os.getenv('INPUT_DEST')}/lint.txt"
+print(FILE_DEST)
+FILE = open(FILE_DEST, "w+")
 FILE.write(RESULT.getvalue())
 FILE.close()
 
-with open(f"{os.getenv('INPUT_DEST')}/lint.txt", "r") as FILE:
+with open(FILE_DEST, "r") as FILE:
     print(FILE.read())

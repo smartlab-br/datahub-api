@@ -8,8 +8,9 @@ from pylint import epylint as lint
     return_std=True
 )
 
-print(RESULT.getvalue())
-
 FILE = open(f"{os.getenv('INPUT_DEST')}/lint.txt", "w+")
 FILE.write(RESULT.getvalue())
 FILE.close()
+
+with open(f"{os.getenv('INPUT_DEST')}/lint.txt", "r") as FILE:
+    print(FILE.read())

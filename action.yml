@@ -1,14 +1,14 @@
 # action.yml
-name: 'Build image for tests'
-description: 'Build the image to go through the pipeline'
+name: 'qa_image_build'
+description: 'Build the image to go through the qa pipeline'
 inputs:
   check:
     description: 'Type of check to perform'
     required: true
     default: 'lint'
   dest:
-    description: 'Destination directory inside workspace to output build-artifacts.'
-    default: 'build'
+    description: 'Destination directory inside workspace to output QA reports.'
+    default: 'report'
     required: false
 outputs:
   time: # id of output

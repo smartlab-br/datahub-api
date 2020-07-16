@@ -10,6 +10,8 @@ COPY app/test/requirements.txt /app/requirements_qa.txt
 
 RUN pip3 install -r /app/requirements.txt && \
     pip3 install -r /app/requirements_qa.txt && \
+    mkdir /report && \
+    chown -R uwsgi:uwsgi /report && \
     chmod +x /start.sh
 
 USER uwsgi

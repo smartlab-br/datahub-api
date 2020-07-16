@@ -22,7 +22,7 @@ jobs:
     #     pip install -Iv pandas==0.23.3 flask-restful==0.3.6 requests==2.21.0 PyYAML==5.1 Babel==2.6.0 impyla==0.15a1 sklearn==0.0
       - name: Linting (pylint)
         uses: ./
-        id: image_qa
+        # id: docker_build
         with:
           check: 'lint'
           dest: "report"
@@ -41,7 +41,7 @@ jobs:
     #     nose2 --config app/test/nose2.cfg --with-cov --coverage-report xml --coverage-config app/test/coverage/.coveragerc > app/test/report.txt 2>&1
       - name: Unit testing
         uses: ./
-        id: image_unittest
+        # id: docker_build
         with:
           check: 'test'
           dest: "report"

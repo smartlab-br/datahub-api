@@ -15,6 +15,6 @@ outputs:
     description: 'The time we greeted you'
 runs:
   using: 'docker'
-  image: 'Dockerfile_qa'
+  image: './Dockerfile_qa'
   args:
     - ${{ inputs.check }}

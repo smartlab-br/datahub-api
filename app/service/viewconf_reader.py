@@ -159,6 +159,14 @@ class ViewConfReader():
             reverse=scale_def.get("order", "asc") == 'desc'
         )
 
+        if "levels" in scale_def:
+            scale = LinearColormap(
+                plt.mpl_colors,
+                vmin=0,
+                vmax=int(scale_def.get("levels")) - 1
+            )
+            return [scale(i) for i in range(scale_def.get("levels"))]
+
         return LinearColormap(
             plt.mpl_colors,
             vmin=vmin,

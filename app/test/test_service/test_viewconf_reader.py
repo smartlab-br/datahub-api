@@ -307,7 +307,7 @@ class ViewConfGetColorScaleTest(unittest.TestCase):
         self.assertEqual(color_scale(1), "#a50f15ff")
 
     def test_fetch_reversed_color_scale_single_chart(self):
-        ''' Tests if a color scale with custom attributes is fetched apropriately
+        ''' Tests if a color scale in reverse order is fetched apropriately
             from single chart YAML options '''
         color_scale = ViewConfReader.get_color_scale({
             'chart_options': {'colorScale': {"name": "Reds", "order": "desc"}}
@@ -316,22 +316,33 @@ class ViewConfGetColorScaleTest(unittest.TestCase):
         self.assertEqual(color_scale(0.5), "#fb6a4aff")
         self.assertEqual(color_scale(1), "#fee5d9ff")
     
-    # @staticmethod
-    # def get_color_scale(options, vmin=None, vmax=None):
-    #     ''' Gets a color array as given by options or builds a linear scale ''
-    # TODO play with nature, levels and order attributes
-    #     plt = brewer2mpl.get_map(
-    #         scale_def.get("name"), [OK]
-    #         scale_def.get('nature', 'sequential'), []
-    #         scale_def.get("levels", 5), []
-    #         reverse=scale_def.get("order", "asc") == 'desc' [OK]
-    #     )
-
-    #     return LinearColormap(
-    #         plt.mpl_colors,
-    #         vmin=vmin,
-    #         vmax=vmax
-    #     )
+    def test_fetch_qualitative_paired_color_scale_single_chart(self):
+        ''' Tests if a paired qualitative color scale is fetched apropriately
+            from single chart YAML options '''
+        color_scale = ViewConfReader.get_color_scale({
+            'chart_options': {'colorScale': {
+                "name": "Paired",
+                "nature": "Qualitative"
+            }}
+        })
+        self.assertEqual(color_scale(0), "#a6cee3ff")
+        self.assertEqual(color_scale(0.5), "#b2df8aff")
+        self.assertEqual(color_scale(1), "#fb9a99ff")
+    
+    def test_fetch_qualitative_paired_color_scale_single_chart_color_list(self):
+        ''' Tests if a paired qualitative color scale with defined # of colors
+            is fetched apropriately from single chart YAML options '''
+        color_scale = ViewConfReader.get_color_scale({
+            'chart_options': {'colorScale': {
+                "name": "Paired",
+                "nature": "Qualitative",
+                "levels": 5
+            }}
+        })
+        self.assertEqual(
+            color_scale,
+            ['#a6cee3ff', '#1f78b4ff', '#b2df8aff', '#33a02cff', '#fb9a99ff']
+        )
 
 class ViewConfSetCustomOptionsTest(unittest.TestCase):
     ''' Test behaviours linked to creating custom attributes to YAML options '''

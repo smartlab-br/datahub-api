@@ -137,18 +137,20 @@ class ViewConfReader():
         return options.get('title', {}).get('fixed', 'background')
 
     @staticmethod
-    def get_color_scale(options, vmin=None, vmax=None):
+    def get_color_scale(options, vmin=0, vmax=1):
         ''' Gets a color array as given by options or builds a linear scale '''
         # Check if color list is given, escaping if true
-        if options.get('chart_options', {}).get('colorArray'):
+        if options and options.get('chart_options', {}).get('colorArray'):
             return options.get('chart_options', {}).get('colorArray')
-        scale_def = options.get('chart_options', {}).get('colorScale', {'name': 'Blues'})
-        if options.get('type') == 'multiple-charts':
-            for chart in options.get('charts'):
-                if chart.get('id') == options.get('chart_id'):
-                    if chart.get('options', {}).get('colorArray'):
-                        return chart.get('options', {}).get('colorArray')
-                    scale_def = chart.get('options', {}).get('colorScale', {'name': 'Blues'})
+        scale_def = {'name': 'Blues'}    
+        if options is not None:
+            scale_def = options.get('chart_options', {}).get('colorScale', {'name': 'Blues'})
+            if options.get('type') == 'multiple-charts':
+                for chart in options.get('charts'):
+                    if chart.get('id') == options.get('chart_id'):
+                        if chart.get('options', {}).get('colorArray'):
+                            return chart.get('options', {}).get('colorArray')
+                        scale_def = chart.get('options', {}).get('colorScale', {'name': 'Blues'})
 
         plt = brewer2mpl.get_map(
             scale_def.get("name"),

@@ -1,5 +1,7 @@
 '''Main tests in API'''
 import unittest
+import numpy as np
+import pandas as pd
 from service.viewconf_reader import ViewConfReader
 
 class ViewConfGetApiUrlTest(unittest.TestCase):
@@ -231,6 +233,106 @@ class ViewConfGetMarkerColorTest(unittest.TestCase):
             None
         )
 
+class ViewConfGetColorScaleTest(unittest.TestCase):
+    ''' Test behaviours linked to getting the color scale '''
+    def test_fetch_color_array_single_chart(self):
+        ''' Tests if a color array apssed as chart_option is returned AS-IS '''
+        options_from_yaml = {'chart_options': {'colorArray': ['red', 'yellow', 'green']}}
+        self.assertEqual(
+            ViewConfReader.get_color_scale(options_from_yaml),
+            ['red', 'yellow', 'green']
+        )
+        
+    def test_fetch_color_array_among_multiple(self):
+        ''' Tests if the color array property is properly acquired when the card
+            contains multiple instances '''
+        options_from_yaml = {
+            "type": "multiple-charts",
+            "charts": [
+                {"id": "wrong", "options": {'colorArray': ['blue', 'purple', 'orange']}},
+                {"id": "right", "options": {'colorArray': ['red', 'yellow', 'green']}}
+            ],
+            "chart_id": "right"
+        }
+        self.assertEqual(
+            ViewConfReader.get_color_scale(options_from_yaml),
+            ['red', 'yellow', 'green']
+        )
+
+    def test_fetch_default_color_scale_no_option(self):
+        ''' Tests if the default color scale is returned when YAML option is None '''
+        color_scale = ViewConfReader.get_color_scale(None)
+        self.assertEqual(color_scale(0), "#eff3ffff")
+        self.assertEqual(color_scale(0.5), "#6baed6ff")
+        self.assertEqual(color_scale(1), "#08519cff")
+
+    def test_fetch_default_color_scale(self):
+        ''' Tests if the default color scale is returned when no definition is given '''
+        color_scale = ViewConfReader.get_color_scale({})
+        self.assertEqual(color_scale(0), "#eff3ffff")
+        self.assertEqual(color_scale(0.5), "#6baed6ff")
+        self.assertEqual(color_scale(1), "#08519cff")
+
+    def test_fetch_default_color_scale_min_max(self):
+        ''' Tests if the default color scale is returned when no definition is given '''
+        min_val = 10
+        max_val = 20
+        color_scale = ViewConfReader.get_color_scale({}, min_val, max_val)
+        self.assertEqual(color_scale(min_val), "#eff3ffff")
+        self.assertEqual(color_scale((max_val + min_val) / 2), "#6baed6ff")
+        self.assertEqual(color_scale(max_val), "#08519cff")
+
+    def test_fetch_color_scale_single_chart(self):
+        ''' Tests if a color scale is fetched apropriately from single chart YAML options '''
+        color_scale = ViewConfReader.get_color_scale({
+            'chart_options': {'colorScale': {"name": "Reds"}}
+        })
+        self.assertEqual(color_scale(0), "#fee5d9ff")
+        self.assertEqual(color_scale(0.5), "#fb6a4aff")
+        self.assertEqual(color_scale(1), "#a50f15ff")
+        
+    def test_fetch_color_scale_among_multiple(self):
+        ''' Tests if the color scale property is properly acquired when the card
+            contains multiple instances '''
+        color_scale = ViewConfReader.get_color_scale({
+            "type": "multiple-charts",
+            "charts": [
+                {"id": "wrong", "options": {'colorScale': {"name": "invalid"}}},
+                {"id": "right", "options": {'colorScale': {"name": "Reds"}}}
+            ],
+            "chart_id": "right"
+        })
+        self.assertEqual(color_scale(0), "#fee5d9ff")
+        self.assertEqual(color_scale(0.5), "#fb6a4aff")
+        self.assertEqual(color_scale(1), "#a50f15ff")
+
+    def test_fetch_reversed_color_scale_single_chart(self):
+        ''' Tests if a color scale with custom attributes is fetched apropriately
+            from single chart YAML options '''
+        color_scale = ViewConfReader.get_color_scale({
+            'chart_options': {'colorScale': {"name": "Reds", "order": "desc"}}
+        })
+        self.assertEqual(color_scale(0), "#a50f15ff")
+        self.assertEqual(color_scale(0.5), "#fb6a4aff")
+        self.assertEqual(color_scale(1), "#fee5d9ff")
+    
+    # @staticmethod
+    # def get_color_scale(options, vmin=None, vmax=None):
+    #     ''' Gets a color array as given by options or builds a linear scale ''
+    # TODO play with nature, levels and order attributes
+    #     plt = brewer2mpl.get_map(
+    #         scale_def.get("name"), [OK]
+    #         scale_def.get('nature', 'sequential'), []
+    #         scale_def.get("levels", 5), []
+    #         reverse=scale_def.get("order", "asc") == 'desc' [OK]
+    #     )
+
+    #     return LinearColormap(
+    #         plt.mpl_colors,
+    #         vmin=vmin,
+    #         vmax=vmax
+    #     )
+
 class ViewConfSetCustomOptionsTest(unittest.TestCase):
     ''' Test behaviours linked to creating custom attributes to YAML options '''
     def test_default_generated_options(self):
@@ -390,71 +492,103 @@ class ViewConfApiToOptionsTest(unittest.TestCase):
                 "valor": ["myval"]
             }
         )
-    
 
+class ViewConfCustomCalcTest(unittest.TestCase):
+    ''' Test behaviours linked to custom calc functions '''
+    def test_proportional_default_fields(self):
+        ''' Tests custom calc proportion function using default fields 
+            when no options are sent'''
+        self.assertEqual(
+            ViewConfReader.get_proportional_indicator_uf({
+                "vl_indicador": 110,
+                "media_uf": 100
+            }),
+            np.log(1.11)
+        )
 
+    def test_proportional(self):
+        ''' Tests custom calc proportion function with custom fields '''
+        self.assertEqual(
+            ViewConfReader.get_proportional_indicator_uf(
+                {"myfield": 110, "mymeanfield": 100},
+                campo="myfield",
+                media="mymeanfield"
+            ),
+            np.log(1.11)
+        )
 
+class ViewConfGenerateColumnsTest(unittest.TestCase):
+    ''' Test behaviours linked to adding columns do dataframes as
+        defined by calc and format attributes in YAML '''
+    SAMPLE_DATAFRAME = [
+        {"vl_indicador": 110, "media_uf": 100, "to_format": "1", "to_format_2": "1.1"},
+        {"vl_indicador": 220, "media_uf": 200, "to_format": "2", "to_format_2": "2.2"}
+    ]
+    def test_proportional_default_fields(self):
+        ''' Tests custom calc and formatting column generators '''
+        options = {
+            "api": {
+                "options": {
+                    "formatters": [
+                        {"id": "to_format", "format": 'inteiro'},
+                        {"id": "to_format_2", "format": 'real', "precision": 2},
+                    ],
+                    "calcs": [{
+                        "id": "deviation",
+                        "function": "get_proportional_indicator_uf",
+                        "fn_args": [
+                            {"fixed": 'vl_indicador'},
+                            {"fixed": 'media_br'}
+                        ]
+                    },
+                    {
+                        "id": "deviation_again",
+                        "function": "get_proportional_indicator_uf",
+                        "fn_args": [
+                            {"fixed": 'vl_indicador'},
+                            {"fixed": 'media_br'}
+                        ]
+                    }]
+                }
+            }
+        }
+        result = ViewConfReader.generate_columns(
+            pd.DataFrame(self.SAMPLE_DATAFRAME),
+            options
+        )
+        expected = [
+            {
+                "vl_indicador": 110, "media_uf": 100, "to_format": "1", "to_format_2": "1.1",
+                "calc_deviation": 0.10436001532424286,
+                "calc_deviation_again": 0.10436001532424286,
+                "fmt_to_format": "1",
+                "fmt_to_format_2": "1,1"
+            },
+            {
+                "vl_indicador": 220, "media_uf": 200, "to_format": "2", "to_format_2": "2.2",
+                "calc_deviation": 0.10436001532424286,
+                "calc_deviation_again": 0.10436001532424286,
+                "fmt_to_format": "2",
+                "fmt_to_format_2": "2,2"
+            }
+        ]
+        self.assertEqual(result.to_dict(orient="records"), expected)
 
-
-
-    # @classmethod
-    # def generate_columns(cls, dataframe, options):
-    #     ''' Create new columns by applying calcs and formatters '''
-    #     # Applying calcs
-    #     calcs = options.get('api', {}).get('options', {}).get('calcs', [])
-    #     for calc in calcs:
-    #         try:
-    #             dataframe['calc_' + calc.get('id')] = dataframe.apply(
-    #                 getattr(cls, calc.get('function')),
-    #                 axis=1,
-    #                 **calc
-    #             )
-    #         except AttributeError:
-    #             # Ignores non-existing functions
-    #             continue
-
-    #     # Applying formatters
-    #     formatters = options.get('api', {}).get('options', {}).get('formatters', [])
-    #     for fmtr in formatters:
-    #         dataframe['fmt_' + fmtr.get('id')] = dataframe[fmtr.get('id')].apply(
-    #             NumberFormatter.format,
-    #             options=fmtr
-    #         )
-
-    #     return dataframe
-
-    # @staticmethod
-    # def get_proportional_indicator_uf(row, **kwargs):
-    #     ''' Custom function to get the data as a positive number based on moved log curve '''
-    #     return np.log(((row.get(kwargs.get('campo', 'vl_indicador')) - row.get(kwargs.get('media', 'media_uf'))) / row.get(kwargs.get('media', 'media_uf'))) + 1.01)
-
-    
-    # @staticmethod
-    # def get_color_scale(options, vmin=None, vmax=None):
-    #     ''' Gets a color array as given by options or builds a linear scale '''
-    #     # Check if color list is given, escaping if true
-    #     if options.get('chart_options', {}).get('colorArray'):
-    #         return options.get('chart_options', {}).get('colorArray')
-    #     scale_def = options.get('chart_options', {}).get('colorScale', {'name': 'Blues'})
-    #     if options.get('type') == 'multiple-charts':
-    #         for chart in options.get('charts'):
-    #             if chart.get('id') == options.get('chart_id'):
-    #                 if chart.get('options', {}).get('colorArray'):
-    #                     return chart.get('options', {}).get('colorArray')
-    #                 scale_def = chart.get('options', {}).get('colorScale', {'name': 'Blues'})
-
-    #     plt = brewer2mpl.get_map(
-    #         scale_def.get("name"),
-    #         scale_def.get('nature', 'sequential'),
-    #         scale_def.get("levels", 5),
-    #         reverse=scale_def.get("order", "asc") == 'desc'
-    #     )
-
-    #     return LinearColormap(
-    #         plt.mpl_colors,
-    #         vmin=vmin,
-    #         vmax=vmax
-    #     )
+    def test_invalid_calc(self):
+        ''' Tests if custom calc function is ignored if it doesn't exist '''
+        options = {"api": {"options": {"calcs": [{
+            "id": "deviation",
+            "function": "mynonexistingfunction",
+            "fn_args": [
+                {"fixed": 'vl_indicador'},
+                {"fixed": 'media_br'}
+            ]
+        }]}}}
+        result = ViewConfReader.generate_columns(
+            pd.DataFrame(self.SAMPLE_DATAFRAME),
+            options
+        )
+        self.assertEqual(result.to_dict(orient="records"), self.SAMPLE_DATAFRAME)
 
 
 

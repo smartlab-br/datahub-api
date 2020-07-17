@@ -1,0 +1,6 @@
+FROM smartlab/datahub-api:latest
+LABEL maintainer="smartlab-dev@mpt.mp.br"
+
+RUN rmdir -rf /app/test
+
+USER uwsgi

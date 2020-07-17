@@ -4,8 +4,6 @@ from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
 from model.chart import Chart
 
-from flask import send_file
-
 class ChartsResource(BaseResource):
     ''' Classe de múltiplos Indicadores Municipais '''
     def __init__(self):
@@ -15,7 +13,7 @@ class ChartsResource(BaseResource):
     def get(self, chart_type):
         ''' Obtém os registros do dataset temático, conforme parâmetros informados '''
         options = request.args.copy()
-        options = self.build_options(options, rules = 'charts')
+        options = self.build_options(options, rules='charts')
         options['chart_type'] = chart_type
         content = self.__get_domain().get_chart(options)
 

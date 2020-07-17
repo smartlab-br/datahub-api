@@ -2,13 +2,13 @@
 class QueryOptionsBuilder():
     ''' Classe de serviço '''
     @classmethod
-    def build_options(cls, r_args, rules = 'query'):
+    def build_options(cls, r_args, rules='query'):
         ''' Constrói as opções da pesquisa '''
         if isinstance(r_args, dict):
             options = r_args.copy()
         else:
             options = r_args.copy().to_dict(flat=False)
-        
+
         categorias = cls.extract_qry_param(r_args, 'categorias')
         if categorias is None:
             if rules in ['query']:
@@ -22,9 +22,6 @@ class QueryOptionsBuilder():
             filtros = [f.replace('|', ',') for f in filtros]
             options['where'] = filtros
             del options['filtros']
-
-        if r_args.get('theme') is None and rules in ['query']:
-            theme = 'MAIN'
 
         for k in r_args:
             if k in ["valor", "agregacao", "ordenacao", "pivot", "calcs", "partition"]:

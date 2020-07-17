@@ -5,6 +5,8 @@ from kazoo.client import KazooClient
 #pylint: disable=R0903
 class ProductionConfig():
     ''' Config loader for production environment '''
+    CORS_AUTOMATIC_OPTIONS = True
+
     zk = KazooClient(hosts=os.getenv('ZOOKEEPER_HOST') + ':' + os.getenv('ZOOKEEPER_PORT'))
     zk.start()
 

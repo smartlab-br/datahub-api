@@ -1,6 +1,6 @@
 ''' Controller para fornecer dados da CEE '''
-from flask_restful_swagger_2 import swagger
 from flask import request
+from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
 
 class EstadicMunicMptUnidadesResource(BaseResource):

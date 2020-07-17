@@ -31,7 +31,7 @@ exclude_lines =
 
 [run]
 omit = test/**/*, */**/__init__.py, **/__pycache__/**, **/config/**
-data_file = app/test/coverage/.coverage
+data_file = report/.coverage
 
 [xml]
-output = app/test/coverage/coverage.xml
+output = report/coverage.xml

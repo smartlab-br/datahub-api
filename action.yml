@@ -16,5 +16,7 @@ outputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
+  env:
+    PYTHONPATH: "$PYTHONPATH:./app"
   args:
     - ${{ inputs.check }}

@@ -3,7 +3,7 @@ import unittest
 from model.charts.maps.base import BaseMap
 
 class BaseMapGetHeadersTest(unittest.TestCase):
-    ''' Test behaviors linked to fetching or changing headers from YAML options '''
+    ''' Test behaviours linked to fetching or changing headers from YAML options '''
     BASE_DESCRIPTION = [
         {"id": "ignore", "items": [
             {"label": "lbl_ign1_1", "value": "val_ign1_1", "id": "id_ign1_1"},

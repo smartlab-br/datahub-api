@@ -3,7 +3,7 @@ import unittest
 from service.viewconf_reader import ViewConfReader
 
 class ViewConfGetApiUrlTest(unittest.TestCase):
-    ''' Test behaviors linked to YAML API call transformations '''
+    ''' Test behaviours linked to YAML API call transformations '''
     def test_no_call(self):
         ''' Tests if returns None when no api call is passed '''
         self.assertEqual(
@@ -42,7 +42,7 @@ class ViewConfGetApiUrlTest(unittest.TestCase):
         )
     
     def test_template_missing_args(self):
-        ''' Tests if returns template as fixes, AS-IS, when no custom args are passed '''
+        ''' Tests if returns template as fixed, AS-IS, when no custom args are passed '''
         dict_from_yaml = {
             "template": "{0}, {1}, {2}, {3}.",
             "args": [
@@ -80,7 +80,7 @@ class ViewConfGetApiUrlTest(unittest.TestCase):
         )
 
 class ViewConfGetChartTitleTest(unittest.TestCase):
-    ''' Test behaviors linked to getting the correct chart title '''
+    ''' Test behaviours linked to getting the correct chart title '''
     def test_fetch_chart_title_no_options(self):
         ''' Tests if title falls back to None when no YAML options are
             actually passed to the method '''
@@ -157,7 +157,7 @@ class ViewConfGetChartTitleTest(unittest.TestCase):
         )
 
 class ViewConfGetMarkerColorTest(unittest.TestCase):
-    ''' Test behaviors linked to getting the correct chart title '''
+    ''' Test behaviours linked to getting the correct chart title '''
     def test_default_color_single_chart_no_options(self):    
         ''' Tests if "red" is returned when no options is sent '''
         self.assertEqual(ViewConfReader.get_marker_color(None), "red")
@@ -232,7 +232,7 @@ class ViewConfGetMarkerColorTest(unittest.TestCase):
         )
 
 class ViewConfSetCustomOptionsTest(unittest.TestCase):
-    ''' Test behaviors linked to creating custom attributes to YAML options '''
+    ''' Test behaviours linked to creating custom attributes to YAML options '''
     def test_default_generated_options(self):
         ''' Tests resulting options when none were passed '''
         self.assertEqual(
@@ -277,7 +277,7 @@ class ViewConfSetCustomOptionsTest(unittest.TestCase):
         )
 
 class ViewConfGetHeadersFromDescriptorTest(unittest.TestCase):
-    ''' Test behaviors linked to getting headers from descriptos in the card from YAML '''
+    ''' Test behaviours linked to getting headers from descriptos in the card from YAML '''
     BASE_INITIAL = [{
         'text': 'Analysis Unit',
         'value': 'nm_municipio'
@@ -340,29 +340,62 @@ class ViewConfGetHeadersFromDescriptorTest(unittest.TestCase):
             self.BASE_INITIAL
         )
 
-    # @classmethod
-    # def api_to_options(cls, api_call_obj, custom_args):
-    #     ''' Transforms API string into datahub options '''
-    #     url = cls.get_api_url(api_call_obj, custom_args)
-    #     url_parts = urllib.parse.urlparse(url)
+class ViewConfApiToOptionsTest(unittest.TestCase):
+    ''' Test behaviours linked to transforming a URL from YAML config to a disctionary '''
+    def test_conversion_thematic(self):
+        ''' Tests resulting dictionary '''
+        dict_from_yaml = {"fixed": "/thematic/mytheme?categorias=mycat1,mycat2&valor=myval"}
+        self.assertEqual(
+            ViewConfReader.api_to_options(dict_from_yaml, None),
+            {
+                "theme": "mytheme",
+                "categorias": ["mycat1","mycat2"],
+                "valor": ["myval"]
+            }
+        )
 
-    #     args_dict = {arg.split('=')[0]: arg.split('=')[1] for arg in url_parts.query.split('&')}
-    #     options = QueryOptionsBuilder.build_options(args_dict)
+    def test_conversion_thematic_operation(self):
+        ''' Tests if no direct operation is allowed in thematic url '''
+        dict_from_yaml = {"fixed": "/thematic/mytheme-myop?categorias=mycat1,mycat2&valor=myval"}
+        self.assertEqual(
+            ViewConfReader.api_to_options(dict_from_yaml, None),
+            {
+                "theme": "mytheme-myop",
+                "categorias": ["mycat1","mycat2"],
+                "valor": ["myval"]
+            }
+        )
 
-    #     path_parts = url_parts.path.split('/')
-    #     if path_parts[0] == '':
-    #         path_parts.pop(0)
+    def test_conversion(self):
+        ''' Tests resulting dictionary '''
+        dict_from_yaml = {"fixed": "/my/theme?categorias=mycat1,mycat2&valor=myval"}
+        self.assertEqual(
+            ViewConfReader.api_to_options(dict_from_yaml, None),
+            {
+                "theme": "mytheme",
+                "categorias": ["mycat1","mycat2"],
+                "valor": ["myval"]
+            }
+        )
 
-    #     if path_parts[0] == 'thematic':
-    #         options['theme'] = path_parts[1]
-    #     elif '-' in path_parts[-1]:
-    #         options['theme'] = ''.join(path_parts[:-1])
-    #         options['operation'] = path_parts[-1]
-    #     else:
-    #         options['theme'] = ''.join(path_parts)
-
-    #     return options
+    def test_conversion_operation(self):
+        ''' Tests if the theme is located before operation segment '''
+        dict_from_yaml = {"fixed": "/my/theme/det-myop?categorias=mycat1,mycat2&valor=myval"}
+        self.assertEqual(
+            ViewConfReader.api_to_options(dict_from_yaml, None),
+            {
+                "theme": "mytheme",
+                "operation": "det-myop",
+                "categorias": ["mycat1","mycat2"],
+                "valor": ["myval"]
+            }
+        )
     
+
+
+
+
+
 
     # @classmethod
     # def generate_columns(cls, dataframe, options):
@@ -422,6 +455,11 @@ class ViewConfGetHeadersFromDescriptorTest(unittest.TestCase):
     #         vmin=vmin,
     #         vmax=vmax
     #     )
+
+
+
+
+
 
     # @staticmethod
     # def get_dimension_descriptor(language, observatory, scope, dimension):

@@ -4,11 +4,9 @@
 .idea
 .vscode
 .scannerwork
-app/test/report*
 app/.scannerwork
 Dockerfile
 **/__pycache__
 setenv.sh
 app/.coverage
-**/lint.txt
-**/test.txt
+report/*

@@ -17,6 +17,6 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   env:
-    PYTHONPATH: "$PYTHONPATH:/app:/github/workspace/app"
+    PYTHONPATH: "$PYTHONPATH:/github/workspace/app"
   args:
     - ${{ inputs.check }}

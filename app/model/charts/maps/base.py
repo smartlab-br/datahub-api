@@ -112,7 +112,7 @@ class BaseMap():
 
         # Tooltip gen function
         def tooltip_gen(au_row, **kwargs):
-            if 'headers' in options:
+            if kwargs.get('headers'):
                 marker_tooltip = "".join([
                     f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>"
                     for
@@ -124,9 +124,13 @@ class BaseMap():
             return "Tooltip!"
 
         # Merge dataframe and pivoted dataframe
+        headers = None
+        if options is not None:
+            headers = options.get("headers")
+
         df_tooltip['tooltip'] = df_tooltip.apply(
             tooltip_gen,
-            headers=options.get("headers"),
+            headers=headers,
             axis=1
         )
         return df_tooltip[[chart_options.get('id_field', 'cd_mun_ibge'), 'tooltip']]
@@ -134,6 +138,8 @@ class BaseMap():
     @staticmethod
     def get_location_columns(chart_options):
         ''' Get the column names to use as reference to location and value in the dataframe '''
+        if chart_options is None:
+            return ['lat', 'long']
         cols = [chart_options.get('lat', 'lat'), chart_options.get('long', 'long')]
         if 'value_field' in chart_options:
             cols.append(chart_options.get('value_field'))
@@ -142,6 +148,8 @@ class BaseMap():
     @staticmethod
     def prepare_dataframe(dataframe, chart_options):
         ''' Creates a standard index for the dataframes '''
+        if chart_options is None:
+            return dataframe
         dataframe['str_id'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')].astype(str)
         dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
         return dataframe.set_index('idx')

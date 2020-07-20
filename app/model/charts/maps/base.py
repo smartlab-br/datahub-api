@@ -83,6 +83,8 @@ class BaseMap():
         ''' Chooses whether to use given headers config or infer from options '''
         if 'headers' in options:
             return options.get('headers')
+        if chart_options is None:
+            return [{'text': 'Analysis Unit', 'value': 'nm_municipio'}]
         return ViewConfReader.get_headers_from_options_descriptor(
             options.get('description'),
             [{

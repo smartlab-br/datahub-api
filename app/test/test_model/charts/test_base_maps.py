@@ -28,7 +28,7 @@ class BaseMapGetHeadersTest(unittest.TestCase):
         options = {'headers': {'name': 'test'}}
         self.assertEqual(
             BaseMap.get_headers(None, options),
-            options
+            options.get('headers')
         )
 
     def test_existing_headers(self):
@@ -36,7 +36,7 @@ class BaseMapGetHeadersTest(unittest.TestCase):
         options = {'headers': {'name': 'test'}}
         self.assertEqual(
             BaseMap.get_headers({'name_field': 'au_field'}, options),
-            options
+            options.get('headers')
         )
 
     def test_existing_headers_over_description(self):
@@ -44,7 +44,7 @@ class BaseMapGetHeadersTest(unittest.TestCase):
         options = {'headers': {'name': 'test'}, 'description': self.BASE_DESCRIPTION}
         self.assertEqual(
             BaseMap.get_headers({'name_field': 'au_field'}, options),
-            options
+            options.get('headers')
         )
     
     def test_existing_description_no_chart_options(self):
@@ -53,25 +53,26 @@ class BaseMapGetHeadersTest(unittest.TestCase):
         options = {'description': self.BASE_DESCRIPTION}
         self.assertEqual(
             BaseMap.get_headers(None, options),
-            [{'text': 'Analysis Unit', 'value': 'nm_municipio'}].extend(self.BASE_EXPECT)
+            [{'text': 'Analysis Unit', 'value': 'nm_municipio'}]
         )
 
     def test_existing_description(self):
         ''' Tests if returns the expected header build using card description options '''
         options = {'description': self.BASE_DESCRIPTION}
+        expect = [{'text': 'Analysis Unit', 'value': 'au_field'}]
+        expect.extend(self.BASE_EXPECT)
         self.assertEqual(
             BaseMap.get_headers({'name_field': 'au_field'}, options),
-            [{'text': 'Analysis Unit', 'value': 'au_field'}].extend(self.BASE_EXPECT)
+            expect
         )
 
     def test_existing_description_default_au_field(self):
         ''' Tests if returns the expected result, with default 'nm_municipio' header
             when there's no name_field attribute in chart_options '''
         options = {'description': self.BASE_DESCRIPTION}
-        self.assertEqual(
-            BaseMap.get_headers({}, options),
-            [{'text': 'Analysis Unit', 'value': 'nm_municipio'}].extend(self.BASE_EXPECT)
-        )
+        expect = [{'text': 'Analysis Unit', 'value': 'nm_municipio'}]
+        expect.extend(self.BASE_EXPECT)
+        self.assertEqual(BaseMap.get_headers({}, options), expect)
 
 
     # @staticmethod

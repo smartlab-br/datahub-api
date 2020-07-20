@@ -155,7 +155,7 @@ class PandasOperatorCutTest(unittest.TestCase):
         )
 
     def test_cut_from_op(self):
-        ''' Tests if data is re-ranked '''
+        ''' Tests if data is cut correctly from operate function '''
         expected = [
             {"row_id": 0, "cut": 'a', "agr_count": 50},
             {"row_id": 1, "cut": 'b', "agr_count": 228},
@@ -166,6 +166,33 @@ class PandasOperatorCutTest(unittest.TestCase):
             StubPandasOperator.operate(
                 self.DATAFRAME_CUT.copy(),
                 'cut-idade',
+                ["idade"]
+            ).to_dict(orient="records"),
+            expected
+        )
+
+    def test_cut_from_op_no_target(self):
+        ''' Tests if data is returned AS-IS if no pattern is sent to operate '''
+        self.assertEqual(
+            StubPandasOperator.operate(
+                self.DATAFRAME_CUT.copy(),
+                'cut',
+                ["idade"]
+            ).to_dict(orient="records"),
+            self.DATAFRAME_CUT.copy().to_dict(orient="records")
+        )
+
+    def test_cut_from_op_pattern(self):
+        ''' Tests if data is re-ranked '''
+        expected = [
+            {"row_id": 0, "cut": 'a', "agr_count": 278},
+            {"row_id": 1, "cut": 'b', "agr_count": 12}
+        ]
+
+        self.assertEqual(
+            StubPandasOperator.operate(
+                self.DATAFRAME_CUT.copy(),
+                'cut-idade-ptrn',
                 ["idade"]
             ).to_dict(orient="records"),
             expected

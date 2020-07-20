@@ -9,6 +9,10 @@ class BaseCartesianChart(BaseChart):
     @staticmethod
     def pivot_dataframe(dataframe, options):
         ''' Pivot dataframe to create series in charts '''
+        if options is None:
+            return None
+        if dataframe is None:
+            return {}
         src = dataframe.copy()
         src = pd.pivot_table(
             src,

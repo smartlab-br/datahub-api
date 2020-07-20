@@ -10,8 +10,10 @@ class PandasOperator():
     @classmethod
     def get_cut_pattern(cls, pattern_id):
         ''' Gets patterns from GIT '''
-        location = app.config['GIT_VIEWCONF_BASE_URL'].format('options', 'cut', pattern_id)
-        return yaml.load(requests.get(location, verify=False).content)
+        return yaml.load(requests.get(
+            app.config['GIT_VIEWCONF_BASE_URL'].format('options', 'cut', pattern_id),
+            verify=False
+        ).content)
 
     @classmethod
     def operate(cls, dataset, operation, categories):

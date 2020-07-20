@@ -1,5 +1,6 @@
 ''' Testes do formatador '''
 import unittest
+from multidict import MultiDict
 from service.qry_options_builder import QueryOptionsBuilder
 
 class OptionsBuilderTest(unittest.TestCase):
@@ -60,3 +61,42 @@ class OptionsBuilderTest(unittest.TestCase):
 
         opts = QueryOptionsBuilder.build_options(r_args)
         self.assertEqual(opts.get('theme'), None)
+
+    def test_chart_args(self):
+        ''' Verifica se os parâmetros de gráficos são criados corretamente '''
+        r_args = {
+            "categorias": 'a,b',
+            "valor": 'c,d',
+            "agregacao": 'e,f',
+            "ordenacao": 'g,h',
+            "filtros": r'eq-o-comma\,separated,and,eq-p-q',
+            "pivot": 'i,j',
+            "limit": '10',
+            "offset": '11',
+            "calcs": 'k,l',
+            "partition": 'm,n',
+            "theme": 't',
+            "as_image": 'N',
+            "from_viewconf": 'S'
+        }
+
+        opts = QueryOptionsBuilder.build_options(r_args)
+
+        self.assertEqual(
+            opts,
+            {
+                "categorias": ['a', 'b'],
+                "valor": ['c', 'd'],
+                "agregacao": ['e', 'f'],
+                "ordenacao": ['g', 'h'],
+                "where": ['eq-o-comma,separated', 'and', 'eq-p-q'],
+                "pivot": ['i', 'j'],
+                "limit": '10',
+                "offset": '11',
+                "calcs": ['k', 'l'],
+                "partition": ['m', 'n'],
+                "theme": 't',
+                "as_image": False,
+                "from_viewconf": True
+            }
+        )

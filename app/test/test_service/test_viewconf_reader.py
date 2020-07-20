@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 import pandas as pd
 from service.viewconf_reader import ViewConfReader
+from test.stubs.viewconf import StubViewConfReader
 
 class ViewConfGetApiUrlTest(unittest.TestCase):
     ''' Test behaviours linked to YAML API call transformations '''
@@ -601,21 +602,63 @@ class ViewConfGenerateColumnsTest(unittest.TestCase):
         )
         self.assertEqual(result.to_dict(orient="records"), self.SAMPLE_DATAFRAME)
 
+class ViewConfGetCardDescriptorTest(unittest.TestCase):
+    ''' Test behaviours linked to getting the card descriptor from YAML '''
+    
+    def test_empty_yaml(self):
+        ''' Tests if an empty yaml results in None descriptor '''
+        self.assertEqual(
+            StubViewConfReader.get_card_descriptor(
+                'br', None, None, 'empty', 'right'
+            ),
+            None
+        )
 
+    def test_no_sections_yaml(self):
+        ''' Tests if a yaml with no sections results in None descriptor '''
+        self.assertEqual(
+            StubViewConfReader.get_card_descriptor(
+                'br', None, None, 'no_sections', 'right'
+            ),
+            None
+        )
 
+    def test_no_cards_yaml(self):
+        ''' Tests if a yaml with no cards results in None descriptor '''
+        self.assertEqual(
+            StubViewConfReader.get_card_descriptor(
+                'br', None, None, 'no_cards', 'right'
+            ),
+            None
+        )
 
+    def test_empty_cards_yaml(self):
+        ''' Tests if a yaml with empty cards attribute results in None descriptor '''
+        self.assertEqual(
+            StubViewConfReader.get_card_descriptor(
+                'br', None, None, 'empty_cards', 'right'
+            ),
+            None
+        )
 
+    def test_card_not_found_yaml(self):
+        ''' Tests if a yaml with no cards with the given id results in None descriptor '''
+        self.assertEqual(
+            StubViewConfReader.get_card_descriptor(
+                'br', None, None, 'card_not_found', 'right'
+            ),
+            None
+        )
 
-    # @staticmethod
-    # def get_dimension_descriptor(language, observatory, scope, dimension):
-    #     ''' Gets the dimension YAML descriptor as dictionary '''
-    #     location = app.config['GIT_VIEWCONF_BASE_URL'].format(
-    #         f'{language}/observatorio/{observatory}/localidade/',
-    #         scope,
-    #         dimension
-    #     )
-    #     return yaml.load(requests.get(location, verify=False).content)
-
+    def test_card_yaml(self):
+        ''' Tests if descriptor is returned correctly '''
+        self.assertEqual(
+            StubViewConfReader.get_card_descriptor(
+                'br', None, None, 'card_exists', 'right'
+            ),
+            {"id": "right"}
+        )
+    
     # @classmethod
     # def get_card_descriptor(cls, language, observatory, scope, dimension, card_id):
     #     ''' Gets a single card from a viewconf yaml as a dictionary '''

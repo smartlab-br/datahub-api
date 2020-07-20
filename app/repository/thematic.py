@@ -75,10 +75,12 @@ class ThematicRepository(ImpalaRepository):
 
     def get_default_partitioning(self, options):
         ''' Gets default partitioning from thematic datasets' definition '''
-        if 'theme' not in options:
+        if options is None:
             return self.DEFAULT_PARTITIONING['MAIN']
-        if options['theme'] in self.DEFAULT_PARTITIONING:
-            return self.DEFAULT_PARTITIONING[options['theme']]
-        if options['theme'] in self.DEFAULT_PARTITIONING['NONE']:
+        if 'theme' not in options:
+            return self.DEFAULT_PARTITIONING.get('MAIN')
+        if options.get('theme') in self.DEFAULT_PARTITIONING:
+            return self.DEFAULT_PARTITIONING.get(options.get('theme'))
+        if options.get('theme') in self.DEFAULT_PARTITIONING.get('NONE'):
             return ''
-        return self.DEFAULT_PARTITIONING['MAIN']
+        return self.DEFAULT_PARTITIONING.get('MAIN')

@@ -2,6 +2,7 @@
 from io import StringIO
 import pandas as pd
 from repository.base import BaseRepository, HadoopRepository
+from repository.thematic import ThematicRepository
 
 class StubRepository(BaseRepository):
     ''' Fake repo to test instance methods '''
@@ -77,3 +78,9 @@ class StubFindModelAgrRepository(StubFindModelRepository):
         )
         dataset = pd.read_csv(str_dataset, sep=";")
         return dataset
+
+class StubThematicRepository(ThematicRepository):
+    ''' Fake repo to test instance methods '''
+    def load_and_prepare(self):
+        ''' Overriding method outside test scope '''
+        self.dao = 'Instanciei o DAO'

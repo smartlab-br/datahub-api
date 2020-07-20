@@ -35,12 +35,16 @@ class ViewConfReader():
     @staticmethod
     def get_dimension_descriptor(language, observatory, scope, dimension):
         ''' Gets the dimension YAML descriptor as dictionary '''
-        location = app.config['GIT_VIEWCONF_BASE_URL'].format(
-            f'{language}/observatorio/{observatory}/localidade/',
-            scope,
-            dimension
+        return yaml.load(
+            requests.get(
+                app.config['GIT_VIEWCONF_BASE_URL'].format(
+                    f'{language}/observatorio/{observatory}/localidade/',
+                    scope,
+                    dimension
+                ),
+                verify=False
+            ).content
         )
-        return yaml.load(requests.get(location, verify=False).content)
 
     @classmethod
     def api_to_options(cls, api_call_obj, custom_args):
@@ -69,12 +73,12 @@ class ViewConfReader():
     def get_card_descriptor(cls, language, observatory, scope, dimension, card_id):
         ''' Gets a single card from a viewconf yaml as a dictionary '''
         dim = cls.get_dimension_descriptor(language, observatory, scope, dimension)
-        if dim.get('secoes'):
-            for secao in dim.get('secoes'):
-                if secao.get('cards'):
-                    for card in secao.get('cards'):
-                        if card.get('id') == card_id:
-                            return card
+        if dim is None:
+            return None
+        for secao in dim.get('secoes', []):
+            for card in secao.get('cards', []):
+                if card.get('id') == card_id:
+                    return card
         return None
 
     @staticmethod

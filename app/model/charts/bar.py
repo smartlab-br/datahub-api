@@ -239,88 +239,87 @@ class BarHorizontalStacked(Bar):
         )
         return chart
 
-class BarVerticalPyramid(BarVerticalStacked):
+class BarPyramid():
+    ''' Abstraction for pyramid charts '''
+    @staticmethod
+    def get_series(**kwargs):
+        # series, data, options, legend_names, branch_direction, branch_value
+        chart_options = kwargs.get('options', {}).get('chart_options')
+        branch_series = [v for v in kwargs.get('series') if v in chart_options.get(kwargs.get('branch_direction'))]
+        
+        if kwargs.get('opposite_value'):
+            branch_data = {k:[-v_item for v_item in v] for k, v in kwargs.get('data').items() if k in branch_series}
+            branch_color = ViewConfReader.get_color_scale(kwargs.get('options'))[-len(branch_series)]
+        else:
+            branch_data = {k:[v_item for v_item in v] for k, v in kwargs.get('data').items() if k in branch_series}
+            branch_color = ViewConfReader.get_color_scale(kwargs.get('options'))[:len(branch_series)]
+        
+        branch_data[chart_options.get(kwargs.get('branch_value'))] = kwargs.get('data').get(chart_options.get(kwargs.get('branch_value')))
+        branch_legend_labels = [v for _k, v in kwargs.get('legend_names').items() if _k in chart_options.get(kwargs.get('branch_direction'))]
+        
+        return (branch_series, branch_data, branch_legend_labels, branch_color)
+
+    def generate_pyramid_stacks(self, chart, data, series, legend_names, options):
+        min_val = 0
+        options['chart_options']['right'] = [s for s in series if s not in options.get('chart_options',{}).get('left')]
+        for serie in series:
+            # Identify the series direction (check if value is on 'left' chart option attribute)
+            direction = 'right' # Positive branch
+            if serie in options.get('chart_options').get('left'): # Negative Branch
+                direction = 'left'
+            # Get branch configurations from data and series
+            (b_series, b_data, b_legend_labels, b_color) = self.get_series(
+                series=series, data=data, options=options,
+                legend_names=legend_names, branch_direction=direction,
+                branch_value='y', opposite_value=direction=='right'
+            )
+            # Updates the minimum value
+            if direction == 'left':
+                min_val = min_val + min(b_data.get(serie,{}))
+            chart = self.create_bar(
+                chart, options, series=b_series, data=b_data, 
+                legend_labels=b_legend_labels, color=b_color
+            )
+
+        return (chart, min_val)
+
+class BarVerticalPyramid(BarPyramid, BarVerticalStacked):
     ''' Class for drawing bar charts '''
     def generate_stacks(self, chart, data, series, legend_names, options):
-        # Create bars
-        d_series = [v for v in series if v in options.get('chart_options').get('left')]
-        u_series = [v for v in series if v not in options.get('chart_options').get('left')]
-
-        d_data = {k:[-v_item for v_item in v] for k, v in data.items() if k in d_series}
-        u_data = {k:v for k, v in data.items() if k in u_series}
-
-        # Getting minimum value
-        chart.y_range.start = min([min(v) for _k, v in d_data.items()])
-
-        # Adding categories column
-        d_data[options.get('chart_options').get('y')] = data.get(options.get('chart_options').get('y'))
-        u_data[options.get('chart_options').get('y')] = data.get(options.get('chart_options').get('y'))
-
-        d_legend_labels = [v for _k, v in legend_names.items() if _k in options.get('chart_options').get('left')]
-        u_legend_labels = [v for _k, v in legend_names.items() if _k not in options.get('chart_options').get('left')]
-
-        d_color = ViewConfReader.get_color_scale(options)[:len(d_series)]
-        u_color = ViewConfReader.get_color_scale(options)[-len(u_series):]
-
+        ''' Redirects the generate method to pyramid abstraction '''
+        (chart, min_val) = self.generate_pyramid_stacks(chart, data, series, legend_names, options)
+        chart.y_range.start = min_val
+        return chart
+    
+    def create_bar(self, chart, options, **kwargs):
+        # Create the bar
         chart.vbar_stack(
-            d_series,
+            kwargs.get('series'),
             x=options.get('chart_options').get('x'),
             height=self.BAR_SIZE,
-            color=d_color,
-            source=d_data,
-            legend_label=d_legend_labels
+            color=kwargs.get('color'),
+            source=kwargs.get('data'),
+            legend_label=kwargs.get('legend_labels')
         )
-
-        chart.vbar_stack(
-            u_series,
-            x=options.get('chart_options').get('x'),
-            height=self.BAR_SIZE,
-            color=u_color,
-            source=u_data,
-            legend_label=u_legend_labels
-        )
-
         return chart
 
-class BarHorizontalPyramid(BarHorizontalStacked):
+class BarHorizontalPyramid(BarHorizontalStacked, BarPyramid):
     ''' Class for drawing bar charts '''
     def generate_stacks(self, chart, data, series, legend_names, options):
-        # Left branches
-        l_series = [v for v in series if v in options.get('chart_options').get('left')]
-        r_series = [v for v in series if v not in options.get('chart_options').get('left')]
-
-        l_data = {k:[-v_item for v_item in v] for k, v in data.items() if k in l_series}
-        r_data = {k:v for k, v in data.items() if k in r_series}
-
-        # Getting minimum value
-        chart.x_range.start = min([min(v) for _k, v in l_data.items()])
-
-        # Adding categories column
-        l_data[options.get('chart_options').get('y')] = data.get(options.get('chart_options').get('y'))
-        r_data[options.get('chart_options').get('y')] = data.get(options.get('chart_options').get('y'))
-
-        l_legend_labels = [v for _k, v in legend_names.items() if _k in options.get('chart_options').get('left')]
-        r_legend_labels = [v for _k, v in legend_names.items() if _k not in options.get('chart_options').get('left')]
-
-        l_color = ViewConfReader.get_color_scale(options)[:len(l_series)]
-        r_color = ViewConfReader.get_color_scale(options)[-len(r_series):]
-
-        chart.hbar_stack(
-            l_series,
-            y=options.get('chart_options').get('y'),
-            height=self.BAR_SIZE,
-            color=l_color,
-            source=l_data,
-            legend_label=l_legend_labels
-        )
-
-        chart.hbar_stack(
-            r_series,
-            y=options.get('chart_options').get('y'),
-            height=self.BAR_SIZE,
-            color=r_color,
-            source=r_data,
-            legend_label=r_legend_labels
-        )
-
+        ''' Redirects the generate method to pyramid abstraction '''
+        (chart, min_val) = self.generate_pyramid_stacks(chart, data, series, legend_names, options)
+        chart.x_range.start = min_val
         return chart
+        
+    def create_bar(self, chart, options, **kwargs):
+        # Create the bar
+        chart.hbar_stack(
+            kwargs.get('series'),
+            y=options.get('chart_options').get('y'),
+            height=self.BAR_SIZE,
+            color=kwargs.get('color'),
+            source=kwargs.get('data'),
+            legend_label=kwargs.get('legend_labels')
+        )
+        return chart
+

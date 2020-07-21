@@ -13,16 +13,9 @@ class Heat(BaseMap):
         analysis_unit = options.get('au')
         chart_options = options.get('chart_options')
 
-        dataframe['str_id'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')].astype(str)
-        dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
-
-        # Runs dataframe modifiers from viewconf
-        # dataframe = ViewConfReader().generate_columns(dataframe, options)
-
-        dataframe = dataframe.set_index('idx')
+        dataframe = self.prepare_dataframe(dataframe, chart_options)
         centroide = None
-        marker_tooltip = ''
-
+        
         # Creating map instance
         result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
 
@@ -94,23 +87,11 @@ class Heat(BaseMap):
                 au_row[chart_options.get('long', 'longitude')]
             ]
 
-        if 'headers' in options:
-            marker_tooltip = "".join([
-                f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>"
-                for
-                hdr
-                in
-                options.get('headers')
-            ])
-            marker_tooltip = f"<table>{marker_tooltip}</table>"
-        else:
-            marker_tooltip = "Tooltip!"
-
         if centroide:
             marker_layer = folium.map.FeatureGroup(name=au_title)
             folium.map.Marker(
                 centroide,
-                tooltip=marker_tooltip,
+                tooltip=self.tooltip_gen(au_row, headers=options.get('headers')),
                 icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
             ).add_to(marker_layer)
             marker_layer.add_to(result)

@@ -93,8 +93,7 @@ class BaseMap():
             }]
         )
 
-    @staticmethod
-    def get_tooltip_data(dataframe, chart_options, options):
+    def get_tooltip_data(self, dataframe, chart_options, options):
         ''' Creates tooltip content series from given options and dataframe '''
         # Get pivoted dataframe for tooltip list creation
         df_tooltip = dataframe.copy().pivot_table(
@@ -110,26 +109,13 @@ class BaseMap():
         df_tooltip.columns = ['_'.join(reversed(col)).strip() for col in df_tooltip.columns.values]
         df_tooltip = df_tooltip.reset_index()
 
-        # Tooltip gen function
-        def tooltip_gen(au_row, **kwargs):
-            if kwargs.get('headers'):
-                marker_tooltip = "".join([
-                    f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>"
-                    for
-                    hdr
-                    in
-                    kwargs.get('headers')
-                ])
-                return f"<table>{marker_tooltip}</table>"
-            return "Tooltip!"
-
         # Merge dataframe and pivoted dataframe
         headers = None
         if options is not None:
             headers = options.get("headers")
 
         df_tooltip['tooltip'] = df_tooltip.apply(
-            tooltip_gen,
+            self.tooltip_gen,
             headers=headers,
             axis=1
         )
@@ -153,4 +139,17 @@ class BaseMap():
         dataframe['str_id'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')].astype(str)
         dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
         return dataframe.set_index('idx')
-        
+
+    @staticmethod
+    def tooltip_gen(row, **kwargs):
+        headers = kwargs.get('headers')
+        if headers is None or row is None:
+            return "Tooltip!"
+        tooltip = "".join([
+            f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>"
+            for
+            hdr
+            in
+            headers
+        ])
+        return f"<table>{tooltip}</table>"

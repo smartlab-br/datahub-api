@@ -140,7 +140,10 @@ class BarVerticalStacked(Bar):
             chart = figure(x_range=data.get(options.get('chart_options').get('x')))
             chart.y_range.start = 0
             chart = self.chart_config(chart, options)
-            chart = self.generate_stacks(chart, data, series, legend_names, options)
+            chart = self.generate_stacks(
+                chart, data=data, series=series,
+                legend_names=legend_names, options=options
+            )
         else:
             chart = figure(x_range=sorted(list(dataframe[options.get('chart_options', {}).get('x')])))
             chart.y_range.start = 0
@@ -151,15 +154,15 @@ class BarVerticalStacked(Bar):
             )
         return chart
 
-    def generate_stacks(self, chart, data, series, legend_names, options):
+    def generate_stacks(self, chart, **kwargs):
         ''' Create bars '''
         chart.vbar_stack(
-            series,
-            x=options.get('chart_options').get('x'),
+            kwargs.get('series'),
+            x=kwargs.get('options', {}).get('chart_options', {}).get('x'),
             width=self.BAR_SIZE,
-            color=ViewConfReader.get_color_scale(options),
-            source=data,
-            legend_label=[v for _k, v in legend_names.items()]
+            color=ViewConfReader.get_color_scale(kwargs.get('options')),
+            source=kwargs.get('data'),
+            legend_label=[v for _k, v in kwargs.get('legend_names').items()]
         )
         return chart
 
@@ -189,7 +192,10 @@ class BarHorizontalStacked(Bar):
             chart = figure(y_range=data.get(options.get('chart_options').get('y')))
             chart.x_range.start = 0
             chart = self.chart_config(chart, options)
-            chart = self.generate_stacks(chart, data, series, legend_names, options)
+            chart = self.generate_stacks(
+                chart, data=data, series=series,
+                legend_names=legend_names, options=options
+            )
         else:
             chart = figure(y_range=sorted(list(dataframe[options.get('chart_options', {}).get('x')])))
             chart.x_range.start = 0
@@ -201,15 +207,15 @@ class BarHorizontalStacked(Bar):
 
         return chart
 
-    def generate_stacks(self, chart, data, series, legend_names, options):
+    def generate_stacks(self, chart, **kwargs):
         ''' Creates bars '''
         chart.hbar_stack(
-            series,
-            y=options.get('chart_options').get('y'),
+            kwargs.get('series'),
+            y=kwargs.get('options', {}).get('chart_options', {}).get('y'),
             height=self.BAR_SIZE,
-            color=ViewConfReader.get_color_scale(options),
-            source=data,
-            legend_label=[v for _k, v in legend_names.items()]
+            color=ViewConfReader.get_color_scale(kwargs.get('options')),
+            source=kwargs.get('data'),
+            legend_label=[v for _k, v in kwargs.get('legend_names').items()]
         )
         return chart
 
@@ -234,26 +240,28 @@ class BarPyramid():
 
         return (branch_series, branch_data, branch_legend_labels, branch_color)
 
-    def generate_pyramid_stacks(self, chart, data, series, legend_names, options):
+    def generate_pyramid_stacks(self, chart, **kwargs):
         ''' Generates pyramid's bar stacks '''
         min_val = 0
+        options = kwargs.get('options')
         options['chart_options']['right'] = [
             s
             for
             s
             in
-            series
+            kwargs.get('series')
             if s not in options.get('chart_options', {}).get('left')
         ]
-        for serie in series:
+        for serie in kwargs.get('series'):
             # Identify the series direction (check if value is on 'left' chart option attribute)
             direction = 'right' # Positive branch
             if serie in options.get('chart_options').get('left'): # Negative Branch
                 direction = 'left'
             # Get branch configurations from data and series
             (b_series, b_data, b_legend_labels, b_color) = self.get_series(
-                series=series, data=data, options=options,
-                legend_names=legend_names, branch_direction=direction,
+                series=kwargs.get('series'), data=kwargs.get('data'),
+                options=options, legend_names=kwargs.get('legend_names'),
+                branch_direction=direction,
                 branch_value='y'
             )
             # Updates the minimum value
@@ -272,9 +280,9 @@ class BarPyramid():
 
 class BarVerticalPyramid(BarPyramid, BarVerticalStacked):
     ''' Class for drawing bar charts '''
-    def generate_stacks(self, chart, data, series, legend_names, options):
+    def generate_stacks(self, chart, **kwargs):
         ''' Redirects the generate method to pyramid abstraction '''
-        (chart, min_val) = self.generate_pyramid_stacks(chart, data, series, legend_names, options)
+        (chart, min_val) = self.generate_pyramid_stacks(chart, **kwargs)
         chart.y_range.start = min_val
         return chart
 
@@ -292,9 +300,9 @@ class BarVerticalPyramid(BarPyramid, BarVerticalStacked):
 
 class BarHorizontalPyramid(BarHorizontalStacked, BarPyramid):
     ''' Class for drawing bar charts '''
-    def generate_stacks(self, chart, data, series, legend_names, options):
+    def generate_stacks(self, chart, **kwargs):
         ''' Redirects the generate method to pyramid abstraction '''
-        (chart, min_val) = self.generate_pyramid_stacks(chart, data, series, legend_names, options)
+        (chart, min_val) = self.generate_pyramid_stacks(chart, **kwargs)
         chart.x_range.start = min_val
         return chart
 

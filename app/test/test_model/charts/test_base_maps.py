@@ -240,9 +240,9 @@ class BaseMapGetTooltipDataTest(unittest.TestCase):
     ]
     def test_no_options(self):
         ''' Tests if a default tooltip text is set for all items if no options are given '''
-        BaseMap.get_tooltip_data(self.DATAFRAME.copy(), {}, None)
+        BaseMap().get_tooltip_data(self.DATAFRAME.copy(), {}, None)
         self.assertEqual(
-            BaseMap.get_tooltip_data(self.DATAFRAME.copy(), {}, None).to_dict(orient="records"),
+            BaseMap().get_tooltip_data(self.DATAFRAME.copy(), {}, None).to_dict(orient="records"),
             [
                 {'cd_mun_ibge': 123456, 'tooltip': "Tooltip!"},
                 {'cd_mun_ibge': 234567, 'tooltip': "Tooltip!"}
@@ -252,7 +252,7 @@ class BaseMapGetTooltipDataTest(unittest.TestCase):
     def test_no_headers(self):
         ''' Tests if a default tooltip text is set for all items if no headers are given '''
         self.assertEqual(
-            BaseMap.get_tooltip_data(self.DATAFRAME.copy(), {}, {}).to_dict(orient="records"),
+            BaseMap().get_tooltip_data(self.DATAFRAME.copy(), {}, {}).to_dict(orient="records"),
             [
                 {'cd_mun_ibge': 123456, 'tooltip': "Tooltip!"},
                 {'cd_mun_ibge': 234567, 'tooltip': "Tooltip!"}
@@ -262,7 +262,7 @@ class BaseMapGetTooltipDataTest(unittest.TestCase):
     def test_headers(self):
         ''' Tests if a default tooltip text is set for all items if no headers are given '''
         self.assertEqual(
-            BaseMap.get_tooltip_data(
+            BaseMap().get_tooltip_data(
                 self.DATAFRAME.copy(),
                 {},
                 {"headers": [
@@ -289,7 +289,7 @@ class BaseMapGetTooltipDataTest(unittest.TestCase):
             del item['cd_mun_ibge']
 
         self.assertEqual(
-            BaseMap.get_tooltip_data(
+            BaseMap().get_tooltip_data(
                 dataframe,
                 {'id_field': 'cd_m', 'name_field': 'nm_m', 'lat': 'lat', 'long': 'long'},
                 {"headers": [

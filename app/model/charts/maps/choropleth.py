@@ -17,33 +17,32 @@ class Choropleth(BaseMap):
 
         #Gets the geometry
         state_geo = self.get_geometry(options, analysis_unit)
-        dataframe['str_id'] = dataframe[chart_options.get('id_field')].astype(str)
-        dataframe['idx'] = dataframe[chart_options.get('id_field')]
+        dataframe = self.prepare_dataframe(dataframe, chart_options)
 
-        # Runs dataframe modifiers from viewconf
-        # dataframe = ViewConfReader().generate_columns(dataframe, options)
-
-        dataframe = dataframe.set_index('idx')
         centroide = None
-        marker_tooltip = ''
         # for each_au in state_geo.get('features'):
         for each_au in state_geo.get('objects', {}).get('data', {}).get('geometries', []):
             # During topo conversion, all ID will be named smartlab_geo_id and
             # all NAME will be in an attribute called smartlab_geo_name.
             try:
                 df_row = dataframe.loc[int(each_au.get('properties').get("smartlab_geo_id"))]
-                each_au.get('properties').update(json.loads(df_row.to_json()), headers=options.get('headers'))
+                each_au.get('properties').update(
+                    json.loads(df_row.to_json()),
+                    headers=options.get('headers')
+                )
             except KeyError:
                 df_row = {hdr.get('value'): 'N/A' for hdr in options.get('headers')}
-                df_row[options.get('headers')[0].get('value')] = each_au.get('properties').get('smartlab_geo_name')
-                each_au.get('properties').update(json.loads(json.dumps(df_row)), headers=options.get('headers'))
+                df_row[options.get('headers')[0].get('value')] = each_au.get(
+                    'properties'
+                ).get('smartlab_geo_name')
+                each_au.get('properties').update(
+                    json.loads(json.dumps(df_row)),
+                    headers=options.get('headers')
+                )
             if str(each_au.get('properties', {}).get(chart_options.get('id_field'))) == str(analysis_unit):
                 centroide = each_au.get('properties', {}).get('centroide')
                 if centroide:
                     centroide.reverse()
-
-                marker_tooltip = "".join([f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(df_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>" for hdr in options.get('headers')])
-                marker_tooltip = f"<table>{marker_tooltip}</table>"
 
         # Creating map instance
         result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
@@ -102,7 +101,7 @@ class Choropleth(BaseMap):
             marker_layer = folium.map.FeatureGroup(name=au_title)
             folium.map.Marker(
                 centroide,
-                tooltip=marker_tooltip,
+                tooltip=self.tooltip_gen(au_row, headers=options.get('headers')),
                 icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
             ).add_to(marker_layer)
             marker_layer.add_to(result)
@@ -132,7 +131,7 @@ class Choropleth(BaseMap):
             visao = 'uf'
             quality = 1
             res = 'municipio'
-        else: 
+        else:
             visao = options.get('visao', 'uf')
             quality = options.get('chart_options', {}).get('quality', '1')
             res = options.get('chart_options', {}).get('resolution', 'municipio')

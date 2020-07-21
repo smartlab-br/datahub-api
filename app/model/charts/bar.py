@@ -16,7 +16,7 @@ class Bar(BaseCartesianChart):
     #       text: "vl_indicador"
 
     # TODO Final - Responsivity
-    def __init__(self, style_theme):
+    def __init__(self, style_theme='light_minimal'):
         curdoc().theme = style_theme
 
     def draw(self, dataframe, options):
@@ -34,9 +34,9 @@ class Bar(BaseCartesianChart):
         chart.ygrid.grid_line_color = None
 
         # Axis visibility
-        if not options.get('chart_options', {}).get('show_x_axis', False):
+        if options is None or not options.get('chart_options', {}).get('show_x_axis', False):
             chart.xaxis.visible = False
-        if not options.get('chart_options', {}).get('show_y_axis', False):
+        if options is None or not options.get('chart_options', {}).get('show_y_axis', False):
             chart.yaxis.visible = False
 
         # Legend config
@@ -50,13 +50,23 @@ class Bar(BaseCartesianChart):
         return ViewConfReader.get_color_scale(options)[index]
 
     def get_legend_names(self, dataframe, options):
-        if options.get('chart_options').get('legend_field') and options.get('chart_options').get('legend_field') in dataframe.columns:
-            dataframe[options.get('chart_options').get('legend_field')] = dataframe[options.get('chart_options').get('id')]
-            tmp = dataframe[[options.get('chart_options').get('id'), options.get('chart_options').get('legend_field')]].drop_duplicates().set_index(options.get('chart_options').get('id')).to_dict()
-            return tmp.get(options.get('chart_options').get('legend_field'))
+        if (options is None or options.get('chart_options',{}).get('id') is None or
+            dataframe is None or dataframe.empty):
+            return {}
+        if options.get('chart_options', {}).get('legend_field') in dataframe.columns:
+            tmp = dataframe[[options.get('chart_options').get('id'), options.get('chart_options').get('legend_field')]].drop_duplicates().to_dict(orient="records")
+            return {
+                item.get(options.get('chart_options').get('id')): item.get(options.get('chart_options').get('legend_field'))
+                for
+                item
+                in
+                tmp
+            }
         return {i: i for i in dataframe[options.get('chart_options').get('id')].unique()}
 
     def build_tooltip(self, options):
+        if options is None or 'headers' not in options:
+            return 'Tooltip!'
         rows = [f'<tr style="text-align: left;"><th style="padding: 4px; padding-right: 10px;">{hdr.get("text")}</th><td style="padding: 4px;">@{hdr.get("value")}</td></tr>' for hdr in options.get('headers')]
         return f"<table>{''.join(rows)}</table>"
 
@@ -247,7 +257,7 @@ class BarPyramid():
         chart_options = kwargs.get('options', {}).get('chart_options')
         branch_series = [v for v in kwargs.get('series') if v in chart_options.get(kwargs.get('branch_direction'))]
         
-        if kwargs.get('opposite_value'):
+        if kwargs.get('branch_direction', 'right') == 'left':
             branch_data = {k:[-v_item for v_item in v] for k, v in kwargs.get('data').items() if k in branch_series}
             branch_color = ViewConfReader.get_color_scale(kwargs.get('options'))[-len(branch_series)]
         else:
@@ -271,7 +281,7 @@ class BarPyramid():
             (b_series, b_data, b_legend_labels, b_color) = self.get_series(
                 series=series, data=data, options=options,
                 legend_names=legend_names, branch_direction=direction,
-                branch_value='y', opposite_value=direction=='right'
+                branch_value='y'
             )
             # Updates the minimum value
             if direction == 'left':

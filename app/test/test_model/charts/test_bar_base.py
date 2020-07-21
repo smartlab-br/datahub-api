@@ -28,7 +28,7 @@ class BarChartConfigTest(unittest.TestCase):
         chart = Bar().chart_config(figure(), {})
         self.assertEqual(chart.xaxis.visible, False)
         self.assertEqual(chart.yaxis.visible, False)
-        
+
     def test_bar_chart_config(self):
         ''' Tests if default config is set when no chart_option is given '''
         chart = Bar().chart_config(

@@ -22,7 +22,7 @@ class BaseChartLegendNamesTest(unittest.TestCase):
             BaseChart.get_legend_names(dataframe, None),
             {}
         )
-    
+
     def test_legend_names_no_chart_options(self):
         ''' Tests if no legend names are returned when there's no chart_options '''
         dataframe = pd.DataFrame([{'idx': 'A'}, {'idx': 'B'}])
@@ -38,7 +38,7 @@ class BaseChartLegendNamesTest(unittest.TestCase):
             BaseChart.get_legend_names(None, options_from_yaml),
             {}
         )
-    
+
     def test_legend_names_empty_dataframe(self):
         ''' Tests if no legend names are returned when the dataframe is empty '''
         options_from_yaml = {'chart_options': {'id': 'idx'}}
@@ -86,25 +86,30 @@ class BaseChartTooltipTest(unittest.TestCase):
             BaseChart.build_tooltip(None),
             'Tooltip!'
         )
-    
+
     def test_tooltip_no_headers(self):
         ''' Tests if default tooltip is returned when no headers are given '''
         self.assertEqual(
             BaseChart.build_tooltip({}),
             'Tooltip!'
         )
-        
+
     def test_tooltip(self):
         ''' Tests if tooltips are built correctly '''
         options_from_yaml = {'headers': [
             {'text': 'Value A:', 'value': 'field_a'},
             {'text': 'Value B:', 'value': 'field_b'}
         ]}
-        self.maxDiff = None
         self.assertEqual(
             BaseChart.build_tooltip(options_from_yaml),
             '<table>'
-                '<tr style="text-align: left;"><th style="padding: 4px; padding-right: 10px;">Value A:</th><td style="padding: 4px;">@field_a</td></tr>'
-                '<tr style="text-align: left;"><th style="padding: 4px; padding-right: 10px;">Value B:</th><td style="padding: 4px;">@field_b</td></tr>'
+            '<tr style="text-align: left;">'
+            '<th style="padding: 4px; padding-right: 10px;">Value A:</th>'
+            '<td style="padding: 4px;">@field_a</td>'
+            '</tr>'
+            '<tr style="text-align: left;">'
+            '<th style="padding: 4px; padding-right: 10px;">Value B:</th>'
+            '<td style="padding: 4px;">@field_b</td>'
+            '</tr>'
             '</table>'
         )

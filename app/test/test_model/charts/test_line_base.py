@@ -1,6 +1,5 @@
 '''Main tests in API'''
 import unittest
-import pandas as pd
 from bokeh.plotting import figure
 from model.charts.line import Line
 
@@ -11,13 +10,13 @@ class LineChartConfigTest(unittest.TestCase):
         chart = Line().chart_config(figure(), None)
         self.assertEqual(chart.xaxis.visible, True)
         self.assertEqual(chart.yaxis.visible, True)
-    
+
     def test_bar_chart_config_no_chart_option(self):
         ''' Tests if default config is set when no chart_option is given '''
         chart = Line().chart_config(figure(), {})
         self.assertEqual(chart.xaxis.visible, True)
         self.assertEqual(chart.yaxis.visible, True)
-        
+
     def test_bar_chart_config(self):
         ''' Tests if default config is set when no chart_option is given '''
         chart = Line().chart_config(

@@ -509,7 +509,7 @@ class ViewConfApiToOptionsTest(unittest.TestCase):
 class ViewConfCustomCalcTest(unittest.TestCase):
     ''' Test behaviours linked to custom calc functions '''
     def test_proportional_default_fields(self):
-        ''' Tests custom calc proportion function using default fields 
+        ''' Tests custom calc proportion function using default fields
             when no options are sent '''
         self.assertEqual(
             ViewConfReader.get_proportional_indicator_uf({

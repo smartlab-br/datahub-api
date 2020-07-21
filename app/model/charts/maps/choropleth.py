@@ -8,29 +8,15 @@ from model.charts.maps.base import BaseMap
 
 class Choropleth(BaseMap):
     ''' Choropleth building class '''
+    BASE_TOPOJSON_REPO = 'https://raw.githubusercontent.com/smartlab-br/geodata/master/topojson/br'
     def draw(self, dataframe, options):
         ''' Gera um mapa topojson a partir das opções enviadas '''
         # http://localhost:5000/charts/choropleth?from_viewconf=S&au=2927408&card_id=mapa_pib_brasil&dimension=socialeconomico&as_image=S
-        visao = options.get('visao', 'uf')
-
         analysis_unit = options.get('au')
         chart_options = options.get('chart_options')
 
-        # Gets the geojson
-        quality = options.get('chart_options', {}).get('quality', '1')
-        if len(str(analysis_unit)) > 2:
-            cd_uf = str(analysis_unit)[:2]
-            res = 'municipio'
-            state_geo = f'https://raw.githubusercontent.com/smartlab-br/geodata/master/topojson/br/{visao}/{res}/{cd_uf}_q{quality}.json'
-        elif len(str(analysis_unit)) == 2 and options.get('chart_options', {}).get('topology') == 'uf':
-            state_geo = f'https://raw.githubusercontent.com/smartlab-br/geodata/master/topojson/br/uf_q{quality}.json'
-        # Trocar por topojson dos estados no Brasil
-        elif res == visao:
-            state_geo = f'https://raw.githubusercontent.com/smartlab-br/geodata/master/topojson/br/{visao}/{analysis_unit}_q{quality}.json'
-        else:
-            state_geo = f'https://raw.githubusercontent.com/smartlab-br/geodata/master/topojson/br/{visao}/{res}/{analysis_unit}_q{quality}.json'
-        state_geo = requests.get(state_geo).json()
-
+        #Gets the geometry
+        state_geo = self.get_geometry(options, analysis_unit)
         dataframe['str_id'] = dataframe[chart_options.get('id_field')].astype(str)
         dataframe['idx'] = dataframe[chart_options.get('id_field')]
 
@@ -135,3 +121,27 @@ class Choropleth(BaseMap):
         result.fit_bounds([lower_left, upper_right])
 
         return result
+
+    def get_geometry(self, options, analysis_unit):
+        ''' Gets the topojson from external resource '''
+        return requests.get(self.get_geometry_loc(options, analysis_unit)).json()
+
+    def get_geometry_loc(self, options, analysis_unit):
+        ''' Gets the topojson location '''
+        if options is None:
+            visao = 'uf'
+            quality = 1
+            res = 'municipio'
+        else: 
+            visao = options.get('visao', 'uf')
+            quality = options.get('chart_options', {}).get('quality', '1')
+            res = options.get('chart_options', {}).get('resolution', 'municipio')
+            topology = options.get('chart_options', {}).get('topology')
+        if analysis_unit is None or (len(str(analysis_unit)) == 2 and topology == 'uf'):
+            return f'{self.BASE_TOPOJSON_REPO}/uf_q{quality}.json'
+        if len(str(analysis_unit)) == 7 and visao == 'uf':
+            cd_uf = str(analysis_unit)[:2]
+            return f'{self.BASE_TOPOJSON_REPO}/{visao}/{res}/{cd_uf}_q{quality}.json'
+        if res == visao:
+            return f'{self.BASE_TOPOJSON_REPO}/{visao}/{analysis_unit}_q{quality}.json'
+        return f'{self.BASE_TOPOJSON_REPO}/{visao}/{res}/{analysis_unit}_q{quality}.json'

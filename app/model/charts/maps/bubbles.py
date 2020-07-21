@@ -1,10 +1,10 @@
 ''' Model for fetching chart '''
 import folium
 import pandas as pd
-from model.charts.maps.base import BaseMap
 from folium import CircleMarker
 from folium.plugins import TimestampedGeoJson
 from folium.map import FeatureGroup
+from model.charts.maps.base import BaseMap
 
 class Bubbles(BaseMap):
     ''' Heatmap building class '''
@@ -26,7 +26,9 @@ class Bubbles(BaseMap):
         chart_options['base_radius'] = chart_options.get('base_radius', self.BASE_RADIUS)
         chart_options['multiplier'] = chart_options.get('multiplier', self.RADIUS_MULTIPLIER)
         def get_circle_radius(row, **kwargs):
-            return chart_options.get('base_radius') + chart_options.get('multiplier') * row[chart_options.get('value_field', 'api_calc_ln_norm_pos_part')]
+            chart_options = kwargs.get('chart_options')
+            value = row[chart_options.get('value_field', 'api_calc_ln_norm_pos_part')]
+            return chart_options.get('base_radius') + chart_options.get('multiplier') * value
         dataframe['radius'] = dataframe.apply(
             get_circle_radius,
             chart_options=chart_options,
@@ -88,7 +90,7 @@ class Bubbles(BaseMap):
                 layer.add_to(result)
             else:
                 features = []
-                for row_index, row in group.iterrows():
+                for _row_index, row in group.iterrows():
                     features.append({
                         'type': 'Feature',
                         'geometry': {

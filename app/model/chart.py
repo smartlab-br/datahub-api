@@ -1,15 +1,15 @@
 ''' Model for fetching chart '''
 import io
 from html.parser import HTMLParser
-from model.base import BaseModel
-from model.thematic import Thematic
 from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.io.export import get_screenshot_as_png
-from service.viewconf_reader import ViewConfReader
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from model.base import BaseModel
+from model.thematic import Thematic
+from service.viewconf_reader import ViewConfReader
 from factory.chart import ChartFactory
 
 class Chart(BaseModel):

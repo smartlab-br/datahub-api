@@ -1,9 +1,9 @@
 ''' Class for drawing bar charts '''
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, NumeralTickFormatter
+from bokeh.io import curdoc
 from service.viewconf_reader import ViewConfReader
 from model.charts.base import BaseCartesianChart
-from bokeh.io import curdoc
 
 class Line(BaseCartesianChart):
     ''' Class for drawing bar charts '''
@@ -51,7 +51,6 @@ class Line(BaseCartesianChart):
     def chart_config(self, chart, options):
         ''' Adds common chart configurations, according to given options '''
         chart = super().chart_config(chart, options)
-        
         chart.x_range.range_padding = 0.0
 
         # Axis visibility

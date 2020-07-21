@@ -1,5 +1,4 @@
 ''' Stubs for model testing '''
-from io import StringIO
 from service.viewconf_reader import ViewConfReader
 
 class StubViewConfReader(ViewConfReader):

@@ -3,9 +3,9 @@ from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource
 from bokeh.transform import dodge
 import pandas as pd
+from bokeh.io import curdoc
 from model.charts.base import BaseCartesianChart
 from service.viewconf_reader import ViewConfReader
-from bokeh.io import curdoc
 
 class Bar(BaseCartesianChart):
     ''' Class for drawing bar charts '''
@@ -25,7 +25,7 @@ class Bar(BaseCartesianChart):
 
     def chart_config(self, chart, options):
         chart = super().chart_config(chart, options)
-        
+
         # Axis visibility
         if options is None or not options.get('chart_options', {}).get('show_x_axis', False):
             chart.xaxis.visible = False
@@ -152,7 +152,7 @@ class BarVerticalStacked(Bar):
         return chart
 
     def generate_stacks(self, chart, data, series, legend_names, options):
-        # Create bars
+        ''' Create bars '''
         chart.vbar_stack(
             series,
             x=options.get('chart_options').get('x'),
@@ -202,7 +202,7 @@ class BarHorizontalStacked(Bar):
         return chart
 
     def generate_stacks(self, chart, data, series, legend_names, options):
-        # Create bars
+        ''' Creates bars '''
         chart.hbar_stack(
             series,
             y=options.get('chart_options').get('y'),
@@ -217,25 +217,34 @@ class BarPyramid():
     ''' Abstraction for pyramid charts '''
     @staticmethod
     def get_series(**kwargs):
+        ''' Get series data and params to generate stack configs '''
         # series, data, options, legend_names, branch_direction, branch_value
         chart_options = kwargs.get('options', {}).get('chart_options')
         branch_series = [v for v in kwargs.get('series') if v in chart_options.get(kwargs.get('branch_direction'))]
-        
+
         if kwargs.get('branch_direction', 'right') == 'left':
             branch_data = {k:[-v_item for v_item in v] for k, v in kwargs.get('data').items() if k in branch_series}
             branch_color = ViewConfReader.get_color_scale(kwargs.get('options'))[-len(branch_series)]
         else:
-            branch_data = {k:[v_item for v_item in v] for k, v in kwargs.get('data').items() if k in branch_series}
+            branch_data = {k:v for k, v in kwargs.get('data').items() if k in branch_series}
             branch_color = ViewConfReader.get_color_scale(kwargs.get('options'))[:len(branch_series)]
-        
+
         branch_data[chart_options.get(kwargs.get('branch_value'))] = kwargs.get('data').get(chart_options.get(kwargs.get('branch_value')))
         branch_legend_labels = [v for _k, v in kwargs.get('legend_names').items() if _k in chart_options.get(kwargs.get('branch_direction'))]
-        
+
         return (branch_series, branch_data, branch_legend_labels, branch_color)
 
     def generate_pyramid_stacks(self, chart, data, series, legend_names, options):
+        ''' Generates pyramid's bar stacks '''
         min_val = 0
-        options['chart_options']['right'] = [s for s in series if s not in options.get('chart_options',{}).get('left')]
+        options['chart_options']['right'] = [
+            s
+            for
+            s
+            in
+            series
+            if s not in options.get('chart_options', {}).get('left')
+        ]
         for serie in series:
             # Identify the series direction (check if value is on 'left' chart option attribute)
             direction = 'right' # Positive branch
@@ -249,13 +258,17 @@ class BarPyramid():
             )
             # Updates the minimum value
             if direction == 'left':
-                min_val = min_val + min(b_data.get(serie,{}))
+                min_val = min_val + min(b_data.get(serie, {}))
             chart = self.create_bar(
-                chart, options, series=b_series, data=b_data, 
+                chart, options, series=b_series, data=b_data,
                 legend_labels=b_legend_labels, color=b_color
             )
 
         return (chart, min_val)
+
+    def create_bar(self, chart, options, **kwargs):
+        ''' Abstract method - must be implemented '''
+        raise NotImplementedError
 
 class BarVerticalPyramid(BarPyramid, BarVerticalStacked):
     ''' Class for drawing bar charts '''
@@ -264,9 +277,9 @@ class BarVerticalPyramid(BarPyramid, BarVerticalStacked):
         (chart, min_val) = self.generate_pyramid_stacks(chart, data, series, legend_names, options)
         chart.y_range.start = min_val
         return chart
-    
+
     def create_bar(self, chart, options, **kwargs):
-        # Create the bar
+        ''' Creates the bar '''
         chart.vbar_stack(
             kwargs.get('series'),
             x=options.get('chart_options').get('x'),
@@ -284,9 +297,9 @@ class BarHorizontalPyramid(BarHorizontalStacked, BarPyramid):
         (chart, min_val) = self.generate_pyramid_stacks(chart, data, series, legend_names, options)
         chart.x_range.start = min_val
         return chart
-        
+
     def create_bar(self, chart, options, **kwargs):
-        # Create the bar
+        ''' Creates the bar '''
         chart.hbar_stack(
             kwargs.get('series'),
             y=options.get('chart_options').get('y'),
@@ -296,4 +309,3 @@ class BarHorizontalPyramid(BarHorizontalStacked, BarPyramid):
             legend_label=kwargs.get('legend_labels')
         )
         return chart
-

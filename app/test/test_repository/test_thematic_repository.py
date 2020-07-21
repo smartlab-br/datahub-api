@@ -34,7 +34,7 @@ class ThematicRepositoryPartitioningTest(unittest.TestCase):
             StubThematicRepository().get_default_partitioning({"theme":"municipio"}),
             ''
         )
-    
+
     def test_valid_theme(self):
         ''' Checks if the partition is returned correctly '''
         self.assertEqual(

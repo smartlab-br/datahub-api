@@ -1,8 +1,8 @@
 '''Main tests in API'''
 import unittest
+from test.stubs.pandas_operator import StubPandasOperator
 import pandas as pd
 from service.pandas_operator import PandasOperator
-from test.stubs.pandas_operator import StubPandasOperator
 
 class PandasOperatorRerankTest(unittest.TestCase):
     ''' Test behaviours linked to reranking dataframes '''
@@ -32,7 +32,7 @@ class PandasOperatorRerankTest(unittest.TestCase):
             "agr_sum_vl_indicador": 1
         }
     ])
-    
+
     EXPECTED_RERANK = [
         {
             "cd_indicador": '1',

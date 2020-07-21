@@ -42,46 +42,46 @@ class BaseCartesianChartConfigTest(unittest.TestCase):
     def test_cartesian_chart_config_no_option(self):
         ''' Tests if default config is set when no option is given '''
         chart = BaseCartesianChart().chart_config(figure(), None)
-        
-        self.assertEqual(chart.axis.major_label_text_font, ['Palanquin','Palanquin'])
+
+        self.assertEqual(chart.axis.major_label_text_font, ['Palanquin', 'Palanquin'])
         self.assertEqual(chart.axis.major_tick_line_color, [None, None])
         self.assertEqual(chart.axis.minor_tick_line_color, [None, None])
-    
+
         self.assertEqual(chart.xgrid.grid_line_color, None)
         self.assertEqual(chart.ygrid.grid_line_color, None)
-    
+
         # self.assertEqual(chart.legend.label_text_font, 'Palanquin')
         # self.assertEqual(chart.legend.location, 'top_right')
         # self.assertEqual(chart.legend.orientation, 'vertical')
-    
+
     def test_bar_chart_config_no_chart_option(self):
         ''' Tests if default config is set when no chart_option is given '''
         chart = BaseCartesianChart().chart_config(figure(), {})
-        
-        self.assertEqual(chart.axis.major_label_text_font, ['Palanquin','Palanquin'])
+
+        self.assertEqual(chart.axis.major_label_text_font, ['Palanquin', 'Palanquin'])
         self.assertEqual(chart.axis.major_tick_line_color, [None, None])
         self.assertEqual(chart.axis.minor_tick_line_color, [None, None])
-    
+
         self.assertEqual(chart.xgrid.grid_line_color, None)
         self.assertEqual(chart.ygrid.grid_line_color, None)
-    
+
         # self.assertEqual(chart.legend.label_text_font, 'Palanquin')
         # self.assertEqual(chart.legend.location, 'top_right')
         # self.assertEqual(chart.legend.orientation, 'vertical')
-        
+
     def test_bar_chart_config(self):
         ''' Tests if default config is set when no chart_option is given '''
         chart = BaseCartesianChart().chart_config(
             figure(),
             {'chart_options': {'show_x_axis': False, 'show_y_axis': True}})
-        
-        self.assertEqual(chart.axis.major_label_text_font, ['Palanquin','Palanquin'])
+
+        self.assertEqual(chart.axis.major_label_text_font, ['Palanquin', 'Palanquin'])
         self.assertEqual(chart.axis.major_tick_line_color, [None, None])
         self.assertEqual(chart.axis.minor_tick_line_color, [None, None])
-    
+
         self.assertEqual(chart.xgrid.grid_line_color, None)
         self.assertEqual(chart.ygrid.grid_line_color, None)
-    
+
         # self.assertEqual(chart.legend.label_text_font, 'Palanquin')
         # self.assertEqual(chart.legend.location, 'top_right')
         # self.assertEqual(chart.legend.orientation, 'vertical')

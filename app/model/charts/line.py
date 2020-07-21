@@ -77,25 +77,6 @@ class Line(BaseCartesianChart):
 
         return chart
 
-    @staticmethod
-    def get_fill_color(index, options):
-        ''' Gets the positional color in the scale built according to given options '''
-        return ViewConfReader.get_color_scale(options)[index]
-
-    @staticmethod
-    def get_legend_names(dataframe, options):
-        ''' Get series' names that should be plotted in legend '''
-        if options.get('chart_options', {}).get('legend_field') in dataframe.columns:
-            tmp = dataframe[[options.get('chart_options').get('id'), options.get('chart_options').get('legend_field')]].drop_duplicates().set_index(options.get('chart_options').get('id')).to_dict()
-            return tmp.get(options.get('chart_options').get('legend_field'))
-        return {i: i for i in dataframe[options.get('chart_options').get('id')].unique()}
-
-    @staticmethod
-    def build_tooltip(options):
-        ''' Builds the tooltip HTML based on given options '''
-        rows = [f'<tr style="text-align: left;"><th style="padding: 4px; padding-right: 10px;">{hdr.get("text")}</th><td style="padding: 4px;">@{hdr.get("value")}</td></tr>' for hdr in options.get('headers')]
-        return f"<table>{''.join(rows)}</table>"
-
 class LineArea(Line):
     ''' Class for drawing bar charts '''
     def draw(self, dataframe, options):

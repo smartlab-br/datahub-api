@@ -46,30 +46,6 @@ class Bar(BaseCartesianChart):
 
         return chart
 
-    def get_fill_color(self, index, options):
-        return ViewConfReader.get_color_scale(options)[index]
-
-    def get_legend_names(self, dataframe, options):
-        if (options is None or options.get('chart_options',{}).get('id') is None or
-            dataframe is None or dataframe.empty):
-            return {}
-        if options.get('chart_options', {}).get('legend_field') in dataframe.columns:
-            tmp = dataframe[[options.get('chart_options').get('id'), options.get('chart_options').get('legend_field')]].drop_duplicates().to_dict(orient="records")
-            return {
-                item.get(options.get('chart_options').get('id')): item.get(options.get('chart_options').get('legend_field'))
-                for
-                item
-                in
-                tmp
-            }
-        return {i: i for i in dataframe[options.get('chart_options').get('id')].unique()}
-
-    def build_tooltip(self, options):
-        if options is None or 'headers' not in options:
-            return 'Tooltip!'
-        rows = [f'<tr style="text-align: left;"><th style="padding: 4px; padding-right: 10px;">{hdr.get("text")}</th><td style="padding: 4px;">@{hdr.get("value")}</td></tr>' for hdr in options.get('headers')]
-        return f"<table>{''.join(rows)}</table>"
-
 class BarVertical(Bar):
     ''' Class for drawing bar charts '''
     def draw(self, dataframe, options):

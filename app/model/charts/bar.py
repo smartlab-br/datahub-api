@@ -24,25 +24,13 @@ class Bar(BaseCartesianChart):
         raise NotImplementedError
 
     def chart_config(self, chart, options):
-        # General config
-        chart.axis.major_label_text_font = 'Palanquin'
-        chart.axis.major_tick_line_color = None
-        chart.axis.minor_tick_line_color = None
-
-        # Removing grid lines
-        chart.xgrid.grid_line_color = None
-        chart.ygrid.grid_line_color = None
-
+        chart = super().chart_config(chart, options)
+        
         # Axis visibility
         if options is None or not options.get('chart_options', {}).get('show_x_axis', False):
             chart.xaxis.visible = False
         if options is None or not options.get('chart_options', {}).get('show_y_axis', False):
             chart.yaxis.visible = False
-
-        # Legend config
-        chart.legend.label_text_font = 'Palanquin'
-        chart.legend.location = "top_right"
-        chart.legend.orientation = "vertical"
 
         return chart
 

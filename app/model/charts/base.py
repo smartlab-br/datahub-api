@@ -56,3 +56,22 @@ class BaseCartesianChart(BaseChart):
         src = src.reset_index()
         src[options.get('chart_options').get('x')] = src[options.get('chart_options').get('x')].astype(str)
         return {col:list(src[col]) for col in src.columns}
+
+    @staticmethod
+    def chart_config(chart, options):
+        ''' Adds common chart configurations, according to given options '''
+        # General config
+        chart.axis.major_label_text_font = 'Palanquin'
+        chart.axis.major_tick_line_color = None
+        chart.axis.minor_tick_line_color = None
+        
+        # Removing grid lines
+        chart.xgrid.grid_line_color = None
+        chart.ygrid.grid_line_color = None
+
+        # Legend config
+        chart.legend.label_text_font = 'Palanquin'
+        chart.legend.location = "top_right"
+        chart.legend.orientation = "vertical"
+
+        return chart

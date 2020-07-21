@@ -9,7 +9,7 @@ class Line(BaseCartesianChart):
     ''' Class for drawing bar charts '''
     LINE_WIDTH = 4
 
-    def __init__(self, style_theme):
+    def __init__(self, style_theme='light_minimal'):
         curdoc().theme = style_theme
 
     def draw(self, dataframe, options):
@@ -48,29 +48,21 @@ class Line(BaseCartesianChart):
 
         return chart
 
-    @staticmethod
-    def chart_config(chart, options):
+    def chart_config(self, chart, options):
         ''' Adds common chart configurations, according to given options '''
-        # General config
-        chart.axis.major_label_text_font = 'Palanquin'
-        chart.axis.major_tick_line_color = None
-        chart.axis.minor_tick_line_color = None
+        chart = super().chart_config(chart, options)
+        
         chart.x_range.range_padding = 0.0
 
-        # Removing grid lines
-        chart.xgrid.grid_line_color = None
-        chart.ygrid.grid_line_color = None
-
         # Axis visibility
-        if not options.get('chart_options', {}).get('show_x_axis', True):
-            chart.xaxis.visible = False
-        if not options.get('chart_options', {}).get('show_y_axis', True):
-            chart.yaxis.visible = False
-
-        # Legend config
-        chart.legend.label_text_font = 'Palanquin'
-        chart.legend.location = "top_right"
-        chart.legend.orientation = "vertical"
+        if options is None:
+            chart.xaxis.visible = True
+            chart.yaxis.visible = True
+        else:
+            if not options.get('chart_options', {}).get('show_x_axis', True):
+                chart.xaxis.visible = False
+            if not options.get('chart_options', {}).get('show_y_axis', True):
+                chart.yaxis.visible = False
 
         # Ticks formatting
         chart.yaxis.formatter = NumeralTickFormatter(format="0.00a")

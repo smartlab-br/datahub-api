@@ -90,15 +90,14 @@ class Choropleth(BaseMap):
         if np.issubdtype(dataframe.index.dtype, np.number):
             analysis_unit = int(analysis_unit)
         au_row = dataframe.loc[analysis_unit]
-        au_title = 'Analysis Unit'
-        if len(options.get('headers', [])) > 0:
-            au_title = au_row[options.get('headers', [])[0]['value']]
-
+        
         if 'latitude' in list(dataframe.columns):
             centroide = [au_row['latitude'], au_row['longitude']]
 
         if centroide:
-            marker_layer = folium.map.FeatureGroup(name=au_title)
+            marker_layer = folium.map.FeatureGroup(
+                name=self.get_au_title(au_row, options.get('headers'))
+            )
             folium.map.Marker(
                 centroide,
                 tooltip=self.tooltip_gen(au_row, headers=options.get('headers')),

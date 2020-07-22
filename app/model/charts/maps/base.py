@@ -39,10 +39,6 @@ class BaseMap():
 
         au_row = dataframe.loc[analysis_unit].reset_index().iloc[0]
 
-        au_title = 'Analysis Unit'
-        if len(options.get('headers', [])) > 0:
-            au_title = au_row[options.get('headers', [])[0]['value']]
-
         centroide = None
         if chart_options.get('lat', 'latitude') in list(dataframe.columns):
             centroide = [
@@ -51,7 +47,9 @@ class BaseMap():
             ]
 
         if centroide:
-            marker_layer = folium.map.FeatureGroup(name=au_title)
+            marker_layer = folium.map.FeatureGroup(
+                name=self.get_au_title(au_row, options.get('headers'))
+            )
             folium.map.Marker(
                 centroide,
                 tooltip=au_row.get('tooltip', "Tooltip!"),
@@ -132,16 +130,29 @@ class BaseMap():
         return cols
 
     @staticmethod
-    def prepare_dataframe(dataframe, chart_options):
+    def prepare_dataframe(dataframe, chart_options, tooltip_data=None):
         ''' Creates a standard index for the dataframes '''
         if chart_options is None:
             return dataframe
+
+        # Adding tooltips to detailed dataframe
+        if tooltip_data is not None:
+            dataframe = pd.merge(
+                dataframe,
+                tooltip_data,
+                left_on=chart_options.get('id_field', 'cd_mun_ibge'),
+                right_on=chart_options.get('id_field', 'cd_mun_ibge'),
+                how="left"
+            )
+
         dataframe['str_id'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')].astype(str)
         dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
         return dataframe.set_index('idx')
 
     @staticmethod
     def tooltip_gen(row, **kwargs):
+        ''' Generates marker tooltip based on the location and collection of fields
+            sent on "headers" option '''
         headers = kwargs.get('headers')
         if headers is None or row is None:
             return "Tooltip!"
@@ -153,3 +164,10 @@ class BaseMap():
             headers
         ])
         return f"<table>{tooltip}</table>"
+
+    @staticmethod
+    def get_au_title(row, headers):
+        ''' Gets the analysis unit title from headers definition '''
+        if headers is None or len(headers) <= 0 or row is None:
+            return 'Analysis Unit'
+        return row[headers[0].get('value')]

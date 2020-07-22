@@ -136,7 +136,8 @@ class Chart(BaseModel):
         chart.circle(
             dataframe["x"], dataframe["y"],
             color=[colormap[x] for x in dataframe['v']],
-            fill_alpha=0.2, size=10)
+            fill_alpha=0.2, size=10
+        )
 
         # output_file("iris.html", title="iris.py example")
         return chart

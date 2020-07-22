@@ -205,3 +205,18 @@ class ViewConfReader():
                         'value': layer.get('id')
                     })
         return initial
+
+    @staticmethod
+    def get_layers_names(headers):
+        ''' Get layers names from headers '''
+        if headers is None:
+            return {}
+        return {
+            hdr.get('layer_id'): hdr.get('text')
+            for
+            hdr
+            in
+            headers
+            if
+            hdr.get('layer_id')
+        }

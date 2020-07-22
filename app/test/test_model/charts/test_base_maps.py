@@ -300,38 +300,37 @@ class BaseMapGetTooltipDataTest(unittest.TestCase):
             ).to_dict(orient="records"),
             expect
         )
-    # @staticmethod
-    # def get_tooltip_data(dataframe, chart_options, options):
-    #     ''' Creates tooltip content series from given options and dataframe '''
-    #     # Get pivoted dataframe for tooltip list creation
-    #     df_tooltip = dataframe.copy().pivot_table(
-    #         index=[
-    #             chart_options.get('id_field', 'cd_mun_ibge'),
-    #             chart_options.get('name_field', 'nm_municipio'),
-    #             chart_options.get('lat', 'latitude'),
-    #             chart_options.get('long', 'longitude')
-    #         ],
-    #         columns='cd_indicador',
-    #         fill_value=0
-    #     )
-    #     df_tooltip.columns = ['_'.join(reversed(col)).strip() for col in df_tooltip.columns.values]
-    #     df_tooltip = df_tooltip.reset_index()
-    #     # Tooltip gen function
-    #     def tooltip_gen(au_row, **kwargs):
-    #         if 'headers' in options:
-    #             marker_tooltip = "".join([
-    #                 f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>"
-    #                 for
-    #                 hdr
-    #                 in
-    #                 kwargs.get('headers')
-    #             ])
-    #             return f"<table>{marker_tooltip}</table>"
-    #         return "Tooltip!"
-    #     # Merge dataframe and pivoted dataframe
-    #     df_tooltip['tooltip'] = df_tooltip.apply(
-    #         tooltip_gen,
-    #         headers=options.get("headers"),
-    #         axis=1
-    #     )
-    #     return df_tooltip[[chart_options.get('id_field', 'cd_mun_ibge'), 'tooltip']]
+
+class BaseMapGetAuTitleTest(unittest.TestCase):
+    ''' Test behaviours linked to fetching tooltip series based on given configuration '''
+    DEFAULT_TITLE = "Analysis Unit"
+    def test_au_title_no_headers(self):
+        ''' Tests if default title is returned when no headers are given '''
+        self.assertEqual(
+            BaseMap.get_au_title({'field': 'field_value'}, None),
+            self.DEFAULT_TITLE
+        )
+
+    def test_au_title_empty_headers(self):
+        ''' Tests if default title is returned when empty header is given '''
+        self.assertEqual(
+            BaseMap.get_au_title({'field': 'field_value'}, []),
+            self.DEFAULT_TITLE
+        )
+
+    def test_au_title_no_data(self):
+        ''' Tests if default title is returned when row object is None '''
+        self.assertEqual(
+            BaseMap.get_au_title(None, [{'value': 'field'}]),
+            self.DEFAULT_TITLE
+        )
+
+    def test_au_title_valid(self):
+        ''' Tests if the title is generated correctly '''
+        self.assertEqual(
+            BaseMap().get_au_title(
+                {'field': 'field_value'},
+                [{'value': 'field'}, {'value': 'field_2'}]
+            ),
+            "field_value"
+        )

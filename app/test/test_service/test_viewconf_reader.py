@@ -661,14 +661,40 @@ class ViewConfGetCardDescriptorTest(unittest.TestCase):
             {"id": "right"}
         )
 
-    # @classmethod
-    # def get_card_descriptor(cls, language, observatory, scope, dimension, card_id):
-    #     ''' Gets a single card from a viewconf yaml as a dictionary '''
-    #     dim = cls.get_dimension_descriptor(language, observatory, scope, dimension)
-    #     if dim.get('secoes'):
-    #         for secao in dim.get('secoes'):
-    #             if secao.get('cards'):
-    #                 for card in secao.get('cards'):
-    #                     if card.get('id') == card_id:
-    #                         return card
-    #     return None
+class ViewConfGetLayersNamesTest(unittest.TestCase):
+    ''' Test behaviours linked to getting layer names from headers '''
+    def test_layer_names_no_headers(self):
+        ''' Tests if an empty dictionary is returned when no header is sent '''
+        self.assertEqual(
+            ViewConfReader.get_layers_names(None),
+            {}
+        )
+
+    def test_layer_names_empty_headers(self):
+        ''' Tests if an empty dictionary is returned when an empty header is sent '''
+        self.assertEqual(
+            ViewConfReader.get_layers_names([]),
+            {}
+        )
+
+    def test_layer_names_no_valid_layer_in_header(self):
+        ''' Tests if an empty list is returned when no item in header
+            has an identifier '''
+        self.assertEqual(
+            ViewConfReader.get_layers_names([
+                {'value': 'layer_1', 'text': 'layer 1'},
+                {'value': 'layer_2', 'text': 'layer 2'}
+            ]),
+            {}
+        )
+
+    def test_layer_names(self):
+        ''' Tests if headers are decoded to layer names adequately '''
+        self.assertEqual(
+            ViewConfReader.get_layers_names([
+                {'layer_id': 'layer_1', 'text': 'layer 1'},
+                {'text': 'invalid layer', 'value': 'value_field'},
+                {'layer_id': 'layer_2', 'text': 'layer 2'}
+            ]),
+            {'layer_1': 'layer 1', 'layer_2': 'layer 2'}
+        )

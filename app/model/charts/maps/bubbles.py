@@ -5,6 +5,7 @@ from folium import CircleMarker
 from folium.plugins import TimestampedGeoJson
 from folium.map import FeatureGroup
 from model.charts.maps.base import BaseMap
+from service.viewconf_reader import ViewConfReader
 
 class Bubbles(BaseMap):
     ''' Heatmap building class '''
@@ -15,7 +16,11 @@ class Bubbles(BaseMap):
         ''' Gera um mapa topojson a partir das opções enviadas '''
         # http://localhost:5000/charts/cluster?from_viewconf=S&au=2927408&card_id=mapa_prev_estado&observatory=te&dimension=prevalencia&as_image=N
         chart_options = options.get('chart_options')
-        dataframe = self.prepare_dataframe(dataframe, chart_options)
+        dataframe = self.prepare_dataframe(
+            dataframe,
+            chart_options,
+            self.get_tooltip_data(dataframe, chart_options, options)
+        )
 
         # Creating map instance
         result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
@@ -35,17 +40,6 @@ class Bubbles(BaseMap):
             axis=1
         )
 
-        # Adding tooltips to detailed dataframe
-        dataframe = pd.merge(
-            dataframe,
-            self.get_tooltip_data(dataframe, chart_options, options),
-            left_on=chart_options.get('id_field', 'cd_mun_ibge'),
-            right_on=chart_options.get('id_field', 'cd_mun_ibge'),
-            how="left"
-        )
-        dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
-        dataframe = dataframe.set_index('idx')
-
         grouped = dataframe.groupby(chart_options.get('layer_id', 'cd_indicador'))
         show = True # Shows only the first layer
         for group_id, group in grouped:
@@ -59,15 +53,7 @@ class Bubbles(BaseMap):
             if 'timeseries' not in chart_options:
                 # Creating a layer for the group
                 layer = FeatureGroup(
-                    name={
-                        hdr.get('layer_id'): hdr.get('text')
-                        for
-                        hdr
-                        in
-                        options.get('headers')
-                        if
-                        hdr.get('layer_id')
-                    }.get(group_id),
+                    name=ViewConfReader.get_layers_names(options.get('headers')).get(group_id),
                     show=show
                 )
                 show = False

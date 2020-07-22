@@ -15,7 +15,7 @@ class Heat(BaseMap):
 
         dataframe = self.prepare_dataframe(dataframe, chart_options)
         centroide = None
-        
+
         # Creating map instance
         result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
 
@@ -26,16 +26,7 @@ class Heat(BaseMap):
         options['headers'] = self.get_headers(chart_options, options)
 
         # Get group names from headers
-        group_names = {
-            hdr.get('layer_id'): hdr.get('text')
-            for
-            hdr
-            in
-            options.get('headers')
-            if
-            hdr.get('layer_id')
-        }
-
+        group_names = ViewConfReader.get_layers_names(options.get('headers'))
         grouped = dataframe.groupby(chart_options.get('layer_id', 'cd_indicador'))
         show = True # Shows only the first
         for group_id, group in grouped:
@@ -77,10 +68,6 @@ class Heat(BaseMap):
             values=chart_options.get('value_field', 'vl_indicador')
         ).reset_index().iloc[0]
 
-        au_title = 'Analysis Unit'
-        if len(options.get('headers', [])) > 0:
-            au_title = au_row[options.get('headers', [])[0]['value']]
-
         if chart_options.get('lat', 'latitude') in list(dataframe.columns):
             centroide = [
                 au_row[chart_options.get('lat', 'latitude')],
@@ -88,7 +75,9 @@ class Heat(BaseMap):
             ]
 
         if centroide:
-            marker_layer = folium.map.FeatureGroup(name=au_title)
+            marker_layer = folium.map.FeatureGroup(
+                name=self.get_au_title(au_row, options.get('headers'))
+            )
             folium.map.Marker(
                 centroide,
                 tooltip=self.tooltip_gen(au_row, headers=options.get('headers')),

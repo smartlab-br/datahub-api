@@ -1,6 +1,5 @@
 ''' Testes do formatador '''
 import unittest
-from multidict import MultiDict
 from service.qry_options_builder import QueryOptionsBuilder
 
 class OptionsBuilderTest(unittest.TestCase):

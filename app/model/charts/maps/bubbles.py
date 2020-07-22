@@ -1,5 +1,4 @@
 ''' Model for fetching chart '''
-import folium
 import pandas as pd
 from folium import CircleMarker
 from folium.plugins import TimestampedGeoJson
@@ -20,7 +19,7 @@ class Bubbles(BaseMap):
             dataframe, chart_options, options,
             self.get_tooltip_data(dataframe, chart_options, options)
         )
-        
+
         # Adding circle radius to dataset
         chart_options['base_radius'] = chart_options.get('base_radius', self.BASE_RADIUS)
         chart_options['multiplier'] = chart_options.get('multiplier', self.RADIUS_MULTIPLIER)

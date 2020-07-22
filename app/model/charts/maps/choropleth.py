@@ -90,7 +90,7 @@ class Choropleth(BaseMap):
         if np.issubdtype(dataframe.index.dtype, np.number):
             analysis_unit = int(analysis_unit)
         au_row = dataframe.loc[analysis_unit]
-        
+
         if 'latitude' in list(dataframe.columns):
             centroide = [au_row['latitude'], au_row['longitude']]
 

@@ -124,7 +124,9 @@ class ViewConfReader():
     @staticmethod
     def get_proportional_indicator_uf(row, **kwargs):
         ''' Custom function to get the data as a positive number based on moved log curve '''
-        return np.log(((row.get(kwargs.get('campo', 'vl_indicador')) - row.get(kwargs.get('media', 'media_uf'))) / row.get(kwargs.get('media', 'media_uf'))) + 1.01)
+        val = row.get(kwargs.get('campo', 'vl_indicador'))
+        mean_val = row.get(kwargs.get('media', 'media_uf'))
+        return np.log(((val - mean_val) / mean_val) + 1.01)
 
     @staticmethod
     def get_chart_title(options):
@@ -146,7 +148,7 @@ class ViewConfReader():
         # Check if color list is given, escaping if true
         if options and options.get('chart_options', {}).get('colorArray'):
             return options.get('chart_options', {}).get('colorArray')
-        scale_def = {'name': 'Blues'}    
+        scale_def = {'name': 'Blues'}
         if options is not None:
             scale_def = options.get('chart_options', {}).get('colorScale', {'name': 'Blues'})
             if options.get('type') == 'multiple-charts':

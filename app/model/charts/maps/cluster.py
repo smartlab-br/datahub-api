@@ -1,5 +1,4 @@
 ''' Model for fetching chart '''
-import folium
 from folium.plugins import MarkerCluster
 from model.charts.maps.base import BaseMap
 from service.viewconf_reader import ViewConfReader
@@ -17,17 +16,26 @@ class Cluster(BaseMap):
         #     {'text': 'te_rgt_agr_sum_vl_indicador', "value": 'te_rgt_agr_sum_vl_indicador'},
         #     {'text': 'te_rgt_api_calc_min_part', "value": 'te_rgt_api_calc_min_part'},
         #     {'text': 'te_rgt_api_calc_max_part', "value": 'te_rgt_api_calc_max_part'},
-        #     {'text': 'te_rgt_api_calc_ln_norm_pos_part', "value": 'te_rgt_api_calc_ln_norm_pos_part'},
+        #     {
+        #         'text': 'te_rgt_api_calc_ln_norm_pos_part',
+        #         "value": 'te_rgt_api_calc_ln_norm_pos_part'
+        #     },
 
         #     {'text': 'te_res_agr_sum_vl_indicador', "value": 'te_res_agr_sum_vl_indicador'},
         #     {'text': 'te_res_api_calc_min_part', "value": 'te_res_api_calc_min_part'},
         #     {'text': 'te_res_api_calc_max_part', "value": 'te_res_api_calc_max_part'},
-        #     {'text': 'te_res_api_calc_ln_norm_pos_part', "value": 'te_rgt_api_calc_ln_norm_pos_part'},
+        #     {
+        #         'text': 'te_res_api_calc_ln_norm_pos_part',
+        #         "value": 'te_rgt_api_calc_ln_norm_pos_part'
+        #     },
 
         #     {'text': 'te_nat_agr_sum_vl_indicador', "value": 'te_nat_agr_sum_vl_indicador'},
         #     {'text': 'te_nat_api_calc_min_part', "value": 'te_nat_api_calc_min_part'},
         #     {'text': 'te_nat_api_calc_max_part', "value": 'te_nat_api_calc_max_part'},
-        #     {'text': 'te_nat_api_calc_ln_norm_pos_part', "value": 'te_nat_api_calc_ln_norm_pos_part'}
+        #     {
+        #         'text': 'te_nat_api_calc_ln_norm_pos_part',
+        #         "value": 'te_nat_api_calc_ln_norm_pos_part'
+        #     }
         # ]
 
         (dataframe, result, options) = self.pre_draw(

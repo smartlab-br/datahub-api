@@ -73,6 +73,11 @@ class BaseResource(Resource):
         ''' Constrói as opções da pesquisa '''
         return QueryOptionsBuilder.build_options(r_args, rules)
 
+    @staticmethod
+    def build_person_options(r_args, mod='empresa'):
+        ''' Constrói as opções da pesquisa '''
+        return QueryOptionsBuilder.build_person_options(r_args, mod)
+
     def __init__(self):
         ''' Construtor'''
         self.domain = None

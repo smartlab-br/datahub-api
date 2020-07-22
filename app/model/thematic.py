@@ -33,7 +33,9 @@ class Thematic(BaseModel):
         },
         'trabalho': {
             'datasets': [
-                'catweb', 'incidenciaescravidao', 'migracoesescravos',
+                'catweb', 'rais', 'cagedtrabalhador', 'caged',
+                'cagedsaldo', 'cagedtrabalhadorano',
+                'incidenciaescravidao', 'migracoesescravos',
                 'operacoesresgate', 'teindicadoresnacionais',
                 'teindicadoresmunicipais', 'teindicadoresestaduais',
                 'teindicadoresunidadempt', 'temlexposicaoresgate',
@@ -43,6 +45,27 @@ class Thematic(BaseModel):
             'source': {
                 'fonte': 'Ministério da Economia - Secretaria de Trabalho',
                 'link': 'http://trabalho.gov.br/'
+            }
+        },
+        'denatran': {
+            'datasets': ['renavam', 'aeronaves'],
+            'source': {
+                'fonte': 'Denatran',
+                'link': 'https://infraestrutura.gov.br/denatran'
+            }
+        },
+        'mpt': {
+            'datasets': ['auto'],
+            'source': {
+                'fonte': 'MPT - Ministério Público do Trabalho',
+                'link': 'https://mpt.mp.br'
+            }
+        },
+        'rfb': {
+            'datasets': ['rfb', 'rfbsocios', 'rfbparticipacaosocietaria'],
+            'source': {
+                'fonte': 'Receita Federal',
+                'link': 'https://receita.economia.gov.br/'
             }
         },
         'assistenciasocial': {
@@ -89,3 +112,19 @@ class Thematic(BaseModel):
                 if options.get('theme') in each_source['datasets']:
                     return each_source['source']
         return self.METADATA['ibge']['source']
+
+    def get_column_defs(self, table_name):
+        ''' Get the column name definitions, according to the table '''
+        return self.get_repo().get_column_defs(table_name)
+    
+    def decode_column_defs(self, original, table_name, perspective):
+        ''' Get the column name definitions, according to the table and the perspective '''
+        return self.get_repo().decode_column_defs(original, table_name, perspective)
+    
+    def get_persp_values(self, theme):
+        ''' Get the perspective values for a theme '''
+        return self.get_repo().PERSP_VALUES.get(theme)
+
+    def get_persp_columns(self, theme):
+        ''' Get the perspective values for a theme '''
+        return self.get_repo().PERSP_COLUMNS.get(theme)

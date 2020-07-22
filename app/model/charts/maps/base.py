@@ -1,6 +1,7 @@
 ''' Base class for maps '''
 import folium
 import numpy as np
+import pandas as pd
 from service.viewconf_reader import ViewConfReader
 
 class BaseMap():
@@ -30,30 +31,31 @@ class BaseMap():
             }\
         </style>"
 
-    @staticmethod
-    def add_au_marker(folium_map, dataframe, analysis_unit, options, chart_options):
+    def add_au_marker(self, folium_map, analysis_unit, **kwargs):
         ''' Adds a marker for current analysis unit in the map '''
         # Adding marker to current analysis unit
-        if np.issubdtype(dataframe.index.dtype, np.number):
+        if np.issubdtype(kwargs.get('dataframe').index.dtype, np.number):
             analysis_unit = int(analysis_unit)
 
-        au_row = dataframe.loc[analysis_unit].reset_index().iloc[0]
+        au_row = kwargs.get('dataframe').loc[analysis_unit].reset_index().iloc[0]
 
         centroide = None
-        if chart_options.get('lat', 'latitude') in list(dataframe.columns):
+        if kwargs.get('chart_options', {}).get('lat', 'latitude') in list(kwargs.get('dataframe').columns):
             centroide = [
-                au_row[chart_options.get('lat', 'latitude')].item(),
-                au_row[chart_options.get('long', 'longitude')].item()
+                au_row[kwargs.get('chart_options', {}).get('lat', 'latitude')].item(),
+                au_row[kwargs.get('chart_options', {}).get('long', 'longitude')].item()
             ]
 
         if centroide:
             marker_layer = folium.map.FeatureGroup(
-                name=self.get_au_title(au_row, options.get('headers'))
+                name=self.get_au_title(au_row, kwargs.get('options', {}).get('headers'))
             )
             folium.map.Marker(
                 centroide,
                 tooltip=au_row.get('tooltip', "Tooltip!"),
-                icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
+                icon=folium.Icon(color=ViewConfReader.get_marker_color(
+                    kwargs.get('options')
+                ))
             ).add_to(marker_layer)
             marker_layer.add_to(folium_map)
         return folium_map

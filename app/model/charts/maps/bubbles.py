@@ -107,6 +107,11 @@ class Bubbles(BaseMap):
 
                 show = False
 
-        result = self.add_au_marker(result, dataframe, options.get('au'), options, chart_options)
+        result = self.add_au_marker(
+            result, options.get('au'),
+            dataframe=dataframe,
+            options=options,
+            chart_options=chart_options
+        )
         result = self.post_adjustments(result, dataframe, chart_options)
         return result

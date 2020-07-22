@@ -32,7 +32,10 @@ class BaseRepository():
         "sisben": "nu_cnpj_raiz",
         "catweb": {
             "empregador":{"column": "nu_cnpj_raiz_empregador", "flag": "tp_empregador"},
-            "concessao": {"column": "nu_cnpj_raiz_empregador_concessao", "flag": "tp_empregador_concessao"},
+            "concessao": {
+                "column": "nu_cnpj_raiz_empregador_concessao",
+                "flag": "tp_empregador_concessao"
+            },
             "aeps": {"column": "nu_cnpj_raiz_empregador_aeps", "flag": "tp_empregador_aeps"},
             "tomador": {"column": "tp_tomador", "flag": "nu_cnpj_raiz_tomador"}
         },
@@ -54,7 +57,10 @@ class BaseRepository():
         'sisben': 'nu_cnpj',
         "catweb": {
             "empregador":{"column": "nu_cnpj_empregador", "flag": "tp_empregador"},
-            "concessao": {"column": "nu_cnpj_empregador_concessao", "flag": "tp_empregador_concessao"},
+            "concessao": {
+                "column": "nu_cnpj_empregador_concessao",
+                "flag": "tp_empregador_concessao"
+            },
             "aeps": {"column": "nu_cnpj_empregador_aeps", "flag": "tp_empregador_aeps"},
             "tomador": {"column": "tp_tomador", "flag": "nu_cnpj_tomador"}
         }
@@ -165,15 +171,15 @@ class BaseRepository():
             'persp_options': self.PERSP_VALUES.get(table_name),
             'compet': self.COMPET_COLUMNS.get(table_name)
         }
-    
+
     @staticmethod
     def decode_column_defs(original, table_name, perspective):
         ''' Get the column definitions from a dataframe with a certain perspective'''
         result = original.copy()
-        result['cnpj_raiz'] = original.get('cnpj_raiz',{}).get(perspective,{}).get('column')
-        result['cnpj_raiz_flag'] = original.get('cnpj_raiz',{}).get(perspective,{}).get('flag')
-        result['cnpj'] = original.get('cnpj',{}).get(perspective,{}).get('column')
-        result['cnpj_flag'] = original.get('cnpj',{}).get(perspective,{}).get('flag')
+        result['cnpj_raiz'] = original.get('cnpj_raiz', {}).get(perspective, {}).get('column')
+        result['cnpj_raiz_flag'] = original.get('cnpj_raiz', {}).get(perspective, {}).get('flag')
+        result['cnpj'] = original.get('cnpj', {}).get(perspective, {}).get('column')
+        result['cnpj_flag'] = original.get('cnpj', {}).get(perspective, {}).get('flag')
         return result
 
     def get_table_name(self, theme):
@@ -523,7 +529,7 @@ class HadoopRepository(BaseRepository):
             str_offset = f'OFFSET {options.get("offset")}'
         if 'theme' not in options:
             options['theme'] = 'MAIN'
-        
+
         query = self.get_named_query('QRY_FIND_DATASET').format(
             str_categorias,
             self.get_table_name(options.get('theme')),

@@ -45,7 +45,7 @@ class ThematicRepository(ImpalaRepository):
 
         'rais': 'compliance.tb_rais',
         'rfb': "compliance.rfb_dados_cadastrais_2018",
-        'sisben': "compliance.concessao_2018",
+        'sisben_c': "compliance.concessao_2018",
         'catweb_c': "compliance.catweb",
         'auto': "compliance.tb_auto",
         'caged': "compliance.tb_caged_estab",

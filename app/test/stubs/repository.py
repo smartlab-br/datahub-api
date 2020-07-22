@@ -1,5 +1,4 @@
 ''' Stubs for model testing '''
-from io import StringIO
 import pandas as pd
 from repository.base import BaseRepository, HadoopRepository
 from repository.thematic import ThematicRepository

@@ -9,6 +9,7 @@ class Report(Empresa):
     REDIS_KEY = 'rmd:{}'
     REDIS_STATUS_KEY = 'rmd:st:{}:{}'
     STATUS = ['FAILED', 'PROCESSING', 'SUCCESS']
+    DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
     def __init__(self):
         ''' Construtor '''
@@ -67,7 +68,7 @@ class Report(Empresa):
         reqtime = datetime.now()
         for st in self.STATUS:
             if st == status:
-                self.get_repo().store_status(self.REDIS_STATUS_KEY.format(st, cnpj_raiz), reqtime.strftime("%Y-%m-%d %H:%M:%S"))
+                self.get_repo().store_status(self.REDIS_STATUS_KEY.format(st, cnpj_raiz), reqtime.strftime(self.DATE_FORMAT))
             else:
                 # Removes old status from REDIS
                 try:
@@ -86,9 +87,9 @@ class Report(Empresa):
                 pass
             if redis_report_status is None:
                 continue
-            if st == 'PROCESSING' and (datetime.now() - datetime.strptime(redis_report_status, "%Y-%m-%d %H:%M:%S")).days > 1:
+            if st == 'PROCESSING' and (datetime.now() - datetime.strptime(redis_report_status, self.DATE_FORMAT)).days > 1:
                 return 'RENEWING'
-            elif st == 'SUCCESS' and (datetime.now() - datetime.strptime(redis_report_status, "%Y-%m-%d %H:%M:%S")).days > 30:
+            elif st == 'SUCCESS' and (datetime.now() - datetime.strptime(redis_report_status, self.DATE_FORMAT)).days > 30:
                 return 'UNLOCKING'
             return st
         return None # No status found

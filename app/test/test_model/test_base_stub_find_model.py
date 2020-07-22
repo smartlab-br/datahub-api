@@ -1,7 +1,6 @@
 '''Main tests in API'''
 import unittest
-from test.stubs.constants \
-    import COMMON_EXPECTED_RESPONSE_STRING, COMMON_OPTIONS
+from test.stubs.constants import COMMON_OPTIONS
 from test.stubs.repository import StubFindModelRepository, StubFindModelCutRepository
 from model.base import BaseModel
 
@@ -95,7 +94,10 @@ class BaseModelFindJoinedDatasetTest(unittest.TestCase):
         self.assertEqual(
             model.find_joined_dataset(
                 {
-                    "categorias": ['nm_indicador', 'nu_competencia', 'vl_indicador', 'lat_mun', 'long_mun'],
+                    "categorias": [
+                        'nm_indicador', 'nu_competencia', 'vl_indicador',
+                        'lat_mun', 'long_mun'
+                    ],
                     "valor": ['vl_indicador'],
                     "agregacao": ['sum'],
                     "ordenacao": ['-nm_indicador'],

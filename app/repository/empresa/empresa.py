@@ -17,7 +17,7 @@ class EmpresaRepository(HBaseRepository):
                 options.get('column_family'),
                 options.get('column')
             )
-            
+
             # Result splitting according to perspectives
             nu_results = {}
             for ds_key in result:
@@ -53,12 +53,11 @@ class EmpresaRepository(HBaseRepository):
                             list_dimred.append('col_compet')
                     result[ds_key] = result[ds_key][list_dimred]
 
-                # Captura de metadados
-                
                 # Conversão dos datasets em json
                 result[ds_key] = json.loads(result[ds_key].to_json(orient="records"))
 
             return result
+        return None
 
     @staticmethod
     def filter_by_person(dataframe, options, col_cnpj_name, col_pf_name):

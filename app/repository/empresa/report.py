@@ -1,5 +1,4 @@
 ''' Repository para recuperar informações de uma empresa '''
-import base64
 from kafka import KafkaProducer
 from flask import current_app
 from repository.base import RedisRepository
@@ -18,7 +17,7 @@ class ReportRepository(RedisRepository):
         # Then publishes to Kafka
         producer.send("polaris-compliance-input-report", bytes(cnpj_raiz, 'utf-8'))
         producer.close()
-    
+
     def store_status(self, key, value):
         ''' Store status in REDIS '''
         self.get_dao().set(key, value)

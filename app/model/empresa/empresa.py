@@ -1,8 +1,8 @@
 ''' Repository para recuperar informações da CEE '''
 from datetime import datetime
-import requests
 import json
 import re
+import requests
 from kafka import KafkaProducer
 from flask import current_app
 from model.thematic import Thematic
@@ -19,7 +19,7 @@ class Empresa(BaseModel):
         'rfbparticipacaosocietaria', 'aeronaves', 'renavam', 'cagedsaldo',
         'cagedtrabalhador', 'cagedtrabalhadorano'
     ]
-    
+
     def __init__(self):
         ''' Construtor '''
         self.repo = None
@@ -102,7 +102,7 @@ class Empresa(BaseModel):
         if (not options.get('column_family') or
                 not rules_dao.DATASETS.get((options.get('column_family')))):
             raise ValueError('Dataset inválido')
-        if (options.get('column') and 
+        if (options.get('column') and
                 options.get('column') not in rules_dao.DATASETS.get((options.get('column_family'))).split(',')):
             raise ValueError('Competência inválida para o dataset informado')
         loading_status_dao = PessoaDatasetsRepository()
@@ -126,7 +126,7 @@ class Empresa(BaseModel):
                                 len(col_val.split('|')) > 1 and
                                 (datetime.strptime(col_val.split('|')[1], "%Y-%m-%d") - datetime.now()).days > 30):
                             is_valid = False
-                
+
                 if 'column' in options:
                     column_status = self.assess_column_status(
                         slot_list.split(','),
@@ -136,7 +136,7 @@ class Empresa(BaseModel):
                     if options.get('column_family') == dataframe:
                         column_status_specific = column_status
             if columns_available:
-                    loading_entry[dataframe] = columns_available
+                loading_entry[dataframe] = columns_available
 
         # Overrides if there's a specific column status
         if column_status_specific is not None:
@@ -155,7 +155,7 @@ class Empresa(BaseModel):
                 'INGESTED' in columns_available[column]):
             return 'DEPRECATED'
         return 'UNAVAILABLE'
-    
+
     def get_statistics(self, options):
         ''' Gets statistics for a company using impala '''
         if options.get('column_family'):
@@ -174,20 +174,27 @@ class Empresa(BaseModel):
             # Autos and Catweb need a timeframe to filter
             if df in ['auto', 'catweb'] and 'column' not in options:
                 raise AttributeError(f'{df} demanda uma competência')
-            
+
             # If the dataset doesn't have a unique column to identify a company
             if isinstance(cols.get('cnpj_raiz'), dict) and options.get('perspective') is None and thematic_handler.get_persp_values(df):
                 local_result = {}
                 for each_persp_key, each_persp_value in thematic_handler.get_persp_values(df).items():
                     local_cols = thematic_handler.decode_column_defs(cols, df, each_persp_key)
-                    local_options = self.get_stats_local_options(options, local_cols, df, each_persp_key)
+                    local_options = self.get_stats_local_options(
+                        options,
+                        local_cols,
+                        df,
+                        each_persp_key
+                    )
                     if df != 'catweb':
                         local_options["where"].append(f"and")
-                        local_options["where"].append(f"eq-{thematic_handler.get_persp_columns(df)}-{each_persp_value}")
+                        local_options["where"].append(
+                            f"eq-{thematic_handler.get_persp_columns(df)}-{each_persp_value}"
+                        )
                     base_stats = json.loads(thematic_handler.find_dataset(local_options))
                     if df not in result:
                         result[df] = base_stats.get('metadata')
-                    if base_stats.get('dataset',[]):
+                    if base_stats.get('dataset', []):
                         local_result[each_persp_key] = base_stats.get('dataset')[0]
                     else: # TODO - How to express no value??
                         local_result[each_persp_key] = {'agr_count': 0}
@@ -198,17 +205,29 @@ class Empresa(BaseModel):
                 result[df]['stats_persp'] = local_result
             else:
                 if isinstance(cols.get('cnpj_raiz'), dict):
-                    local_cols = thematic_handler.decode_column_defs(local_cols, df, options.get('perspective'))
-                local_options = self.get_stats_local_options(options, local_cols, df, options.get('perspective'))
+                    local_cols = thematic_handler.decode_column_defs(
+                        local_cols,
+                        df,
+                        options.get('perspective')
+                    )
+                local_options = self.get_stats_local_options(
+                    options,
+                    local_cols,
+                    df,
+                    options.get('perspective')
+                )
                 base_stats = thematic_handler.find_dataset(local_options)
                 result[df] = base_stats.get('metadata')
-                
-                if base_stats.get('dataset',[]):
+
+                if base_stats.get('dataset', []):
                     result[df]["stats"] = base_stats.get('dataset')[0]
                 else: # TODO - How to express no value??
                     result[df]["stats"] = {'agr_count': 0}
 
-                result[df] = {**result[df], **self.get_grouped_stats(thematic_handler, local_options, cols)}
+                result[df] = {
+                    **result[df],
+                    **self.get_grouped_stats(thematic_handler, local_options, cols)
+                }
         return result
 
     def get_stats_local_options(self, options, local_cols, df, persp):
@@ -216,11 +235,17 @@ class Empresa(BaseModel):
         subset_rules = [f"eq-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}"]
         # Change initial subset_rules for renavam and aeronaves
         if df == 'cagedsaldo':
-            subset_rules = [f"eqlpint-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-14-0-1-8"]
+            subset_rules = [
+                f"eqlpint-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-14-0-1-8"
+            ]
         elif df == 'rfbsocios': # Some columns are varchar
-            subset_rules = [f"eqlponstr-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-8-0-1-8"]
+            subset_rules = [
+                f"eqlponstr-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-8-0-1-8"
+            ]
         elif df == 'rfbparticipacaosocietaria': # Some columns are varchar
-            subset_rules = [f"eqlponstr-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-14-0-1-8"]
+            subset_rules = [
+                f"eqlponstr-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-14-0-1-8"
+            ]
         elif df in ['catweb', 'auto']: # Some columns are varchar
             subset_rules = [f"eq-{local_cols.get('cnpj_raiz')}-'{options.get('cnpj_raiz')}'"]
         elif df == 'aeronaves':
@@ -235,19 +260,19 @@ class Empresa(BaseModel):
                 "and",
                 f"eqsz-{local_cols.get('cnpj_raiz')}-14"
             ]
-        elif df == 'sisben':        
+        elif df == 'sisben':
             subset_rules = [
                 f"eq-{local_cols.get('cnpj_raiz')}-'{options.get('cnpj_raiz')}'",
                 "and",
                 f"ne-{local_cols.get('cnpj')}-'00000000000000'"
             ]
-        
+
         if 'cnpj_raiz_flag' in local_cols:
             subset_rules.append("and")
             subset_rules.append(f"eq-{local_cols.get('cnpj_raiz_flag')}-'1'")
 
         # Add cnpj filter
-        if options.get('cnpj'): 
+        if options.get('cnpj'):
             subset_rules.append("and")
             subset_rules.append(f"eq-{local_cols.get('cnpj')}-{options.get('cnpj')}")
             if 'cnpj_flag' in local_cols:
@@ -255,13 +280,16 @@ class Empresa(BaseModel):
                 subset_rules.append(f"eq-{local_cols.get('cnpj_flag')}-'1'")
 
         # Add pf filter
-        if options.get('id_pf'): 
+        if options.get('id_pf'):
             subset_rules.append("and")
             subset_rules.append(f"eq-{local_cols.get('pf')}-{options.get('id_pf')}")
 
         # Add timeframe filter
-        ds_no_compet = ['catweb', 'sisben', 'auto', 'rfb', 'rfbsocios', 'rfbparticipacaosocietaria', 'aeronaves', 'renavam']
-        if options.get('column') and df not in ds_no_compet: 
+        ds_no_compet = [
+            'catweb', 'sisben', 'auto', 'rfb', 'rfbsocios',
+            'rfbparticipacaosocietaria', 'aeronaves', 'renavam'
+        ]
+        if options.get('column') and df not in ds_no_compet:
             subset_rules.append("and")
             subset_rules.append(f"eq-{local_cols.get('compet')}-{options.get('column')}")
 
@@ -274,9 +302,13 @@ class Empresa(BaseModel):
             subset_rules.append("and")
             subset_rules.append(f"nl-dtcancelamento")
             subset_rules.append("and")
-            subset_rules.append(f"gestr-{local_cols.get('compet')}-\'{options.get('column')}\-01\-01\'-1-10")
+            subset_rules.append(
+                f"gestr-{local_cols.get('compet')}-\'{options.get('column')}\-01\-01\'-1-10"
+            )
             subset_rules.append("and")
-            subset_rules.append(f"lestr-{local_cols.get('compet')}-\'{options.get('column')}\-12\-31\'-1-10")
+            subset_rules.append(
+                f"lestr-{local_cols.get('compet')}-\'{options.get('column')}\-12\-31\'-1-10"
+            )
         elif df == 'catweb':
             subset_rules.append("and")
             subset_rules.append(f"ge-{local_cols.get('compet')}-\'{options.get('column')}0101\'")
@@ -285,23 +317,23 @@ class Empresa(BaseModel):
         elif df in ['caged', 'cagedsaldo', 'cagedtrabalhador', 'cagedtrabalhadorano']:
             subset_rules.append("and")
             subset_rules.append(f"eq-tipo_estab-1")
-        
-        if df == 'catweb':
-            return {
-                "categorias": [local_cols.get('cnpj_raiz')],
-                "agregacao": ['count'],
-                "where": subset_rules,
-                "theme": 'catweb_c' # Disambiguation
-            }
+
         if df == 'cagedsaldo':
             return {
                 "categorias": ['\'1\'-pos'],
-                "valor": ['qtd_admissoes','qtd_desligamentos','saldo_mov'],
+                "valor": ['qtd_admissoes', 'qtd_desligamentos', 'saldo_mov'],
                 "agregacao": ['count'],
                 "where": subset_rules,
                 "theme": df
             }
-        elif df in ['rfb','rfbsocios','rfbparticipacaosocietaria']:
+        if df in ['catweb', 'sisben']:
+            return {
+                "categorias": [local_cols.get('cnpj_raiz')],
+                "agregacao": ['count'],
+                "where": subset_rules,
+                "theme": f'{df}_c' # Disambiguation
+            }
+        if df in ['rfb', 'rfbsocios', 'rfbparticipacaosocietaria']:
             return {
                 "categorias": ['\'1\'-pos'],
                 "agregacao": ['count'],
@@ -314,13 +346,13 @@ class Empresa(BaseModel):
             "agregacao": ['count'],
             "where": subset_rules,
             "theme": df
-        }    
+        }
 
     @staticmethod
     def get_grouped_stats(thematic_handler, options, cols):
         ''' Get stats for dataframe partitions '''
         # TODO 2 - Remove .0 from compet grouping
-        result = {}        
+        result = {}
 
         options['as_pandas'] = True
         options['no_wrap'] = True
@@ -330,18 +362,27 @@ class Empresa(BaseModel):
             options["categorias"] = [cols.get('cnpj')]
             options["ordenacao"] = [cols.get('cnpj')]
             result["stats_estab"] = json.loads(
-                thematic_handler.find_dataset(options).set_index(cols.get('cnpj')).to_json(orient="index")
+                thematic_handler.find_dataset(options).set_index(cols.get('cnpj')).to_json(
+                    orient="index"
+                )
             )
 
         # Get statistics partitioning by timeframe
-        ds_no_compet = ['catweb', 'sisben', 'auto', 'rfb', 'rfbsocios', 'rfbparticipacaosocietaria', 'aeronaves', 'renavam']
-        if 'compet' in cols and options.get('theme') not in ds_no_compet: # Ignores datasources with no timeframe definition
+        ds_no_compet = [
+            'catweb', 'sisben', 'auto', 'rfb', 'rfbsocios',
+            'rfbparticipacaosocietaria', 'aeronaves', 'renavam'
+        ]
+
+        # Ignores datasources with no timeframe definition
+        if 'compet' in cols and options.get('theme') not in ds_no_compet:
             options["categorias"] = [cols.get('compet')]
             options["ordenacao"] = [f"-{cols.get('compet')}"]
             result["stats_compet"] = json.loads(
-                thematic_handler.find_dataset(options).set_index(cols.get('compet')).to_json(orient="index")
+                thematic_handler.find_dataset(options).set_index(cols.get('compet')).to_json(
+                    orient="index"
+                )
             )
-        
+
             # Get statistics partitioning by unit and timeframe
             options["categorias"] = [cols.get('cnpj'), cols.get('compet')]
             options["ordenacao"] = [f"-{cols.get('compet')}"]
@@ -351,7 +392,7 @@ class Empresa(BaseModel):
             result["stats_estab_compet"] = json.loads(
                 df_local_result.set_index('idx').to_json(orient="index")
             )
-    
+
         ## RETIRADO pois a granularidade torna imviável a performance
         # metadata['stats_pf'] = dataframe[
         #     [col_pf_name, 'col_compet']
@@ -363,5 +404,5 @@ class Empresa(BaseModel):
         # ].groupby(
         #     ['col_compet', col_cnpj_name]
         # ).describe(include='all')
-        
+
         return result

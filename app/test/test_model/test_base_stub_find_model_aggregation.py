@@ -1,7 +1,6 @@
 '''Main tests in API'''
 import unittest
-from test.stubs.constants \
-    import COMMON_EXPECTED_RESPONSE_STRING, COMMON_OPTIONS
+from test.stubs.constants import COMMON_OPTIONS
 from test.stubs.repository import StubFindModelAgrRepository
 from model.base import BaseModel
 

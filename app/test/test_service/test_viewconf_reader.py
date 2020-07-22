@@ -393,10 +393,7 @@ class ViewConfSetCustomOptionsTest(unittest.TestCase):
 
 class ViewConfGetHeadersFromDescriptorTest(unittest.TestCase):
     ''' Test behaviours linked to getting headers from descriptos in the card from YAML '''
-    BASE_INITIAL = [{
-        'text': 'Analysis Unit',
-        'value': 'nm_municipio'
-    }]
+    BASE_INITIAL = [{'text': '', 'value': 'nm_municipio'}]
 
     def test_no_descriptor(self):
         ''' Tests resulting headers when no descriptor is sent '''

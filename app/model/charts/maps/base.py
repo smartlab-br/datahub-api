@@ -82,11 +82,11 @@ class BaseMap():
         if 'headers' in options:
             return options.get('headers')
         if chart_options is None:
-            return [{'text': 'Analysis Unit', 'value': 'nm_municipio'}]
+            return [{'text': '', 'value': 'nm_municipio'}]
         return ViewConfReader.get_headers_from_options_descriptor(
             options.get('description'),
             [{
-                'text': 'Analysis Unit',
+                'text': '',
                 'value': chart_options.get('name_field', 'nm_municipio')
             }]
         )
@@ -171,3 +171,20 @@ class BaseMap():
         if headers is None or len(headers) <= 0 or row is None:
             return 'Analysis Unit'
         return row[headers[0].get('value')]
+
+    def pre_draw(self, dataframe, chart_options, options, tooltip_data):
+        ''' Common setup for dataframe and map '''
+        options['headers'] = self.get_headers(chart_options, options)
+        return (
+            self.prepare_dataframe(
+                dataframe,
+                chart_options,
+                tooltip_data
+            ),
+            folium.Map(
+                tiles=self.TILES_URL,
+                attr=self.TILES_ATTRIBUTION,
+                control_scale=True
+            ),
+            options
+        )

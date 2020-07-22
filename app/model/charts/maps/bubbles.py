@@ -16,17 +16,11 @@ class Bubbles(BaseMap):
         ''' Gera um mapa topojson a partir das opções enviadas '''
         # http://localhost:5000/charts/cluster?from_viewconf=S&au=2927408&card_id=mapa_prev_estado&observatory=te&dimension=prevalencia&as_image=N
         chart_options = options.get('chart_options')
-        dataframe = self.prepare_dataframe(
-            dataframe,
-            chart_options,
+        (dataframe, result, options) = self.pre_draw(
+            dataframe, chart_options, options,
             self.get_tooltip_data(dataframe, chart_options, options)
         )
-
-        # Creating map instance
-        result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
-
-        options['headers'] = self.get_headers(chart_options, options)
-
+        
         # Adding circle radius to dataset
         chart_options['base_radius'] = chart_options.get('base_radius', self.BASE_RADIUS)
         chart_options['multiplier'] = chart_options.get('multiplier', self.RADIUS_MULTIPLIER)

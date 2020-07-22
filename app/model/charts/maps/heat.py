@@ -13,17 +13,15 @@ class Heat(BaseMap):
         analysis_unit = options.get('au')
         chart_options = options.get('chart_options')
 
-        dataframe = self.prepare_dataframe(dataframe, chart_options)
+        (dataframe, result, options) = self.pre_draw(
+            dataframe, chart_options, options,
+            self.get_tooltip_data(dataframe, chart_options, options)
+        )
+
         centroide = None
-
-        # Creating map instance
-        result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
-
         cols = [chart_options.get('lat', 'lat'), chart_options.get('long', 'long')]
         if 'value_field' in chart_options:
             cols.append(chart_options.get('value_field'))
-
-        options['headers'] = self.get_headers(chart_options, options)
 
         # Get group names from headers
         group_names = ViewConfReader.get_layers_names(options.get('headers'))

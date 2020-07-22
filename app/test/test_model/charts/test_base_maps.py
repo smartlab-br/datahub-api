@@ -1,6 +1,7 @@
 '''Main tests in API'''
 import unittest
 import pandas as pd
+from folium.folium import Map as FoliumMap
 from model.charts.maps.base import BaseMap
 
 class BaseMapGetHeadersTest(unittest.TestCase):
@@ -54,13 +55,13 @@ class BaseMapGetHeadersTest(unittest.TestCase):
         options = {'description': self.BASE_DESCRIPTION}
         self.assertEqual(
             BaseMap.get_headers(None, options),
-            [{'text': 'Analysis Unit', 'value': 'nm_municipio'}]
+            [{'text': '', 'value': 'nm_municipio'}]
         )
 
     def test_existing_description(self):
         ''' Tests if returns the expected header build using card description options '''
         options = {'description': self.BASE_DESCRIPTION}
-        expect = [{'text': 'Analysis Unit', 'value': 'au_field'}]
+        expect = [{'text': '', 'value': 'au_field'}]
         expect.extend(self.BASE_EXPECT)
         self.assertEqual(
             BaseMap.get_headers({'name_field': 'au_field'}, options),
@@ -71,7 +72,7 @@ class BaseMapGetHeadersTest(unittest.TestCase):
         ''' Tests if returns the expected result, with default 'nm_municipio' header
             when there's no name_field attribute in chart_options '''
         options = {'description': self.BASE_DESCRIPTION}
-        expect = [{'text': 'Analysis Unit', 'value': 'nm_municipio'}]
+        expect = [{'text': '', 'value': 'nm_municipio'}]
         expect.extend(self.BASE_EXPECT)
         self.assertEqual(BaseMap.get_headers({}, options), expect)
 
@@ -334,3 +335,32 @@ class BaseMapGetAuTitleTest(unittest.TestCase):
             ),
             "field_value"
         )
+
+class BaseMapPreDrawTest(unittest.TestCase):
+    ''' Test behaviours linked to common folium map draw capabilities '''
+    DATAFRAME = pd.DataFrame([
+        {"cd_mun_ibge": 123456, 'cd_indicador': 1},
+        {"cd_mun_ibge": 234567, 'cd_indicador': 2},
+        {"cd_mun_ibge": 345678, 'cd_indicador': 3}
+    ])
+
+    def test_simple_return(self):
+        ''' Simple test using parameters from each method invoke made in
+            pre_draw '''
+        (dataframe, folium_map, options) = BaseMap().pre_draw(
+            self.DATAFRAME.copy(),
+            {},
+            {'headers': {'name': 'test'}},
+            None
+        )
+
+        self.assertEqual(
+            dataframe.to_dict(orient="records"),
+            [
+                {"cd_mun_ibge": 123456, 'cd_indicador': 1, 'str_id': '123456'},
+                {"cd_mun_ibge": 234567, 'cd_indicador': 2, 'str_id': '234567'},
+                {"cd_mun_ibge": 345678, 'cd_indicador': 3, 'str_id': '345678'}
+            ]
+        )
+        self.assertTrue(isinstance(folium_map, FoliumMap))
+        self.assertEqual(options, {'headers': {'name': 'test'}})

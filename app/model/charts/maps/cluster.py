@@ -1,5 +1,4 @@
 ''' Model for fetching chart '''
-import pandas as pd
 import folium
 from folium.plugins import MarkerCluster
 from model.charts.maps.base import BaseMap
@@ -31,16 +30,10 @@ class Cluster(BaseMap):
         #     {'text': 'te_nat_api_calc_ln_norm_pos_part', "value": 'te_nat_api_calc_ln_norm_pos_part'}
         # ]
 
-        dataframe = self.prepare_dataframe(
-            dataframe,
-            chart_options,
+        (dataframe, result, options) = self.pre_draw(
+            dataframe, chart_options, options,
             self.get_tooltip_data(dataframe, chart_options, options)
         )
-
-        # Creating map instance
-        result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
-
-        options['headers'] = self.get_headers(chart_options, options)
 
         grouped = dataframe.groupby(chart_options.get('layer_id', 'cd_indicador'))
         show = True # Shows only the first layer

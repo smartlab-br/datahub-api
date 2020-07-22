@@ -31,7 +31,7 @@ class ChartFactoryCreateTest(unittest.TestCase):
         ''' Tests if create returns a Bubbles '''
         chart = ChartFactory().create({"chart_type": "MAP_BUBBLES"})
         self.assertTrue(isinstance(chart, Bubbles))
-    
+
     def test_instantiation_line(self):
         ''' Tests if create returns a line chart '''
         chart = ChartFactory().create({"chart_type": "LINE"})

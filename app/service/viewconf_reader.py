@@ -35,12 +35,16 @@ class ViewConfReader():
     @staticmethod
     def get_dimension_descriptor(language, observatory, scope, dimension):
         ''' Gets the dimension YAML descriptor as dictionary '''
-        location = app.config['GIT_VIEWCONF_BASE_URL'].format(
-            f'{language}/observatorio/{observatory}/localidade/',
-            scope,
-            dimension
+        return yaml.load(
+            requests.get(
+                app.config['GIT_VIEWCONF_BASE_URL'].format(
+                    f'{language}/observatorio/{observatory}/localidade/',
+                    scope,
+                    dimension
+                ),
+                verify=False
+            ).content
         )
-        return yaml.load(requests.get(location, verify=False).content)
 
     @classmethod
     def api_to_options(cls, api_call_obj, custom_args):
@@ -69,12 +73,12 @@ class ViewConfReader():
     def get_card_descriptor(cls, language, observatory, scope, dimension, card_id):
         ''' Gets a single card from a viewconf yaml as a dictionary '''
         dim = cls.get_dimension_descriptor(language, observatory, scope, dimension)
-        if dim.get('secoes'):
-            for secao in dim.get('secoes'):
-                if secao.get('cards'):
-                    for card in secao.get('cards'):
-                        if card.get('id') == card_id:
-                            return card
+        if dim is None:
+            return None
+        for secao in dim.get('secoes', []):
+            for card in secao.get('cards', []):
+                if card.get('id') == card_id:
+                    return card
         return None
 
     @staticmethod
@@ -120,7 +124,9 @@ class ViewConfReader():
     @staticmethod
     def get_proportional_indicator_uf(row, **kwargs):
         ''' Custom function to get the data as a positive number based on moved log curve '''
-        return np.log(((row.get(kwargs.get('campo', 'vl_indicador')) - row.get(kwargs.get('media', 'media_uf'))) / row.get(kwargs.get('media', 'media_uf'))) + 1.01)
+        val = row.get(kwargs.get('campo', 'vl_indicador'))
+        mean_val = row.get(kwargs.get('media', 'media_uf'))
+        return np.log(((val - mean_val) / mean_val) + 1.01)
 
     @staticmethod
     def get_chart_title(options):
@@ -142,7 +148,7 @@ class ViewConfReader():
         # Check if color list is given, escaping if true
         if options and options.get('chart_options', {}).get('colorArray'):
             return options.get('chart_options', {}).get('colorArray')
-        scale_def = {'name': 'Blues'}    
+        scale_def = {'name': 'Blues'}
         if options is not None:
             scale_def = options.get('chart_options', {}).get('colorScale', {'name': 'Blues'})
             if options.get('type') == 'multiple-charts':
@@ -201,3 +207,18 @@ class ViewConfReader():
                         'value': layer.get('id')
                     })
         return initial
+
+    @staticmethod
+    def get_layers_names(headers):
+        ''' Get layers names from headers '''
+        if headers is None:
+            return {}
+        return {
+            hdr.get('layer_id'): hdr.get('text')
+            for
+            hdr
+            in
+            headers
+            if
+            hdr.get('layer_id')
+        }

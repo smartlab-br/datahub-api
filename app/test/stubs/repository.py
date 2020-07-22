@@ -2,6 +2,7 @@
 from io import StringIO
 import pandas as pd
 from repository.base import BaseRepository, HadoopRepository
+from repository.thematic import ThematicRepository
 
 class StubRepository(BaseRepository):
     ''' Fake repo to test instance methods '''
@@ -65,6 +66,21 @@ class StubFindModelRepository(StubRepository):
         dataset = pd.read_csv(str_dataset, sep=";")
         return dataset
 
+class StubFindModelCutRepository(StubFindModelRepository):
+    ''' Fake repo to test instance methods '''
+    #pylint: disable=R0201
+    def find_dataset(self, _options):
+        ''' Retorno estático para execução dos testes '''
+        return pd.DataFrame([
+            {"idade": 10, "agr_count": 25},
+            {"idade": 15, "agr_count": 25},
+            {"idade": 20, "agr_count": 35},
+            {"idade": 25, "agr_count": 50},
+            {"idade": 30, "agr_count": 100},
+            {"idade": 35, "agr_count": 43},
+            {"idade": 60, "agr_count": 12}
+        ])
+
 class StubFindModelAgrRepository(StubFindModelRepository):
     ''' Fake repo to test instance methods '''
     def find_dataset(self, _options):
@@ -77,3 +93,9 @@ class StubFindModelAgrRepository(StubFindModelRepository):
         )
         dataset = pd.read_csv(str_dataset, sep=";")
         return dataset
+
+class StubThematicRepository(ThematicRepository):
+    ''' Fake repo to test instance methods '''
+    def load_and_prepare(self):
+        ''' Overriding method outside test scope '''
+        self.dao = 'Instanciei o DAO'

@@ -1,8 +1,8 @@
 ''' Model for fetching chart '''
 import folium
 import numpy as np
-from model.charts.maps.base import BaseMap
 from folium.plugins import HeatMap, HeatMapWithTime
+from model.charts.maps.base import BaseMap
 from service.viewconf_reader import ViewConfReader
 
 class Heat(BaseMap):
@@ -13,36 +13,18 @@ class Heat(BaseMap):
         analysis_unit = options.get('au')
         chart_options = options.get('chart_options')
 
-        dataframe['str_id'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')].astype(str)
-        dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
+        (dataframe, result, options) = self.pre_draw(
+            dataframe, chart_options, options,
+            self.get_tooltip_data(dataframe, chart_options, options)
+        )
 
-        # Runs dataframe modifiers from viewconf
-        # dataframe = ViewConfReader().generate_columns(dataframe, options)
-
-        dataframe = dataframe.set_index('idx')
         centroide = None
-        marker_tooltip = ''
-
-        # Creating map instance
-        result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
-
         cols = [chart_options.get('lat', 'lat'), chart_options.get('long', 'long')]
         if 'value_field' in chart_options:
             cols.append(chart_options.get('value_field'))
 
-        options['headers'] = self.get_headers(chart_options, options)
-
         # Get group names from headers
-        group_names = {
-            hdr.get('layer_id'): hdr.get('text')
-            for
-            hdr
-            in
-            options.get('headers')
-            if
-            hdr.get('layer_id')
-        }
-
+        group_names = ViewConfReader.get_layers_names(options.get('headers'))
         grouped = dataframe.groupby(chart_options.get('layer_id', 'cd_indicador'))
         show = True # Shows only the first
         for group_id, group in grouped:
@@ -84,33 +66,19 @@ class Heat(BaseMap):
             values=chart_options.get('value_field', 'vl_indicador')
         ).reset_index().iloc[0]
 
-        au_title = 'Analysis Unit'
-        if len(options.get('headers', [])) > 0:
-            au_title = au_row[options.get('headers', [])[0]['value']]
-
         if chart_options.get('lat', 'latitude') in list(dataframe.columns):
             centroide = [
                 au_row[chart_options.get('lat', 'latitude')],
                 au_row[chart_options.get('long', 'longitude')]
             ]
 
-        if 'headers' in options:
-            marker_tooltip = "".join([
-                f"<tr style='text-align: left;'><th style='padding: 4px; padding-right: 10px;'>{hdr.get('text').encode('ascii', 'xmlcharrefreplace').decode()}</th><td style='padding: 4px;'>{str(au_row[hdr.get('value')]).encode('ascii', 'xmlcharrefreplace').decode()}</td></tr>"
-                for
-                hdr
-                in
-                options.get('headers')
-            ])
-            marker_tooltip = f"<table>{marker_tooltip}</table>"
-        else:
-            marker_tooltip = "Tooltip!"
-
         if centroide:
-            marker_layer = folium.map.FeatureGroup(name=au_title)
+            marker_layer = folium.map.FeatureGroup(
+                name=self.get_au_title(au_row, options.get('headers'))
+            )
             folium.map.Marker(
                 centroide,
-                tooltip=marker_tooltip,
+                tooltip=self.tooltip_gen(au_row, headers=options.get('headers')),
                 icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
             ).add_to(marker_layer)
             marker_layer.add_to(result)

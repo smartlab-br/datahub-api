@@ -336,8 +336,12 @@ class BaseModel():
 
     def find_and_operate(self, operation, options=None):
         ''' Obtém um conjunto de dados e opera em cima deles '''
+        if options is None:
+            return self.find_dataset(options)
         local_options = options.copy()
-        ejected_filters = local_options.pop('where')
+        ejected_filters = []
+        if 'where' in local_options:
+            ejected_filters = local_options.pop('where')
 
         # Convert filter strings to actionable list
         (reinserted_filters, ejected_filters) = self.reform_filters_for_pandas(ejected_filters)

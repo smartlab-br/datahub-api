@@ -1,15 +1,15 @@
 ''' Model for fetching chart '''
 import io
 from html.parser import HTMLParser
-from model.base import BaseModel
-from model.thematic import Thematic
 from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.io.export import get_screenshot_as_png
-from service.viewconf_reader import ViewConfReader
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from model.base import BaseModel
+from model.thematic import Thematic
+from service.viewconf_reader import ViewConfReader
 from factory.chart import ChartFactory
 
 class Chart(BaseModel):
@@ -32,15 +32,27 @@ class Chart(BaseModel):
                 options.get('card_id')
             )
             # TODO - [REMOVE] Testing heatmap with time series
-            # struct['api']['template'] = "/te/indicadoresmunicipais?categorias=latitude,nu_competencia,longitude,cd_mun_ibge,nm_municipio,cd_indicador&valor=vl_indicador&agregacao=sum&filtros=nn-vl_indicador,and,in-cd_indicador-'te_rgt'-'te_nat'-'te_res',and,eq-cd_uf-{0}&calcs=ln_norm_pos_part"
+            # struct['api']['template'] = "/te/indicadoresmunicipais?"
+            # "categorias=latitude,nu_competencia,longitude,cd_mun_ibge,nm_municipio,cd_indicador&"
+            # "valor=vl_indicador&agregacao=sum&"
+            # "filtros=nn-vl_indicador,and,in-cd_indicador-'te_rgt'-'te_nat'-'te_res',"
+            # "and,eq-cd_uf-{0}&calcs=ln_norm_pos_part"
             # struct['chart_options']['timeseries'] = 'nu_competencia'
 
             # TODO - [REMOVE] Testing bubbles with time series
-            # struct['api']['template'] = "/te/indicadoresmunicipais?categorias=latitude,longitude,cd_mun_ibge,nm_municipio,nu_competencia,cd_indicador&valor=vl_indicador&agregacao=sum&filtros=nn-vl_indicador,and,in-cd_indicador-'te_rgt'-'te_nat'-'te_res',and,eq-cd_uf-{0}&calcs=ln_norm_pos_part"
+            # struct['api']['template'] = "/te/indicadoresmunicipais?"
+            # "categorias=latitude,longitude,cd_mun_ibge,nm_municipio,nu_competencia,cd_indicador&"
+            # "valor=vl_indicador&agregacao=sum&"
+            # "filtros=nn-vl_indicador,and,in-cd_indicador-'te_rgt'-'te_nat'-'te_res',"
+            # "and,eq-cd_uf-{0}&calcs=ln_norm_pos_part"
             # struct['chart_options']['timeseries'] = 'nu_competencia'
 
             # TODO - [REMOVE] Testing pyramid with cut
-            # struct['api']['template'] = "/sst/cats/cut-idade_cat?categorias=idade_cat,cd_tipo_sexo_empregado_cat&agregacao=count&filtros=eq-cd_municipio_ibge_dv-{0},and,ne-cd_tipo_sexo_empregado_cat-'Não informado',and,ne-idade_cat-0"
+            # struct['api']['template'] = "/sst/cats/cut-idade_cat?"
+            # "categorias=idade_cat,cd_tipo_sexo_empregado_cat&"
+            # "agregacao=count&"
+            # "filtros=eq-cd_municipio_ibge_dv-{0},and,"
+            # "ne-cd_tipo_sexo_empregado_cat-'Não informado',and,ne-idade_cat-0"
 
             options = {
                 **options,
@@ -113,11 +125,14 @@ class Chart(BaseModel):
             )
 
             return driver.get_screenshot_as_png()
+        return None
 
     @staticmethod
     def get_dynamic_chart(chart, lib):
         ''' Gets dynamic chart '''
-        # /charts?theme=teindicadoresmunicipais&categorias=ds_agreg_primaria&valor=vl_indicador&agregacao=SUM&filtros=eq-cd_mun_ibge-2927408,and,eq-cd_indicador-%27te_nat_ocup_atual%27
+        # /charts?theme=teindicadoresmunicipais&categorias=ds_agreg_primaria&
+        # valor=vl_indicador&agregacao=SUM&filtros=eq-cd_mun_ibge-2927408,and,
+        # eq-cd_indicador-%27te_nat_ocup_atual%27
         if lib == 'BOKEH':
             (script, div) = components(chart)
             return {
@@ -126,6 +141,7 @@ class Chart(BaseModel):
             }
         if lib == 'FOLIUM':
             return {'div': chart._repr_html_(), 'mime': 'text/html'}
+        return None
 
     @staticmethod
     def draw_scatter(dataframe, _options):
@@ -136,7 +152,8 @@ class Chart(BaseModel):
         chart.circle(
             dataframe["x"], dataframe["y"],
             color=[colormap[x] for x in dataframe['v']],
-            fill_alpha=0.2, size=10)
+            fill_alpha=0.2, size=10
+        )
 
         # output_file("iris.html", title="iris.py example")
         return chart

@@ -1,10 +1,10 @@
 ''' Model for fetching chart '''
-import folium
 import pandas as pd
-from model.charts.maps.base import BaseMap
 from folium import CircleMarker
 from folium.plugins import TimestampedGeoJson
 from folium.map import FeatureGroup
+from model.charts.maps.base import BaseMap
+from service.viewconf_reader import ViewConfReader
 
 class Bubbles(BaseMap):
     ''' Heatmap building class '''
@@ -15,34 +15,23 @@ class Bubbles(BaseMap):
         ''' Gera um mapa topojson a partir das opções enviadas '''
         # http://localhost:5000/charts/cluster?from_viewconf=S&au=2927408&card_id=mapa_prev_estado&observatory=te&dimension=prevalencia&as_image=N
         chart_options = options.get('chart_options')
-        dataframe = self.prepare_dataframe(dataframe, chart_options)
-
-        # Creating map instance
-        result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
-
-        options['headers'] = self.get_headers(chart_options, options)
+        (dataframe, result, options) = self.pre_draw(
+            dataframe, chart_options, options,
+            self.get_tooltip_data(dataframe, chart_options, options)
+        )
 
         # Adding circle radius to dataset
         chart_options['base_radius'] = chart_options.get('base_radius', self.BASE_RADIUS)
         chart_options['multiplier'] = chart_options.get('multiplier', self.RADIUS_MULTIPLIER)
         def get_circle_radius(row, **kwargs):
-            return chart_options.get('base_radius') + chart_options.get('multiplier') * row[chart_options.get('value_field', 'api_calc_ln_norm_pos_part')]
+            chart_options = kwargs.get('chart_options')
+            value = row[chart_options.get('value_field', 'api_calc_ln_norm_pos_part')]
+            return chart_options.get('base_radius') + chart_options.get('multiplier') * value
         dataframe['radius'] = dataframe.apply(
             get_circle_radius,
             chart_options=chart_options,
             axis=1
         )
-
-        # Adding tooltips to detailed dataframe
-        dataframe = pd.merge(
-            dataframe,
-            self.get_tooltip_data(dataframe, chart_options, options),
-            left_on=chart_options.get('id_field', 'cd_mun_ibge'),
-            right_on=chart_options.get('id_field', 'cd_mun_ibge'),
-            how="left"
-        )
-        dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
-        dataframe = dataframe.set_index('idx')
 
         grouped = dataframe.groupby(chart_options.get('layer_id', 'cd_indicador'))
         show = True # Shows only the first layer
@@ -57,15 +46,7 @@ class Bubbles(BaseMap):
             if 'timeseries' not in chart_options:
                 # Creating a layer for the group
                 layer = FeatureGroup(
-                    name={
-                        hdr.get('layer_id'): hdr.get('text')
-                        for
-                        hdr
-                        in
-                        options.get('headers')
-                        if
-                        hdr.get('layer_id')
-                    }.get(group_id),
+                    name=ViewConfReader.get_layers_names(options.get('headers')).get(group_id),
                     show=show
                 )
                 show = False
@@ -88,7 +69,7 @@ class Bubbles(BaseMap):
                 layer.add_to(result)
             else:
                 features = []
-                for row_index, row in group.iterrows():
+                for _row_index, row in group.iterrows():
                     features.append({
                         'type': 'Feature',
                         'geometry': {
@@ -125,6 +106,11 @@ class Bubbles(BaseMap):
 
                 show = False
 
-        result = self.add_au_marker(result, dataframe, options.get('au'), options, chart_options)
+        result = self.add_au_marker(
+            result, options.get('au'),
+            dataframe=dataframe,
+            options=options,
+            chart_options=chart_options
+        )
         result = self.post_adjustments(result, dataframe, chart_options)
         return result

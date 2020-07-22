@@ -2,7 +2,7 @@
 import unittest
 from test.stubs.constants \
     import COMMON_EXPECTED_RESPONSE_STRING, COMMON_OPTIONS
-from test.stubs.repository import StubFindModelRepository
+from test.stubs.repository import StubFindModelRepository, StubFindModelCutRepository
 from model.base import BaseModel
 
 class StubFindModel(BaseModel):
@@ -11,6 +11,13 @@ class StubFindModel(BaseModel):
     def get_repo(self):
         ''' Método abstrato para carregamento do repositório '''
         return StubFindModelRepository()
+
+class StubFindModelCut(BaseModel):
+    ''' Classe de STUB da abstração de models '''
+    METADATA = {"fonte": 'Instituto STUB'}
+    def get_repo(self):
+        ''' Método abstrato para carregamento do repositório '''
+        return StubFindModelCutRepository()
 
 class BaseModelFindDatasetTest(unittest.TestCase):
     ''' Classe que testa a obtenção de dados de acordo com os parâmetros
@@ -110,3 +117,15 @@ class BaseModelFindJoinedDatasetTest(unittest.TestCase):
         expected = "".join(str_expected.split())
 
         self.assertEqual(result, expected)
+
+class BaseModelFindAndOperateTest(unittest.TestCase):
+    ''' Tests the behaviours linked to acting on data after retrieval '''
+    def test_no_options(self):
+        ''' Verifica se retorna o dataset apenas com o wrapping '''
+        model = StubFindModelCut()
+        self.assertRaises(
+            AttributeError,
+            model.find_and_operate,
+            'cut',
+            None
+        )

@@ -8,6 +8,14 @@ from flask import current_app as app
 class PandasOperator():
     ''' Class for sequence of pandas datasets manipulations '''
     @classmethod
+    def get_cut_pattern(cls, pattern_id):
+        ''' Gets patterns from GIT '''
+        return yaml.load(requests.get(
+            app.config['GIT_VIEWCONF_BASE_URL'].format('options', 'cut', pattern_id),
+            verify=False
+        ).content)
+
+    @classmethod
     def operate(cls, dataset, operation, categories):
         ''' Runs an aoperation, that functions as a macro for building additional columns in
             a dataset '''
@@ -23,11 +31,10 @@ class PandasOperator():
             if len(pattern) > 2:
                 pattern_id = pattern[2]
             # Gets patterns from GIT
-            location = app.config['GIT_VIEWCONF_BASE_URL'].format('options', 'cut', pattern_id)
             return cls.cut(
                 dataset,
                 target,
-                yaml.load(requests.get(location, verify=False).content),
+                cls.get_cut_pattern(pattern_id),
                 categories
             )
         return dataset
@@ -62,8 +69,8 @@ class PandasOperator():
         cut_vals = pd.cut(
             dataset[target],
             options['bins'],
-            right=options['right'],
-            labels=options['labels']
+            right=options.get('right', True),
+            labels=options.get('labels')
         )
         # Adds resulting vector to dataset
         dataset['cut'] = cut_vals

@@ -17,23 +17,21 @@ class BaseModelFindPivotedDatasetTest(unittest.TestCase):
     def test_pivot(self):
         ''' Verifica se retorna o dataset pivotado e com o wrapping '''
         model = StubFindModelAgr()
-
-        options = {
-            **{
-                "categorias": ['nm_indicador'],
-                "pivot": "nu_competencia",
-                "calcs": None
-            }, **COMMON_OPTIONS
-        }
-        result = "".join(model.find_dataset(options).split())
-
-        str_expected = COMMON_EXPECTED_RESPONSE_STRING.format(
-            """
-            "nm_indicador": "Ficticio",
-            "2047":0.5,
-            "2099":1.0
-            """
+        self.assertEqual(
+            model.find_dataset({
+                **{
+                    "categorias": ['nm_indicador'],
+                    "pivot": "nu_competencia",
+                    "calcs": None
+                },
+                **COMMON_OPTIONS
+            }),
+            {
+                "metadata": {"fonte": "Instituto STUB"},
+                "dataset": [{
+                    "nm_indicador": "Ficticio",
+                    "2047":0.5,
+                    "2099":1.0
+                }]
+            }
         )
-        expected = "".join(str_expected.split())
-
-        self.assertEqual(result, expected)

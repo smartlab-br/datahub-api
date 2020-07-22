@@ -48,7 +48,7 @@ class StubHadoopRepository(HadoopRepository):
         ''' Overriding methd outside test scope '''
         return query
 
-class StubFindModelRepository(StubRepository):
+class StubFindModelRepository(StubHadoopRepository):
     ''' Fake repo to test instance methods '''
     def find_joined_dataset(self, options=None):
         ''' Overriding method outside test scope '''
@@ -57,14 +57,10 @@ class StubFindModelRepository(StubRepository):
     #pylint: disable=R0201
     def find_dataset(self, _options):
         ''' Retorno estático para execução dos testes '''
-        str_dataset = StringIO(
-            """nm_indicador;nu_competencia;vl_indicador
-                Ficticio;2099;1
-                Ficticio;2047;0.5
-                """
-        )
-        dataset = pd.read_csv(str_dataset, sep=";")
-        return dataset
+        return pd.DataFrame([
+            {"nm_indicador": "Ficticio", "nu_competencia": 2099, "vl_indicador": 1},
+            {"nm_indicador": "Ficticio", "nu_competencia": 2047, "vl_indicador": 0.5}
+        ])
 
 class StubFindModelCutRepository(StubFindModelRepository):
     ''' Fake repo to test instance methods '''

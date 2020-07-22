@@ -17,3 +17,16 @@ class BaseRepositoryLoadAndPrepareTest(unittest.TestCase):
         ''' Verifica declaração do método de carregamento do dao. '''
         repo = StubRepository()
         self.assertEqual(repo.get_dao(), 'Instanciei o DAO')
+
+class BaseRepositoryNamedQueryTest(unittest.TestCase):
+    ''' Validates recovery of named query '''
+    def test_validate_positive(self):
+        ''' Verifica correta obtenção de named query '''
+        self.assertEqual(
+            StubRepository().NAMED_QUERIES.get('QRY_FIND_DATASET'),
+            'SELECT {} FROM {} {} {} {}'
+        )
+
+    def test_validate_negative(self):
+        ''' Verifica comportamento de obtenção de named query não mapeada '''
+        self.assertEqual(StubRepository().NAMED_QUERIES.get('FAKE_QUERY'), None)

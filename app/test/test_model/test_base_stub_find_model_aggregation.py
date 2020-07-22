@@ -30,8 +30,8 @@ class BaseModelFindPivotedDatasetTest(unittest.TestCase):
                 "metadata": {"fonte": "Instituto STUB"},
                 "dataset": [{
                     "nm_indicador": "Ficticio",
-                    "2047":0.5,
-                    "2099":1.0
+                    2047: 0.5,
+                    2099: 1.0
                 }]
             }
         )

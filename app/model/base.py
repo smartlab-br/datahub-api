@@ -55,20 +55,20 @@ class BaseModel():
         if dataset is None:
             return None
         if options is not None:
-            if 'as_pandas' in options and options['as_pandas']:
+            if options.get('as_pandas', False):
                 return {
                     "metadata": self.fetch_metadata(options),
                     "dataset": dataset
                 }
-            if 'as_dict' in options and options['as_dict']:
-                return {
-                    "metadata": self.fetch_metadata(options),
-                    "dataset": dataset.to_dict('records')
-                }
-        return f'{{ \
-            "metadata": {json.dumps(self.fetch_metadata(options))}, \
-            "dataset": {dataset.to_json(orient="records")} \
-            }}'
+            if options.get('as_string', False):
+                return f'{{ \
+                    "metadata": {json.dumps(self.fetch_metadata(options))}, \
+                    "dataset": {dataset.to_json(orient="records")} \
+                }}'
+        return {
+            "metadata": self.fetch_metadata(options),
+            "dataset": dataset.to_dict('records')
+        }
 
     def get_repo(self):
         ''' Método abstrato para carregamento do repositório '''

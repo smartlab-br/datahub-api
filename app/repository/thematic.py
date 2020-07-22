@@ -20,6 +20,7 @@ class ThematicRepository(ImpalaRepository):
 
         'sisben': 'sst_beneficio',
         'catweb': 'sst_cat',
+        'sstcats': 'sst_cat',
         'sstindicadoresnacionais': 'sst_indicadores_br',
         'sstindicadoresmunicipais': 'sst_indicadores_mun',
         'sstindicadoresestaduais': 'sst_indicadores_mun',
@@ -38,20 +39,23 @@ class ThematicRepository(ImpalaRepository):
         'censoagromunicipal': 'censo_agro',
         'censoagroestadual': 'censo_agro_uf',
         'censoagronacional': 'censo_agro_br',
+        'ticensoagromunicipal': 'censo_agro',
+        'ticensoagroestadual': 'censo_agro_uf',
+        'ticensoagronacional': 'censo_agro_br',
 
-        'rais': 'tb_rais',
-        'rfb': "rfb_dados_cadastrais_2018",
-        'sisben': "concessao_2018",
-        'catweb': "catweb",
-        'auto': "tb_auto",
-        'caged': "tb_caged_estab",
-        'rfbsocios': "rfb_dados_socios_tratado",
-        'rfbparticipacaosocietaria': "rfb_dados_socios_tratado", # Lookup diferente, mas mesma tabela
-        'aeronaves': "tb_aeronaves",
-        'renavam': "tb_renavam_2018",
-        'cagedsaldo': "tb_caged_saldos",
-        'cagedtrabalhador': "tb_caged_trabalhador",
-        'cagedtrabalhadorano': "tb_caged_trabalhador", # Temporalidade diferente, mas mesma tabela
+        'rais': 'compliance.tb_rais',
+        'rfb': "compliance.rfb_dados_cadastrais_2018",
+        'sisben': "compliance.concessao_2018",
+        'catweb_c': "compliance.catweb",
+        'auto': "compliance.tb_auto",
+        'caged': "compliance.tb_caged_estab",
+        'rfbsocios': "compliance.rfb_dados_socios_tratado",
+        'rfbparticipacaosocietaria': "compliance.rfb_dados_socios_tratado", # Lookup diferente, mas mesma tabela
+        'aeronaves': "compliance.tb_aeronaves",
+        'renavam': "compliance.tb_renavam_2018",
+        'cagedsaldo': "compliance.tb_caged_saldos",
+        'cagedtrabalhador': "compliance.tb_caged_trabalhador",
+        'cagedtrabalhadorano': "compliance.tb_caged_trabalhador", # Temporalidade diferente, mas mesma tabela
 
         'incidenciaescravidao': 'incidencia_trabalho_escravo',
         'migracoesescravos': 'te_migracoes',
@@ -63,7 +67,10 @@ class ThematicRepository(ImpalaRepository):
         'temlexposicaoresgate': 'te_exposicao_rgt_mun',
         'temlexposicaoresgatefeatures': 'te_exposicao_rgt_feat_importance_mun',
         'temlexposicaonaturais': 'te_exposicao_nat_mun',
-        'temlexposicaonaturaisfeatures': 'te_exposicao_nat_feat_importance_mun'
+        'temlexposicaonaturaisfeatures': 'te_exposicao_nat_feat_importance_mun',
+        'casoscovid19': 'casos_covid_19',
+        'estabelecimentocnes': 'estabelecimento_cnes',
+        'arranjoregic': 'arranjo_regic'
     }
     DEFAULT_PARTITIONING = {
         'MAIN': 'cd_indicador',

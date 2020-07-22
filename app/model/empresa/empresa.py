@@ -190,7 +190,6 @@ class Empresa(BaseModel):
                     if base_stats.get('dataset',[]):
                         local_result[each_persp_key] = base_stats.get('dataset')[0]
                     else: # TODO - How to express no value??
-                        print(base_stats.get('dataset'))
                         local_result[each_persp_key] = {'agr_count': 0}
                     local_result[each_persp_key] = {
                         **local_result[each_persp_key],
@@ -201,14 +200,12 @@ class Empresa(BaseModel):
                 if isinstance(cols.get('cnpj_raiz'), dict):
                     local_cols = thematic_handler.decode_column_defs(local_cols, df, options.get('perspective'))
                 local_options = self.get_stats_local_options(options, local_cols, df, options.get('perspective'))
-                print(local_options)
-                base_stats = json.loads(thematic_handler.find_dataset(local_options))
+                base_stats = thematic_handler.find_dataset(local_options)
                 result[df] = base_stats.get('metadata')
                 
                 if base_stats.get('dataset',[]):
                     result[df]["stats"] = base_stats.get('dataset')[0]
                 else: # TODO - How to express no value??
-                    print(base_stats.get('dataset'))
                     result[df]["stats"] = {'agr_count': 0}
 
                 result[df] = {**result[df], **self.get_grouped_stats(thematic_handler, local_options, cols)}
@@ -289,6 +286,13 @@ class Empresa(BaseModel):
             subset_rules.append("and")
             subset_rules.append(f"eq-tipo_estab-1")
         
+        if df == 'catweb':
+            return {
+                "categorias": [local_cols.get('cnpj_raiz')],
+                "agregacao": ['count'],
+                "where": subset_rules,
+                "theme": 'catweb_c' # Disambiguation
+            }
         if df == 'cagedsaldo':
             return {
                 "categorias": ['\'1\'-pos'],

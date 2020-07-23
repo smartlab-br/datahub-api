@@ -3,6 +3,7 @@ import json
 import base64
 import gzip
 import requests
+from decimal import Decimal
 from impala.util import as_pandas
 from pandas.io.json import json_normalize
 from flask import current_app
@@ -196,7 +197,14 @@ class HadoopRepository(BaseRepository):
         ''' Runs the query in pandas '''
         cursor = self.get_dao().cursor()
         cursor.execute(query)
-        return as_pandas(cursor)
+        df = as_pandas(cursor)
+        if not df.empty:
+            for col in df.columns:
+                if df[col].dtype == object:
+                    lst_objs = df[col].dropna()
+                    if len(lst_objs) > 0 and isinstance(lst_objs.iloc[0],Decimal):
+                        df[col] = df[col].astype(float)
+        return df
 
     @staticmethod
     def build_agr_array(valor=None, agregacao=None):

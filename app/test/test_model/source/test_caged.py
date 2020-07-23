@@ -66,7 +66,7 @@ class CagedSaldoGetOptionsEmpresaTest(unittest.TestCase):
             {
                 'categorias': ['\'1\'-pos'],
                 "valor": ['qtd_admissoes', 'qtd_desligamentos', 'saldo_mov'],
-                'agregacao': ['count'],
+                'agregacao': ['sum'],
                 'where': [
                     "eqlpint-col_cnpj_raiz-12345678-14-0-1-8",
                     "and", "eq-tipo_estab-1"

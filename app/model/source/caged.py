@@ -26,7 +26,7 @@ class CagedSaldo(BaseCaged):
         return {
             "categorias": ['\'1\'-pos'],
             "valor": ['qtd_admissoes', 'qtd_desligamentos', 'saldo_mov'],
-            "agregacao": ['count'],
+            "agregacao": ['sum'],
             "where": subset_rules,
             "theme": df
         }        

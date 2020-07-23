@@ -17,7 +17,7 @@ class RenavamGetOptionsEmpresaTest(unittest.TestCase):
             {
                 'categorias': ['col_cnpj'],
                 'agregacao': ['count'],
-                'where': ["eq-col_cnpj-'12345678'-1-8", "and", "eqsz-col_cnpj-14"],
+                'where': ["eqon-col_cnpj-12345678-1-8", "and", "eqsz-col_cnpj-14"],
                 'theme': 'renavam'
             }
         )

@@ -177,9 +177,14 @@ class Empresa(BaseModel):
                 raise AttributeError(f'{df} demanda uma competência')
 
             # If the dataset doesn't have a unique column to identify a company
-            if isinstance(cols.get('cnpj_raiz'), dict) and options.get('perspective') is None and thematic_handler.get_persp_values(df):
+            if isinstance(cols.get('cnpj_raiz'), dict) and thematic_handler.get_persp_values(df):    
                 local_result = {}
-                for each_persp_key, each_persp_value in thematic_handler.get_persp_values(df).items():
+
+                perspectives = thematic_handler.get_persp_values(df)
+                if options.get('perspective'):
+                    perspectives = {k: v for k, v in perspectives.items() if k == options.get('perspective')}
+
+                for each_persp_key, each_persp_value in perspectives.items():
                     local_cols = thematic_handler.decode_column_defs(cols, df, each_persp_key)
                     local_options = self.get_stats_local_options(
                         options,
@@ -187,24 +192,29 @@ class Empresa(BaseModel):
                         df,
                         each_persp_key
                     )
-
+                    print(local_options)
                     if df != 'catweb':
-                        local_options["where"].append(f"and")
-                        local_options["where"].append(
+                        local_options["where"].extend([
+                            f"and",
                             f"eq-{thematic_handler.get_persp_columns(df)}-{each_persp_value}"
-                        )
+                        ])
                     base_stats = thematic_handler.find_dataset(local_options)
+
                     if df not in result:
                         result[df] = base_stats.get('metadata')
                     if base_stats.get('dataset', []):
                         local_result[each_persp_key] = base_stats.get('dataset')[0]
-                    else: # TODO - How to express no value??
-                        local_result[each_persp_key] = {'agr_count': 0}
+                    else:
+                        local_result[each_persp_key] = self.build_empty_stats(
+                            local_options,
+                            local_cols,
+                            options
+                        )
+
                     local_result[each_persp_key] = {
                         **local_result[each_persp_key],
-                        **self.get_grouped_stats(thematic_handler, local_options, cols)
+                        **self.get_grouped_stats(thematic_handler, options, local_options, local_cols)
                     }
-                result[df]['stats_persp'] = local_result
             else:
                 if isinstance(cols.get('cnpj_raiz'), dict):
                     local_cols = thematic_handler.decode_column_defs(
@@ -218,19 +228,20 @@ class Empresa(BaseModel):
                     df,
                     options.get('perspective')
                 )
-
+                print(local_options)
                 base_stats = thematic_handler.find_dataset(local_options)
                 result[df] = base_stats.get('metadata')
-
-                if base_stats.get('dataset', []):
+                
+                if base_stats.get('dataset',[]):
                     result[df]["stats"] = base_stats.get('dataset')[0]
-                else: # TODO - How to express no value??
-                    result[df]["stats"] = {'agr_count': 0}
+                else:
+                    result[df]["stats"] = self.build_empty_stats(local_options, local_cols, options)
 
                 result[df] = {
                     **result[df],
-                    **self.get_grouped_stats(thematic_handler, local_options, cols)
+                    **self.get_grouped_stats(thematic_handler, options, local_options, cols)
                 }
+
         return result
 
     def get_stats_local_options(self, options, local_cols, df, persp):
@@ -238,131 +249,10 @@ class Empresa(BaseModel):
         return SourceFactory.create(df).get_options_empresa(
             options, local_cols, df, persp
         )
-        # subset_rules = [f"eq-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}"]
-
-        # # Change initial subset_rules
-        # if df == 'cagedsaldo':
-        #     subset_rules = [
-        #         f"eqlpint-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-14-0-1-8"
-        #     ]
-        # elif df == 'rfbsocios': # Some columns are varchar
-        #     subset_rules = [
-        #         f"eqlponstr-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-8-0-1-8"
-        #     ]
-        # elif df == 'rfbparticipacaosocietaria': # Some columns are varchar
-        #     subset_rules = [
-        #         f"eqlponstr-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-14-0-1-8"
-        #     ]
-        # elif df in ['catweb', 'auto']: # Some columns are varchar
-        #     subset_rules = [f"eq-{local_cols.get('cnpj_raiz')}-'{options.get('cnpj_raiz')}'"]
-        # elif df == 'aeronaves':
-        #     subset_rules = [
-        #         f"eqon-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-1-8",
-        #         "and",
-        #         f"neon-{local_cols.get('cnpj_raiz')}-00000000000000"
-        #     ]
-        # elif df == 'renavam':
-        #     subset_rules = [
-        #         f"eq-{local_cols.get('cnpj_raiz')}-'{options.get('cnpj_raiz')}'-1-8",
-        #         "and",
-        #         f"eqsz-{local_cols.get('cnpj_raiz')}-14"
-        #     ]
-        # elif df == 'sisben':
-        #     subset_rules = [
-        #         f"eq-{local_cols.get('cnpj_raiz')}-'{options.get('cnpj_raiz')}'",
-        #         "and",
-        #         f"ne-{local_cols.get('cnpj')}-'00000000000000'"
-        #     ]
-
-        # if 'cnpj_raiz_flag' in local_cols:
-        #     subset_rules.append("and")
-        #     subset_rules.append(f"eq-{local_cols.get('cnpj_raiz_flag')}-'1'")
-
-        # # Add cnpj filter
-        # if options.get('cnpj'):
-        #     subset_rules.append("and")
-        #     subset_rules.append(f"eq-{local_cols.get('cnpj')}-{options.get('cnpj')}")
-        #     if 'cnpj_flag' in local_cols:
-        #         subset_rules.append("and")
-        #         subset_rules.append(f"eq-{local_cols.get('cnpj_flag')}-'1'")
-
-        # # Add pf filter
-        # if options.get('id_pf'):
-        #     subset_rules.append("and")
-        #     subset_rules.append(f"eq-{local_cols.get('pf')}-{options.get('id_pf')}")
-
-        # # Add timeframe filter
-        # ds_no_compet = [
-        #     'catweb', 'sisben', 'auto', 'rfb', 'rfbsocios',
-        #     'rfbparticipacaosocietaria', 'aeronaves', 'renavam'
-        # ]
-        # if options.get('column') and df not in ds_no_compet:
-        #     subset_rules.append("and")
-        #     subset_rules.append(f"eq-{local_cols.get('compet')}-{options.get('column')}")
-
-        # if df == 'rais':
-        #     subset_rules.append("and")
-        #     subset_rules.append(f"eq-tp_estab-1")
-        # elif df == 'auto':
-        #     subset_rules.append("and")
-        #     subset_rules.append(f"eq-tpinscricao-'1'")
-        #     subset_rules.append("and")
-        #     subset_rules.append(f"nl-dtcancelamento")
-        #     subset_rules.append("and")
-        #     subset_rules.append(
-        #         f"gestr-{local_cols.get('compet')}-\'{options.get('column')}\-01\-01\'-1-10"
-        #     )
-        #     subset_rules.append("and")
-        #     subset_rules.append(
-        #         f"lestr-{local_cols.get('compet')}-\'{options.get('column')}\-12\-31\'-1-10"
-        #     )
-        # elif df == 'catweb':
-        #     subset_rules.append("and")
-        #     subset_rules.append(f"ge-{local_cols.get('compet')}-\'{options.get('column')}0101\'")
-        #     subset_rules.append("and")
-        #     subset_rules.append(f"le-{local_cols.get('compet')}-\'{options.get('column')}1231\'")
-        # elif df in ['caged', 'cagedsaldo', 'cagedtrabalhador', 'cagedtrabalhadorano']:
-        #     subset_rules.append("and")
-        #     subset_rules.append(f"eq-tipo_estab-1")
-
-        # if df == 'cagedsaldo':
-        #     return {
-        #         "categorias": ['\'1\'-pos'],
-        #         "valor": ['qtd_admissoes', 'qtd_desligamentos', 'saldo_mov'],
-        #         "agregacao": ['count'],
-        #         "where": subset_rules,
-        #         "theme": df
-        #     }
-        # if df in ['catweb', 'sisben']:
-        #     return {
-        #         "categorias": [local_cols.get('cnpj_raiz')],
-        #         "agregacao": ['count'],
-        #         "where": subset_rules,
-        #         "theme": f'{df}_c' # Disambiguation
-        #     }
-        # if df in ['rfb', 'rfbsocios', 'rfbparticipacaosocietaria']:
-        #     return {
-        #         "categorias": ['\'1\'-pos'],
-        #         "agregacao": ['count'],
-        #         "where": subset_rules,
-        #         "theme": df
-        #     }
-
-        # return {
-        #     "categorias": [local_cols.get('cnpj_raiz')],
-        #     "agregacao": ['count'],
-        #     "where": subset_rules,
-        #     "theme": df
-        # }
 
     @staticmethod
-    def get_grouped_stats(thematic_handler, options, cols):
+    def get_grouped_stats(thematic_handler, original_options, options, cols):
         ''' Get stats for dataframe partitions '''
-        # TODO (UUU) - Problema com catweb
-        # TODO (UUU) - Decimal not serializable rais 2017
-        # TODO (UUU) - None type in options sisben
-        # TODO (UUU) - Testar os filtros de contexto (ex. PF)
-        # TODO 2 - Remove .0 from compet grouping
         result = {}
 
         options['as_pandas'] = True
@@ -370,41 +260,71 @@ class Empresa(BaseModel):
 
         # Get statistics partitioning by unit
         if 'cnpj' not in cols: # Ignores datasources with no cnpj definition
-            options["categorias"] = [cols.get('cnpj')]
-            options["ordenacao"] = [cols.get('cnpj')]
             result["stats_estab"] = json.loads(
-                thematic_handler.find_dataset(options).set_index(cols.get('cnpj')).to_json(
-                    orient="index"
-                )
+                thematic_handler.find_dataset({
+                    **options,
+                    **{
+                        "categorias": [cols.get('cnpj')],
+                        "ordenacao": [cols.get('cnpj')]
+                    }
+                }).set_index(cols.get('cnpj')).to_json(orient="index")
             )
 
         # Get statistics partitioning by timeframe
         ds_no_compet = [
-            'catweb', 'sisben', 'auto', 'rfb', 'rfbsocios',
+            'sisben', 'sisben_c', 'auto', 'rfb', 'rfbsocios',
             'rfbparticipacaosocietaria', 'aeronaves', 'renavam'
         ]
+        ds_displaced_compet = ['catweb', 'catweb_c']
 
         # Ignores datasources with no timeframe definition
-        if 'compet' in cols and options.get('theme') not in ds_no_compet:
-            options["categorias"] = [cols.get('compet')]
-            options["ordenacao"] = [f"-{cols.get('compet')}"]
+        if options.get('theme') not in ds_no_compet:
+            # Get statistics partitioning by timeframe
+            compet_attrib = 'compet' # Single timeframe, no need to group
+            if 'compet' in cols and options.get('theme') not in ds_displaced_compet: # Changes lookup for tables with timeframe values
+                compet_attrib = cols.get('compet')
+                current_df = thematic_handler.find_dataset({
+                    **options,
+                    **{
+                        "categorias": [compet_attrib],
+                        "ordenacao":[f"-{compet_attrib}"]
+                    }
+                })
+            else:
+                current_df = thematic_handler.find_dataset({
+                    **options,
+                    **{
+                        "categorias": [f"\'{original_options.get('column')}\'-compet"],
+                        "ordenacao": ["-compet"]
+                    }
+                })
+                
+            current_df[compet_attrib] = current_df[compet_attrib].apply(str).replace(
+                {'\.0': ''}, regex=True
+            )
             result["stats_compet"] = json.loads(
-                thematic_handler.find_dataset(options).set_index(cols.get('compet')).to_json(
-                    orient="index"
-                )
+                current_df.set_index(compet_attrib).to_json(orient="index")
             )
 
-            # Get statistics partitioning by unit and timeframe
-            options["categorias"] = [cols.get('cnpj'), cols.get('compet')]
-            options["ordenacao"] = [f"-{cols.get('compet')}"]
-
-            df_local_result = thematic_handler.find_dataset(options)
-            df_local_result['idx'] = df_local_result[cols.get('compet')].apply(str) + \
-                '_' + df_local_result[cols.get('cnpj')].apply(str)
+            # Get statistics partitioning by timeframe and units
+            if 'compet' in cols and options.get('theme') not in ds_displaced_compet: # Changes lookup for tables with timeframe values
+                df_local_result = thematic_handler.find_dataset({
+                    **options,
+                    **{"categorias": [cols.get('cnpj'), compet_attrib]}
+                })
+            else:
+                df_local_result = thematic_handler.find_dataset({
+                    **options,
+                    **{"categorias": [cols.get('cnpj'), f"\'{original_options.get('column')}\'-compet"]}
+                })
+            
+            df_local_result['idx'] = df_local_result[compet_attrib].apply(str).replace(
+                {'\.0': ''}, regex=True) + '_' + \
+                df_local_result[cols.get('cnpj')].apply(str).replace({'\.0': ''}, regex=True)
             result["stats_estab_compet"] = json.loads(
                 df_local_result.set_index('idx').to_json(orient="index")
             )
-
+            
         ## RETIRADO pois a granularidade torna imviável a performance
         # metadata['stats_pf'] = dataframe[
         #     [col_pf_name, 'col_compet']
@@ -417,4 +337,16 @@ class Empresa(BaseModel):
         #     ['col_compet', col_cnpj_name]
         # ).describe(include='all')
 
+        return result
+
+    @staticmethod
+    def build_empty_stats(options, cols, original_options):
+        result = {f"{cols.get('cnpj_raiz')}": f"{original_options.get('cnpj_raiz')}"}
+        if 'valor' in options:
+            for val in options.get('valor', []):
+                for agr in options.get('agregacao', []):
+                    result[f"agr_{agr}_{val}"] = 0
+        else:
+            for agr in options.get('agregacao', []):
+                result[f"agr_{agr}"] = 0
         return result

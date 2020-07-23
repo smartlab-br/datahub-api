@@ -10,6 +10,7 @@ from model.base import BaseModel
 from model.empresa.datasets import DatasetsRepository
 from repository.empresa.empresa import EmpresaRepository
 from repository.empresa.pessoadatasets import PessoaDatasetsRepository
+from factory.source import SourceFactory
 
 #pylint: disable=R0903
 class Empresa(BaseModel):
@@ -186,12 +187,13 @@ class Empresa(BaseModel):
                         df,
                         each_persp_key
                     )
+
                     if df != 'catweb':
                         local_options["where"].append(f"and")
                         local_options["where"].append(
                             f"eq-{thematic_handler.get_persp_columns(df)}-{each_persp_value}"
                         )
-                    base_stats = json.loads(thematic_handler.find_dataset(local_options))
+                    base_stats = thematic_handler.find_dataset(local_options)
                     if df not in result:
                         result[df] = base_stats.get('metadata')
                     if base_stats.get('dataset', []):
@@ -216,6 +218,7 @@ class Empresa(BaseModel):
                     df,
                     options.get('perspective')
                 )
+
                 base_stats = thematic_handler.find_dataset(local_options)
                 result[df] = base_stats.get('metadata')
 
@@ -232,125 +235,133 @@ class Empresa(BaseModel):
 
     def get_stats_local_options(self, options, local_cols, df, persp):
         ''' Create options according to tables and queriy conditions '''
-        subset_rules = [f"eq-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}"]
-        # Change initial subset_rules for renavam and aeronaves
-        if df == 'cagedsaldo':
-            subset_rules = [
-                f"eqlpint-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-14-0-1-8"
-            ]
-        elif df == 'rfbsocios': # Some columns are varchar
-            subset_rules = [
-                f"eqlponstr-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-8-0-1-8"
-            ]
-        elif df == 'rfbparticipacaosocietaria': # Some columns are varchar
-            subset_rules = [
-                f"eqlponstr-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-14-0-1-8"
-            ]
-        elif df in ['catweb', 'auto']: # Some columns are varchar
-            subset_rules = [f"eq-{local_cols.get('cnpj_raiz')}-'{options.get('cnpj_raiz')}'"]
-        elif df == 'aeronaves':
-            subset_rules = [
-                f"eqon-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-1-8",
-                "and",
-                f"neon-{local_cols.get('cnpj_raiz')}-00000000000000"
-            ]
-        elif df == 'renavam':
-            subset_rules = [
-                f"eq-{local_cols.get('cnpj_raiz')}-'{options.get('cnpj_raiz')}'-1-8",
-                "and",
-                f"eqsz-{local_cols.get('cnpj_raiz')}-14"
-            ]
-        elif df == 'sisben':
-            subset_rules = [
-                f"eq-{local_cols.get('cnpj_raiz')}-'{options.get('cnpj_raiz')}'",
-                "and",
-                f"ne-{local_cols.get('cnpj')}-'00000000000000'"
-            ]
+        return SourceFactory.create(df).get_options_empresa(
+            options, local_cols, df, persp
+        )
+        # subset_rules = [f"eq-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}"]
 
-        if 'cnpj_raiz_flag' in local_cols:
-            subset_rules.append("and")
-            subset_rules.append(f"eq-{local_cols.get('cnpj_raiz_flag')}-'1'")
+        # # Change initial subset_rules
+        # if df == 'cagedsaldo':
+        #     subset_rules = [
+        #         f"eqlpint-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-14-0-1-8"
+        #     ]
+        # elif df == 'rfbsocios': # Some columns are varchar
+        #     subset_rules = [
+        #         f"eqlponstr-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-8-0-1-8"
+        #     ]
+        # elif df == 'rfbparticipacaosocietaria': # Some columns are varchar
+        #     subset_rules = [
+        #         f"eqlponstr-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-14-0-1-8"
+        #     ]
+        # elif df in ['catweb', 'auto']: # Some columns are varchar
+        #     subset_rules = [f"eq-{local_cols.get('cnpj_raiz')}-'{options.get('cnpj_raiz')}'"]
+        # elif df == 'aeronaves':
+        #     subset_rules = [
+        #         f"eqon-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-1-8",
+        #         "and",
+        #         f"neon-{local_cols.get('cnpj_raiz')}-00000000000000"
+        #     ]
+        # elif df == 'renavam':
+        #     subset_rules = [
+        #         f"eq-{local_cols.get('cnpj_raiz')}-'{options.get('cnpj_raiz')}'-1-8",
+        #         "and",
+        #         f"eqsz-{local_cols.get('cnpj_raiz')}-14"
+        #     ]
+        # elif df == 'sisben':
+        #     subset_rules = [
+        #         f"eq-{local_cols.get('cnpj_raiz')}-'{options.get('cnpj_raiz')}'",
+        #         "and",
+        #         f"ne-{local_cols.get('cnpj')}-'00000000000000'"
+        #     ]
 
-        # Add cnpj filter
-        if options.get('cnpj'):
-            subset_rules.append("and")
-            subset_rules.append(f"eq-{local_cols.get('cnpj')}-{options.get('cnpj')}")
-            if 'cnpj_flag' in local_cols:
-                subset_rules.append("and")
-                subset_rules.append(f"eq-{local_cols.get('cnpj_flag')}-'1'")
+        # if 'cnpj_raiz_flag' in local_cols:
+        #     subset_rules.append("and")
+        #     subset_rules.append(f"eq-{local_cols.get('cnpj_raiz_flag')}-'1'")
 
-        # Add pf filter
-        if options.get('id_pf'):
-            subset_rules.append("and")
-            subset_rules.append(f"eq-{local_cols.get('pf')}-{options.get('id_pf')}")
+        # # Add cnpj filter
+        # if options.get('cnpj'):
+        #     subset_rules.append("and")
+        #     subset_rules.append(f"eq-{local_cols.get('cnpj')}-{options.get('cnpj')}")
+        #     if 'cnpj_flag' in local_cols:
+        #         subset_rules.append("and")
+        #         subset_rules.append(f"eq-{local_cols.get('cnpj_flag')}-'1'")
 
-        # Add timeframe filter
-        ds_no_compet = [
-            'catweb', 'sisben', 'auto', 'rfb', 'rfbsocios',
-            'rfbparticipacaosocietaria', 'aeronaves', 'renavam'
-        ]
-        if options.get('column') and df not in ds_no_compet:
-            subset_rules.append("and")
-            subset_rules.append(f"eq-{local_cols.get('compet')}-{options.get('column')}")
+        # # Add pf filter
+        # if options.get('id_pf'):
+        #     subset_rules.append("and")
+        #     subset_rules.append(f"eq-{local_cols.get('pf')}-{options.get('id_pf')}")
 
-        if df == 'rais':
-            subset_rules.append("and")
-            subset_rules.append(f"eq-tp_estab-1")
-        elif df == 'auto':
-            subset_rules.append("and")
-            subset_rules.append(f"eq-tpinscricao-'1'")
-            subset_rules.append("and")
-            subset_rules.append(f"nl-dtcancelamento")
-            subset_rules.append("and")
-            subset_rules.append(
-                f"gestr-{local_cols.get('compet')}-\'{options.get('column')}\-01\-01\'-1-10"
-            )
-            subset_rules.append("and")
-            subset_rules.append(
-                f"lestr-{local_cols.get('compet')}-\'{options.get('column')}\-12\-31\'-1-10"
-            )
-        elif df == 'catweb':
-            subset_rules.append("and")
-            subset_rules.append(f"ge-{local_cols.get('compet')}-\'{options.get('column')}0101\'")
-            subset_rules.append("and")
-            subset_rules.append(f"le-{local_cols.get('compet')}-\'{options.get('column')}1231\'")
-        elif df in ['caged', 'cagedsaldo', 'cagedtrabalhador', 'cagedtrabalhadorano']:
-            subset_rules.append("and")
-            subset_rules.append(f"eq-tipo_estab-1")
+        # # Add timeframe filter
+        # ds_no_compet = [
+        #     'catweb', 'sisben', 'auto', 'rfb', 'rfbsocios',
+        #     'rfbparticipacaosocietaria', 'aeronaves', 'renavam'
+        # ]
+        # if options.get('column') and df not in ds_no_compet:
+        #     subset_rules.append("and")
+        #     subset_rules.append(f"eq-{local_cols.get('compet')}-{options.get('column')}")
 
-        if df == 'cagedsaldo':
-            return {
-                "categorias": ['\'1\'-pos'],
-                "valor": ['qtd_admissoes', 'qtd_desligamentos', 'saldo_mov'],
-                "agregacao": ['count'],
-                "where": subset_rules,
-                "theme": df
-            }
-        if df in ['catweb', 'sisben']:
-            return {
-                "categorias": [local_cols.get('cnpj_raiz')],
-                "agregacao": ['count'],
-                "where": subset_rules,
-                "theme": f'{df}_c' # Disambiguation
-            }
-        if df in ['rfb', 'rfbsocios', 'rfbparticipacaosocietaria']:
-            return {
-                "categorias": ['\'1\'-pos'],
-                "agregacao": ['count'],
-                "where": subset_rules,
-                "theme": df
-            }
+        # if df == 'rais':
+        #     subset_rules.append("and")
+        #     subset_rules.append(f"eq-tp_estab-1")
+        # elif df == 'auto':
+        #     subset_rules.append("and")
+        #     subset_rules.append(f"eq-tpinscricao-'1'")
+        #     subset_rules.append("and")
+        #     subset_rules.append(f"nl-dtcancelamento")
+        #     subset_rules.append("and")
+        #     subset_rules.append(
+        #         f"gestr-{local_cols.get('compet')}-\'{options.get('column')}\-01\-01\'-1-10"
+        #     )
+        #     subset_rules.append("and")
+        #     subset_rules.append(
+        #         f"lestr-{local_cols.get('compet')}-\'{options.get('column')}\-12\-31\'-1-10"
+        #     )
+        # elif df == 'catweb':
+        #     subset_rules.append("and")
+        #     subset_rules.append(f"ge-{local_cols.get('compet')}-\'{options.get('column')}0101\'")
+        #     subset_rules.append("and")
+        #     subset_rules.append(f"le-{local_cols.get('compet')}-\'{options.get('column')}1231\'")
+        # elif df in ['caged', 'cagedsaldo', 'cagedtrabalhador', 'cagedtrabalhadorano']:
+        #     subset_rules.append("and")
+        #     subset_rules.append(f"eq-tipo_estab-1")
 
-        return {
-            "categorias": [local_cols.get('cnpj_raiz')],
-            "agregacao": ['count'],
-            "where": subset_rules,
-            "theme": df
-        }
+        # if df == 'cagedsaldo':
+        #     return {
+        #         "categorias": ['\'1\'-pos'],
+        #         "valor": ['qtd_admissoes', 'qtd_desligamentos', 'saldo_mov'],
+        #         "agregacao": ['count'],
+        #         "where": subset_rules,
+        #         "theme": df
+        #     }
+        # if df in ['catweb', 'sisben']:
+        #     return {
+        #         "categorias": [local_cols.get('cnpj_raiz')],
+        #         "agregacao": ['count'],
+        #         "where": subset_rules,
+        #         "theme": f'{df}_c' # Disambiguation
+        #     }
+        # if df in ['rfb', 'rfbsocios', 'rfbparticipacaosocietaria']:
+        #     return {
+        #         "categorias": ['\'1\'-pos'],
+        #         "agregacao": ['count'],
+        #         "where": subset_rules,
+        #         "theme": df
+        #     }
+
+        # return {
+        #     "categorias": [local_cols.get('cnpj_raiz')],
+        #     "agregacao": ['count'],
+        #     "where": subset_rules,
+        #     "theme": df
+        # }
 
     @staticmethod
     def get_grouped_stats(thematic_handler, options, cols):
         ''' Get stats for dataframe partitions '''
+        # TODO (UUU) - Problema com catweb
+        # TODO (UUU) - Decimal not serializable rais 2017
+        # TODO (UUU) - None type in options sisben
+        # TODO (UUU) - Testar os filtros de contexto (ex. PF)
         # TODO 2 - Remove .0 from compet grouping
         result = {}
 
@@ -386,6 +397,7 @@ class Empresa(BaseModel):
             # Get statistics partitioning by unit and timeframe
             options["categorias"] = [cols.get('cnpj'), cols.get('compet')]
             options["ordenacao"] = [f"-{cols.get('compet')}"]
+
             df_local_result = thematic_handler.find_dataset(options)
             df_local_result['idx'] = df_local_result[cols.get('compet')].apply(str) + \
                 '_' + df_local_result[cols.get('cnpj')].apply(str)

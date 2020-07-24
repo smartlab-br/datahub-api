@@ -197,14 +197,14 @@ class HadoopRepository(BaseRepository):
         ''' Runs the query in pandas '''
         cursor = self.get_dao().cursor()
         cursor.execute(query)
-        df = as_pandas(cursor)
-        if not df.empty:
-            for col in df.columns:
-                if df[col].dtype == object:
-                    lst_objs = df[col].dropna()
-                    if len(lst_objs) > 0 and isinstance(lst_objs.iloc[0],Decimal):
-                        df[col] = df[col].astype(float)
-        return df
+        dataframe = as_pandas(cursor)
+        if not dataframe.empty:
+            for col in dataframe.columns:
+                if dataframe[col].dtype == object:
+                    lst_objs = dataframe[col].dropna()
+                    if len(lst_objs) > 0 and isinstance(lst_objs.iloc[0], Decimal):
+                        dataframe[col] = dataframe[col].astype(float)
+        return dataframe
 
     @staticmethod
     def build_agr_array(valor=None, agregacao=None):
@@ -490,21 +490,45 @@ class HadoopRepository(BaseRepository):
                 elif w_clause[0].upper() in ['EQON', 'NEON', 'LEON', 'GEON', 'LTON', 'GTON']:
                     resulting_string = f"regexp_replace(CAST({w_clause[1]} AS STRING), '[^[:digit:]]','')"
                     if len(w_clause) == 5: # Substring
-                        resulting_string = f"substring({resulting_string}, {w_clause[3]}, {w_clause[4]})" 
-                    arr_result.append(f"{resulting_string} {simple_operators.get(w_clause[0].upper()[:2])} '{w_clause[2]}'")
-                elif w_clause[0].upper() in ['EQLPONSTR', 'NELPONSTR', 'LELPONSTR', 'GELPONSTR', 'LTLPONSTR', 'GTLPONSTR']:
+                        resulting_string = f"substring({resulting_string}, {w_clause[3]}, {w_clause[4]})"
+                    arr_result.append(
+                        f"{resulting_string} {simple_operators.get(w_clause[0].upper()[:2])} "
+                        f"'{w_clause[2]}'"
+                    )
+                elif w_clause[0].upper() in ['EQLPONSTR', 'NELPONSTR', 'LELPONSTR',
+                        'GELPONSTR', 'LTLPONSTR', 'GTLPONSTR']:
                     resulting_string = f"regexp_replace(CAST({w_clause[1]} AS STRING), '[^[:digit:]]','')"
                     if len(w_clause) == 7: # Substring
                         resulting_string = f"substring(LPAD({resulting_string}, {w_clause[3]}, '{w_clause[4]}'), {w_clause[5]}, {w_clause[6]})"
-                    arr_result.append(f"{resulting_string} {simple_operators.get(w_clause[0].upper()[:2])} '{w_clause[2]}'")
+                    arr_result.append(
+                        f"{resulting_string} {simple_operators.get(w_clause[0].upper()[:2])} "
+                        f"'{w_clause[2]}'"
+                    )
                 elif w_clause[0].upper() in ['LESTR', 'GESTR', 'LTSTR', 'GTSTR']:
-                    arr_result.append(f"substring(CAST({w_clause[1]} AS STRING), {w_clause[3]}, {w_clause[4]}) {simple_operators.get(w_clause[0].upper()[:2])} {w_clause[2]}")
+                    arr_result.append(
+                        f"substring(CAST({w_clause[1]} AS STRING), {w_clause[3]}, "
+                        f"{w_clause[4]}) {simple_operators.get(w_clause[0].upper()[:2])} "
+                        f"{w_clause[2]}"
+                    )
                 elif w_clause[0].upper() in ['EQLPSTR', 'NELPSTR', 'LELPSTR', 'GELPSTR', 'LTLPSTR', 'GTLPSTR']:
-                    arr_result.append(f"substring(LPAD(CAST({w_clause[1]} AS VARCHAR({w_clause[3]})), {w_clause[3]}, '{w_clause[4]}'), {w_clause[5]}, {w_clause[6]}) {simple_operators.get(w_clause[0].upper()[:2])} {w_clause[2]}")
+                    arr_result.append(
+                        f"substring(LPAD(CAST({w_clause[1]} AS VARCHAR({w_clause[3]})), "
+                        f"{w_clause[3]}, '{w_clause[4]}'), {w_clause[5]}, {w_clause[6]}) "
+                        f"{simple_operators.get(w_clause[0].upper()[:2])} {w_clause[2]}"
+                    )
                 elif w_clause[0].upper() in ['EQLPINT', 'NELPINT', 'LELPINT', 'GELPINT', 'LTLPINT', 'GTLPINT']:
-                    arr_result.append(f"CAST(substring(LPAD(CAST({w_clause[1]} AS VARCHAR({w_clause[3]})), {w_clause[3]}, '{w_clause[4]}'), {w_clause[5]}, {w_clause[6]}) AS INTEGER) {simple_operators.get(w_clause[0].upper()[:2])} {w_clause[2]}")
+                    arr_result.append(
+                        f"CAST(substring(LPAD(CAST({w_clause[1]} AS VARCHAR({w_clause[3]})), "
+                        f"{w_clause[3]}, '{w_clause[4]}'), {w_clause[5]}, {w_clause[6]}) "
+                        f"AS INTEGER) {simple_operators.get(w_clause[0].upper()[:2])} "
+                        f"{w_clause[2]}"
+                    )
                 elif w_clause[0].upper() in ['EQSZ', 'NESZ', 'LESZ', 'GESZ', 'LTSZ', 'GTSZ']:
-                    arr_result.append(f"LENGTH(CAST({w_clause[1]} AS STRING)) {simple_operators.get(w_clause[0].upper()[:2])} {w_clause[2]}")
+                    arr_result.append(
+                        f"LENGTH(CAST({w_clause[1]} AS STRING)) "
+                        f"{simple_operators.get(w_clause[0].upper()[:2])} "
+                        f"{w_clause[2]}"
+                    )
         return ' '.join(arr_result)
 
     @staticmethod
@@ -592,7 +616,6 @@ class HBaseRepository(BaseRepository):
     ''' HBase connector class '''
     def load_and_prepare(self): # No DAO - http request
         ''' Prepara o DAO '''
-        pass
 
     @staticmethod
     def fetch_data(table, key, column_family, column):

@@ -80,3 +80,42 @@ class EmpresaModelBaseTest(unittest.TestCase):
                 "agr_sum_vl_b": 0, "agr_count_vl_b": 0
             }
         )
+
+class AssessColumnStatusTest(unittest.TestCase):
+    ''' Class to test the status assessmente from a collection of status
+        keys retrieved from REDIS '''
+    SLOT_LIST = ['2019', '2020', '2047']
+    KEY_COLLECTION = {'2019': 'INGESTED', '2020': 'INGESTING', '2099': 'INGESTED'}
+
+    def test_assess_column_status_existing(self):
+        ''' Tests if the existing column status is returned correctly '''
+        self.assertEqual(
+            Empresa.assess_column_status(self.SLOT_LIST, self.KEY_COLLECTION, '2019'),
+            'INGESTED'
+        )
+
+    def test_assess_column_status_missing(self):
+        ''' Tests if the missing column status is returned correctly when
+            the column exists in the list but not in the collection from REDIS '''
+        self.assertEqual(
+            Empresa.assess_column_status(self.SLOT_LIST, self.KEY_COLLECTION, '2047'),
+            'MISSING'
+        )
+
+    def test_assess_column_status_deprecated(self):
+        ''' Tests if the deprecated data status is returned correctly when
+            the column exists in the collection from REDIS but not in the
+            dictionary of data present in datalake '''
+        self.assertEqual(
+            Empresa.assess_column_status(self.SLOT_LIST, self.KEY_COLLECTION, '2099'),
+            'DEPRECATED'
+        )
+
+    def test_assess_column_status_unavailable(self):
+        ''' Tests if the unavailable column status is returned correctly
+            when a data that is not present both in the dictionary of
+            available data and the REDIS collection '''
+        self.assertEqual(
+            Empresa.assess_column_status(self.SLOT_LIST, self.KEY_COLLECTION, '1500'),
+            'UNAVAILABLE'
+        )

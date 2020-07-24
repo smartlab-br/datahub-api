@@ -38,7 +38,7 @@ class SourceModelCreateTest(unittest.TestCase):
         chart = SourceFactory().create('auto')
         self.assertTrue(isinstance(chart, Auto))
 
-    def test_instantiation_aeronaves(self):
+    def test_instantiation_catweb(self):
         ''' Tests if create returns a CATWEB dataset model '''
         chart = SourceFactory().create('catweb')
         self.assertTrue(isinstance(chart, Catweb))

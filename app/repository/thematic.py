@@ -50,12 +50,12 @@ class ThematicRepository(ImpalaRepository):
         'auto': "compliance.tb_auto",
         'caged': "compliance.tb_caged_estab",
         'rfbsocios': "compliance.rfb_dados_socios_tratado",
-        'rfbparticipacaosocietaria': "compliance.rfb_dados_socios_tratado", # Lookup diferente, mas mesma tabela
+        'rfbparticipacaosocietaria': "compliance.rfb_dados_socios_tratado",
         'aeronaves': "compliance.tb_aeronaves",
         'renavam': "compliance.tb_renavam_2018",
         'cagedsaldo': "compliance.tb_caged_saldos",
         'cagedtrabalhador': "compliance.tb_caged_trabalhador",
-        'cagedtrabalhadorano': "compliance.tb_caged_trabalhador", # Temporalidade diferente, mas mesma tabela
+        'cagedtrabalhadorano': "compliance.tb_caged_trabalhador",
 
         'incidenciaescravidao': 'incidencia_trabalho_escravo',
         'migracoesescravos': 'te_migracoes',

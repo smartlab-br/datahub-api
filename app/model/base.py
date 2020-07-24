@@ -22,7 +22,9 @@ class BaseModel():
             if options.get('calcs'):
                 nu_val = 'api_calc_' + options['calcs'][0]
             elif options.get('valor') is None:
-                nu_val = self.get_repo().get_agr_string(options.get('agregacao')[0], '*').split()[-1]
+                nu_val = self.get_repo().get_agr_string(
+                    options.get('agregacao')[0], '*'
+                ).split()[-1]
             else:
                 nu_val = self.get_repo().get_agr_string(
                     options.get('agregacao')[0], options.get('valor')[0]

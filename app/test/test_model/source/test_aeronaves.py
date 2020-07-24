@@ -17,7 +17,7 @@ class AeronavesGetOptionsEmpresaTest(unittest.TestCase):
             {
                 'categorias': ['col_cnpj'],
                 'agregacao': ['count'],
-                'where': ['eqon-col_cnpj-12345678-1-8', 'and','neon-col_cnpj-00000000000000'],
+                'where': ['eqon-col_cnpj-12345678-1-8', 'and', 'neon-col_cnpj-00000000000000'],
                 'theme': 'aeronaves'
             }
         )

@@ -31,13 +31,6 @@ class EmpresaStatsResource(BaseResource):
             "in": "query"
         },
         {
-            "name": "reduzido",
-            "description": "Sinalizador que indica conjunto reduzido de colunas (S para sim)",
-            "required": False,
-            "type": 'string',
-            "in": "query"
-        },
-        {
             "name": "perspectiva",
             "description": "Valor que filtra uma perspectiva predefinida de um dataset \
                 (ex. No catweb, 'Empregador'). Nem todos os datasets tem essa opção.",
@@ -46,13 +39,7 @@ class EmpresaStatsResource(BaseResource):
             "in": "query"
         }
     ]
-    CUSTOM_SWAGGER_PARAMS = [
-        {
-            "name": "cnpj_raiz", "required": True, "type": 'string', "in": "path",
-            "description": "CNPJ Raiz da empresa consultada"
-        }
-    ]
-
+    
     def __init__(self):
         ''' Construtor'''
         self.domain = None
@@ -61,7 +48,7 @@ class EmpresaStatsResource(BaseResource):
     @swagger.doc({
         'tags':['empresa'],
         'description':'Obtém estatísticas de uma única empresa',
-        'parameters': DEFAULT_SWAGGER_PARAMS + CUSTOM_SWAGGER_PARAMS,
+        'parameters': BaseResource.EMPRESA_DEFAULT_SWAGGER_PARAMS,
         'responses': {
             '200': {
                 'description': 'Estatísticas da empresa'

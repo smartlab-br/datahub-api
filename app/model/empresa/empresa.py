@@ -104,7 +104,8 @@ class Empresa(BaseModel):
                 not rules_dao.DATASETS.get((options.get('column_family')))):
             raise ValueError('Dataset inválido')
         if (options.get('column') and
-                options.get('column') not in rules_dao.DATASETS.get((options.get('column_family'))).split(',')):
+                options.get('column') not in rules_dao.DATASETS.get(
+                    (options.get('column_family'))).split(',')):
             raise ValueError('Competência inválida para o dataset informado')
         loading_status_dao = PessoaDatasetsRepository()
         is_valid = True
@@ -118,14 +119,21 @@ class Empresa(BaseModel):
                 # A entrada é compatível com o rol de datasources?
                 # A entrada tem menos de 1 mês?
                 if (columns_available is None or
-                        any([slot not in columns_available.keys() for slot in slot_list.split(',')])):
+                        any([
+                            slot not in columns_available.keys()
+                            for
+                            slot
+                            in
+                            slot_list.split(',')
+                        ])):
                     is_valid = False
                 else:
                     for col_key, col_val in columns_available.items():
                         if (options.get('column', col_key) == col_key and
                                 'INGESTED' in col_val and
                                 len(col_val.split('|')) > 1 and
-                                (datetime.strptime(col_val.split('|')[1], "%Y-%m-%d") - datetime.now()).days > 30):
+                                (datetime.strptime(col_val.split('|')[1], "%Y-%m-%d") - 
+                                    datetime.now()).days > 30):
                             is_valid = False
 
                 if 'column' in options:
@@ -167,87 +175,102 @@ class Empresa(BaseModel):
         # TODO 99 - Add threads to run impala queries
         result = {}
         thematic_handler = Thematic()
-        for df in dataframes:
+        for dataframe in dataframes:
             # Get statistics for dataset
-            cols = thematic_handler.get_column_defs(df)
+            cols = thematic_handler.get_column_defs(dataframe)
             local_cols = cols.copy()
 
             # Autos and Catweb need a timeframe to filter
-            if df in ['auto', 'catweb'] and 'column' not in options:
-                raise AttributeError(f'{df} demanda uma competência')
+            if dataframe in ['auto', 'catweb'] and 'column' not in options:
+                raise AttributeError(f'{dataframe} demanda uma competência')
 
             # If the dataset doesn't have a unique column to identify a company
-            if isinstance(cols.get('cnpj_raiz'), dict) and thematic_handler.get_persp_values(df):    
+            perspectives = thematic_handler.get_persp_values(dataframe)
+            if isinstance(cols.get('cnpj_raiz'), dict) and perspectives:
                 local_result = {}
 
-                perspectives = thematic_handler.get_persp_values(df)
                 if options.get('perspective'):
-                    perspectives = {k: v for k, v in perspectives.items() if k == options.get('perspective')}
+                    perspectives = {
+                        k: v
+                        for
+                        k, v
+                        in
+                        perspectives.items()
+                        if
+                        k == options.get('perspective')
+                    }
 
                 for each_persp_key, each_persp_value in perspectives.items():
-                    local_cols = thematic_handler.decode_column_defs(cols, df, each_persp_key)
+                    local_cols = thematic_handler.decode_column_defs(cols, dataframe, each_persp_key)
                     local_options = self.get_stats_local_options(
                         options,
                         local_cols,
-                        df,
+                        dataframe,
                         each_persp_key
                     )
-                    print(local_options)
-                    if df != 'catweb':
-                        local_options["where"].extend([
-                            f"and",
-                            f"eq-{thematic_handler.get_persp_columns(df)}-{each_persp_value}"
-                        ])
-                    base_stats = thematic_handler.find_dataset(local_options)
 
-                    if df not in result:
-                        result[df] = base_stats.get('metadata')
-                    if base_stats.get('dataset', []):
-                        local_result[each_persp_key] = base_stats.get('dataset')[0]
-                    else:
-                        local_result[each_persp_key] = self.build_empty_stats(
-                            local_options,
-                            local_cols,
-                            options
-                        )
+                    local_result[each_persp_key] = self.get_statistics_from_perspective(
+                        dataframe, each_persp_key, local_cols, local_options, options
+                    )
 
-                    local_result[each_persp_key] = {
-                        **local_result[each_persp_key],
-                        **self.get_grouped_stats(thematic_handler, options, local_options, local_cols)
-                    }
+                result[dataframe]['stats_persp'] = local_result
             else:
                 if isinstance(cols.get('cnpj_raiz'), dict):
                     local_cols = thematic_handler.decode_column_defs(
                         local_cols,
-                        df,
+                        dataframe,
                         options.get('perspective')
                     )
                 local_options = self.get_stats_local_options(
                     options,
                     local_cols,
-                    df,
+                    dataframe,
                     options.get('perspective')
                 )
-                print(local_options)
-                base_stats = thematic_handler.find_dataset(local_options)
-                result[df] = base_stats.get('metadata')
-                
-                if base_stats.get('dataset',[]):
-                    result[df]["stats"] = base_stats.get('dataset')[0]
-                else:
-                    result[df]["stats"] = self.build_empty_stats(local_options, local_cols, options)
 
-                result[df] = {
-                    **result[df],
-                    **self.get_grouped_stats(thematic_handler, options, local_options, cols)
-                }
+                result[dataframe] = self.get_statistics_from_perspective(
+                    dataframe, options.get('perspective'), cols, local_options, options
+                )
 
         return result
 
-    def get_stats_local_options(self, options, local_cols, df, persp):
+    def get_statistics_from_perspective(self, dataframe, each_persp_value, local_cols, local_options, options):
+        thematic_handler = Thematic()
+        if dataframe not in ['catweb', 'catweb_c'] and each_persp_value is not None:
+            local_options["where"].extend([
+                f"and",
+                f"eq-{thematic_handler.get_persp_columns(dataframe)}-{each_persp_value}"
+            ])
+
+        base_stats = thematic_handler.find_dataset({
+            **local_options,
+            **{'as_pandas': False, 'no_wrap': False}
+        })
+
+        result = {}
+        if each_persp_value is None:
+            result = base_stats.get('metadata')
+        if base_stats.get('dataset', []):
+            result["stats"] = base_stats.get('dataset')[0]
+        else:
+            result["stats"] = self.build_empty_stats(
+                local_options,
+                local_cols,
+                options
+            )
+
+        return {
+            **result,
+            **self.get_grouped_stats(
+                thematic_handler, options, local_options, local_cols
+            )
+        }
+
+    @staticmethod
+    def get_stats_local_options(options, local_cols, dataframe, persp):
         ''' Create options according to tables and queriy conditions '''
-        return SourceFactory.create(df).get_options_empresa(
-            options, local_cols, df, persp
+        return SourceFactory.create(dataframe).get_options_empresa(
+            options, local_cols, dataframe, persp
         )
 
     @staticmethod
@@ -281,7 +304,8 @@ class Empresa(BaseModel):
         if options.get('theme') not in ds_no_compet:
             # Get statistics partitioning by timeframe
             compet_attrib = 'compet' # Single timeframe, no need to group
-            if 'compet' in cols and options.get('theme') not in ds_displaced_compet: # Changes lookup for tables with timeframe values
+            if 'compet' in cols and options.get('theme') not in ds_displaced_compet:
+                # Changes lookup for tables with timeframe values
                 compet_attrib = cols.get('compet')
                 current_df = thematic_handler.find_dataset({
                     **options,
@@ -298,7 +322,7 @@ class Empresa(BaseModel):
                         "ordenacao": ["-compet"]
                     }
                 })
-                
+
             current_df[compet_attrib] = current_df[compet_attrib].apply(str).replace(
                 {'\.0': ''}, regex=True
             )
@@ -307,7 +331,8 @@ class Empresa(BaseModel):
             )
 
             # Get statistics partitioning by timeframe and units
-            if 'compet' in cols and options.get('theme') not in ds_displaced_compet: # Changes lookup for tables with timeframe values
+            if 'compet' in cols and options.get('theme') not in ds_displaced_compet:
+                # Changes lookup for tables with timeframe values
                 df_local_result = thematic_handler.find_dataset({
                     **options,
                     **{"categorias": [cols.get('cnpj'), compet_attrib]}
@@ -315,16 +340,19 @@ class Empresa(BaseModel):
             else:
                 df_local_result = thematic_handler.find_dataset({
                     **options,
-                    **{"categorias": [cols.get('cnpj'), f"\'{original_options.get('column')}\'-compet"]}
+                    **{
+                        "categorias": [cols.get('cnpj'),
+                        f"\'{original_options.get('column')}\'-compet"]
+                    }
                 })
-            
+
             df_local_result['idx'] = df_local_result[compet_attrib].apply(str).replace(
                 {'\.0': ''}, regex=True) + '_' + \
                 df_local_result[cols.get('cnpj')].apply(str).replace({'\.0': ''}, regex=True)
             result["stats_estab_compet"] = json.loads(
                 df_local_result.set_index('idx').to_json(orient="index")
             )
-            
+
         ## RETIRADO pois a granularidade torna imviável a performance
         # metadata['stats_pf'] = dataframe[
         #     [col_pf_name, 'col_compet']
@@ -341,6 +369,8 @@ class Empresa(BaseModel):
 
     @staticmethod
     def build_empty_stats(options, cols, original_options):
+        ''' Builds a structure to denote no aggregate data
+            found in the datalake '''
         result = {f"{cols.get('cnpj_raiz')}": f"{original_options.get('cnpj_raiz')}"}
         if 'valor' in options:
             for val in options.get('valor', []):

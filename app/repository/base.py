@@ -174,7 +174,7 @@ class BaseRepository():
         }
 
     @staticmethod
-    def decode_column_defs(original, table_name, perspective):
+    def decode_column_defs(original, perspective):
         ''' Get the column definitions from a dataframe with a certain perspective'''
         result = original.copy()
         result['cnpj_raiz'] = original.get('cnpj_raiz', {}).get(perspective, {}).get('column')
@@ -491,48 +491,6 @@ class HadoopRepository(BaseRepository):
                     complex_criteria = self.build_complex_criteria(w_clause)
                     if complex_criteria is not None:
                         arr_result.append(complex_criteria, simple_operators)
-                # elif w_clause[0].upper() in ['EQON', 'NEON', 'LEON', 'GEON', 'LTON', 'GTON']:
-                #     resulting_string = f"regexp_replace(CAST({w_clause[1]} AS STRING), '[^[:digit:]]','')"
-                #     if len(w_clause) == 5: # Substring
-                #         resulting_string = f"substring({resulting_string}, {w_clause[3]}, {w_clause[4]})"
-                #     arr_result.append(
-                #         f"{resulting_string} {simple_operators.get(w_clause[0].upper()[:2])} "
-                #         f"'{w_clause[2]}'"
-                #     )
-                # elif w_clause[0].upper() in ['EQLPONSTR', 'NELPONSTR', 'LELPONSTR',
-                #         'GELPONSTR', 'LTLPONSTR', 'GTLPONSTR']:
-                #     resulting_string = f"regexp_replace(CAST({w_clause[1]} AS STRING), '[^[:digit:]]','')"
-                #     if len(w_clause) == 7: # Substring
-                #         resulting_string = f"substring(LPAD({resulting_string}, {w_clause[3]}, '{w_clause[4]}'), {w_clause[5]}, {w_clause[6]})"
-                #     arr_result.append(
-                #         f"{resulting_string} {simple_operators.get(w_clause[0].upper()[:2])} "
-                #         f"'{w_clause[2]}'"
-                #     )
-                # elif w_clause[0].upper() in ['LESTR', 'GESTR', 'LTSTR', 'GTSTR']:
-                #     arr_result.append(
-                #         f"substring(CAST({w_clause[1]} AS STRING), {w_clause[3]}, "
-                #         f"{w_clause[4]}) {simple_operators.get(w_clause[0].upper()[:2])} "
-                #         f"{w_clause[2]}"
-                #     )
-                # elif w_clause[0].upper() in ['EQLPSTR', 'NELPSTR', 'LELPSTR', 'GELPSTR', 'LTLPSTR', 'GTLPSTR']:
-                #     arr_result.append(
-                #         f"substring(LPAD(CAST({w_clause[1]} AS VARCHAR({w_clause[3]})), "
-                #         f"{w_clause[3]}, '{w_clause[4]}'), {w_clause[5]}, {w_clause[6]}) "
-                #         f"{simple_operators.get(w_clause[0].upper()[:2])} {w_clause[2]}"
-                #     )
-                # elif w_clause[0].upper() in ['EQLPINT', 'NELPINT', 'LELPINT', 'GELPINT', 'LTLPINT', 'GTLPINT']:
-                #     arr_result.append(
-                #         f"CAST(substring(LPAD(CAST({w_clause[1]} AS VARCHAR({w_clause[3]})), "
-                #         f"{w_clause[3]}, '{w_clause[4]}'), {w_clause[5]}, {w_clause[6]}) "
-                #         f"AS INTEGER) {simple_operators.get(w_clause[0].upper()[:2])} "
-                #         f"{w_clause[2]}"
-                #     )
-                # elif w_clause[0].upper() in ['EQSZ', 'NESZ', 'LESZ', 'GESZ', 'LTSZ', 'GTSZ']:
-                #     arr_result.append(
-                #         f"LENGTH(CAST({w_clause[1]} AS STRING)) "
-                #         f"{simple_operators.get(w_clause[0].upper()[:2])} "
-                #         f"{w_clause[2]}"
-                #     )
         return ' '.join(arr_result)
 
     @staticmethod
@@ -548,16 +506,23 @@ class HadoopRepository(BaseRepository):
         if complex_segment == 'LPONSTR':
             result = f"regexp_replace(CAST({w_clause[1]} AS STRING), '[^[:digit:]]','')"
             if len(w_clause) == 7: # Substring
-                result = f"substring(LPAD({result}, {w_clause[3]}, '{w_clause[4]}'), {w_clause[5]}, {w_clause[6]})"
+                result = f"substring(LPAD({result}, {w_clause[3]}, '{w_clause[4]}'), \
+{w_clause[5]}, {w_clause[6]})"
             return f"{result} {simple_op.get(w_clause[0].upper()[:2])} '{w_clause[2]}'"
         if complex_segment == 'STR':
-            return f"substring(CAST({w_clause[1]} AS STRING), {w_clause[3]}, {w_clause[4]}) {simple_op.get(w_clause[0].upper()[:2])} {w_clause[2]}"
+            return f"substring(CAST({w_clause[1]} AS STRING), {w_clause[3]}, {w_clause[4]}) \
+{simple_op.get(w_clause[0].upper()[:2])} {w_clause[2]}"
         if complex_segment == 'LPSTR':
-            return f"substring(LPAD(CAST({w_clause[1]} AS VARCHAR({w_clause[3]})), {w_clause[3]}, '{w_clause[4]}'), {w_clause[5]}, {w_clause[6]}) {simple_op.get(w_clause[0].upper()[:2])} {w_clause[2]}"
+            return f"substring(LPAD(CAST({w_clause[1]} AS VARCHAR({w_clause[3]})), \
+{w_clause[3]}, '{w_clause[4]}'), {w_clause[5]}, {w_clause[6]}) \
+{simple_op.get(w_clause[0].upper()[:2])} {w_clause[2]}"
         if complex_segment == 'LPINT':
-            return f"CAST(substring(LPAD(CAST({w_clause[1]} AS VARCHAR({w_clause[3]})), {w_clause[3]}, '{w_clause[4]}'), {w_clause[5]}, {w_clause[6]}) AS INTEGER) {simple_op.get(w_clause[0].upper()[:2])} {w_clause[2]}"
+            return f"CAST(substring(LPAD(CAST({w_clause[1]} AS VARCHAR({w_clause[3]})), \
+{w_clause[3]}, '{w_clause[4]}'), {w_clause[5]}, {w_clause[6]}) AS INTEGER) \
+{simple_op.get(w_clause[0].upper()[:2])} {w_clause[2]}"
         if complex_segment == 'SZ':
-            return f"LENGTH(CAST({w_clause[1]} AS STRING)) {simple_op.get(w_clause[0].upper()[:2])} {w_clause[2]}"
+            return f"LENGTH(CAST({w_clause[1]} AS STRING)) \
+{simple_op.get(w_clause[0].upper()[:2])} {w_clause[2]}"
         return None
 
     @staticmethod

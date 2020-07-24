@@ -139,8 +139,8 @@ class Empresa(BaseModel):
                         if (options.get('column', col_key) == col_key and
                                 'INGESTED' in col_val and
                                 len(col_val.split('|')) > 1 and
-                                (datetime.strptime(col_val.split('|')[1], "%Y-%m-%d") - 
-                                    datetime.now()).days > 30):
+                                (datetime.strptime(col_val.split('|')[1], "%Y-%m-%d") -
+                                 datetime.now()).days > 30):
                             is_valid = False
 
                 if 'column' in options:
@@ -183,7 +183,7 @@ class Empresa(BaseModel):
         result = {}
         for dataframe in dataframes:
             # Get statistics for dataset
-            cols = self.get_thematic_handler.get_column_defs(dataframe)
+            cols = self.get_thematic_handler().get_column_defs(dataframe)
             local_cols = cols.copy()
 
             # Autos and Catweb need a timeframe to filter
@@ -191,7 +191,7 @@ class Empresa(BaseModel):
                 raise AttributeError(f'{dataframe} demanda uma competência')
 
             # If the dataset doesn't have a unique column to identify a company
-            perspectives = self.get_thematic_handler.get_persp_values(dataframe)
+            perspectives = self.get_thematic_handler().get_persp_values(dataframe)
             if isinstance(cols.get('cnpj_raiz'), dict) and perspectives:
                 local_result = {}
 
@@ -206,8 +206,10 @@ class Empresa(BaseModel):
                         k == options.get('perspective')
                     }
 
-                for each_persp_key, each_persp_value in perspectives.items():
-                    local_cols = self.get_thematic_handler.decode_column_defs(cols, dataframe, each_persp_key)
+                for each_persp_key in perspectives:
+                    local_cols = self.get_thematic_handler().decode_column_defs(
+                        cols, each_persp_key
+                    )
                     local_options = self.get_stats_local_options(
                         options,
                         local_cols,
@@ -222,10 +224,8 @@ class Empresa(BaseModel):
                 result[dataframe]['stats_persp'] = local_result
             else:
                 if isinstance(cols.get('cnpj_raiz'), dict):
-                    local_cols = self.get_thematic_handler.decode_column_defs(
-                        local_cols,
-                        dataframe,
-                        options.get('perspective')
+                    local_cols = self.get_thematic_handler().decode_column_defs(
+                        local_cols, options.get('perspective')
                     )
                 local_options = self.get_stats_local_options(
                     options,
@@ -241,13 +241,15 @@ class Empresa(BaseModel):
         return result
 
     def get_statistics_from_perspective(self, dataframe, each_persp_value, local_cols, local_options, options):
+        ''' Gets statistics from a specific given persoective, when a datasource
+            has multiple column lookup rules '''
         if dataframe not in ['catweb', 'catweb_c'] and each_persp_value is not None:
             local_options["where"].extend([
                 f"and",
-                f"eq-{self.get_thematic_handler.get_persp_columns(dataframe)}-{each_persp_value}"
+                f"eq-{self.get_thematic_handler().get_persp_columns(dataframe)}-{each_persp_value}"
             ])
 
-        base_stats = self.get_thematic_handler.find_dataset({
+        base_stats = self.get_thematic_handler().find_dataset({
             **local_options,
             **{'as_pandas': False, 'no_wrap': False}
         })
@@ -266,8 +268,7 @@ class Empresa(BaseModel):
 
         return {
             **result,
-            **self.get_grouped_stats(options, local_options, local_cols
-            )
+            **self.get_grouped_stats(options, local_options, local_cols)
         }
 
     @staticmethod
@@ -287,7 +288,7 @@ class Empresa(BaseModel):
         # Get statistics partitioning by unit
         if 'cnpj' not in cols: # Ignores datasources with no cnpj definition
             result["stats_estab"] = json.loads(
-                self.get_thematic_handler.find_dataset({
+                self.get_thematic_handler().find_dataset({
                     **options,
                     **{
                         "categorias": [cols.get('cnpj')],

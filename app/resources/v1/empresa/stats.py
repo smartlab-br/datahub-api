@@ -39,7 +39,7 @@ class EmpresaStatsResource(BaseResource):
             "in": "query"
         }
     ]
-    
+
     def __init__(self):
         ''' Construtor'''
         self.domain = None
@@ -82,7 +82,8 @@ class EmpresaStatsResource(BaseResource):
         ''' Domain setter, called from constructor '''
         self.domain = Empresa()
 
-    def is_invalid_id(self, cnpj_raiz):
+    @staticmethod
+    def is_invalid_id(cnpj_raiz):
         ''' Checks if the ID is valid '''
         if len(cnpj_raiz) != 8 or not cnpj_raiz.isdecimal():
             return True

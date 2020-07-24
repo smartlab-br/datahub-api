@@ -731,7 +731,11 @@ class ViewConfGetAttributeFromCharttSpecTest(unittest.TestCase):
             "chart_id": "right"
         }
         self.assertEqual(
-            ViewConfReader.get_attribute_from_chart_spec(options_from_yaml, 'colorArray', 'default'),
+            ViewConfReader.get_attribute_from_chart_spec(
+                options_from_yaml,
+                'colorArray',
+                'default'
+            ),
             ['red', 'yellow', 'green']
         )
 
@@ -741,7 +745,11 @@ class ViewConfGetAttributeFromCharttSpecTest(unittest.TestCase):
             "chart_options": {'colorArray': ['blue', 'purple', 'orange']}
         }
         self.assertEqual(
-            ViewConfReader.get_attribute_from_chart_spec(options_from_yaml, 'colorArray', 'default'),
+            ViewConfReader.get_attribute_from_chart_spec(
+                options_from_yaml,
+                'colorArray',
+                'default'
+            ),
             ['blue', 'purple', 'orange']
         )
 
@@ -756,6 +764,10 @@ class ViewConfGetAttributeFromCharttSpecTest(unittest.TestCase):
             "chart_id": "missing"
         }
         self.assertEqual(
-            ViewConfReader.get_attribute_from_chart_spec(options_from_yaml, 'colorArray', 'default'),
+            ViewConfReader.get_attribute_from_chart_spec(
+                options_from_yaml,
+                'colorArray',
+                'default'
+            ),
             'default'
         )

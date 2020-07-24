@@ -117,9 +117,9 @@ class Thematic(BaseModel):
         ''' Get the column name definitions, according to the table '''
         return self.get_repo().get_column_defs(table_name)
 
-    def decode_column_defs(self, original, table_name, perspective):
+    def decode_column_defs(self, original, perspective):
         ''' Get the column name definitions, according to the table and the perspective '''
-        return self.get_repo().decode_column_defs(original, table_name, perspective)
+        return self.get_repo().decode_column_defs(original, perspective)
 
     def get_persp_values(self, theme):
         ''' Get the perspective values for a theme '''

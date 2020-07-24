@@ -54,7 +54,7 @@ class StubFindModelRepository(StubHadoopRepository):
         return self.find_dataset(options)
 
     #pylint: disable=R0201
-    def find_dataset(self, _options):
+    def find_dataset(self, _options=None):
         ''' Retorno estático para execução dos testes '''
         return pd.DataFrame([
             {"nm_indicador": "Ficticio", "nu_competencia": 2099, "vl_indicador": 1},

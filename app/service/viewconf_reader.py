@@ -141,7 +141,7 @@ class ViewConfReader():
                     return chart.get('title', 'background')
             return options.get('charts')[0].get('title', 'background')
         return options.get('title', {}).get('fixed', 'background')
-    
+
     @staticmethod
     def get_attribute_from_chart_spec(options, attribute, default=None):
         ''' Gets an attribute from a chart option or a specific chart in
@@ -157,7 +157,7 @@ class ViewConfReader():
                     return chart.get('options', {}).get(attribute, default)
             return default
         return options.get('chart_options', {}).get(attribute, default)
-        
+
     @staticmethod
     def get_color_scale(options, vmin=0, vmax=1):
         ''' Gets a color array as given by options or builds a linear scale '''
@@ -165,13 +165,13 @@ class ViewConfReader():
         color_array = ViewConfReader.get_attribute_from_chart_spec(options, 'colorArray')
         if color_array:
             return color_array
-        
+
         scale_def = ViewConfReader.get_attribute_from_chart_spec(
             options,
             'colorScale',
             {'name': 'Blues'}
         )
-        
+
         plt = brewer2mpl.get_map(
             scale_def.get("name"),
             scale_def.get('nature', 'sequential'),

@@ -129,7 +129,7 @@ class StubGetGroupedStatsTest(unittest.TestCase):
             StubEmpresa().get_grouped_stats(
                 {},
                 {'theme': 'mytheme'},
-                {}
+                {'compet': 'compet'}
             ),
             {
                 'stats_estab': {
@@ -159,105 +159,42 @@ class StubGetGroupedStatsTest(unittest.TestCase):
                 {'theme': 'catewb'},
                 {}
             ),
+            StubEmpresa.EXPECTED_GROUPED_STATS
+        )
+
+class StubGetStatisticsFromPerspectiveTest(unittest.TestCase):
+    ''' Tests the grouped perspective statistics fetching using static
+        data as source '''
+    def test_get_statistic_from_perspective(self):
+        ''' Tests basic grouped perspective stats retrieval
+            when no perspective is given '''
+        self.assertEqual(
+            StubEmpresa().get_statistics_from_perspective(
+                'mytheme', None, {}, 
+                {"categorias": ['cnpj']},
+                {"categorias": ['cnpj']}
+            ),
             {
-                'stats_estab': {
-                    '12345678000101': {'agr_count': 100, 'compet': 2047},
-                    '12345678000202': {'agr_count': 200, 'compet': 2099}
+                **{
+                    'fonte': 'Fonte',
+                    'stats': {'cnpj': '12345678000101', 'compet': 2047, 'agr_count': 100}
                 },
-                'stats_compet': {
-                    '2047': {'agr_count': 100, 'cnpj': '12345678000101'},
-                    '2099': {'agr_count': 200, 'cnpj': '12345678000202'}
-                },
-                'stats_estab_compet': {
-                    '2047_12345678000101': {
-                        'agr_count': 100, 'cnpj': '12345678000101', 'compet': 2047
-                    },
-                    '2099_12345678000202': {
-                        'agr_count': 200, 'cnpj': '12345678000202', 'compet': 2099
-                    }
-                }
+                **StubEmpresa.EXPECTED_GROUPED_STATS
             }
         )
 
-# def get_grouped_stats(self, original_options, options, cols):
-#         ''' Get stats for dataframe partitions '''
-#         result = {}
-#         options['as_pandas'] = True
-#         options['no_wrap'] = True
-#         # Get statistics partitioning by unit
-#         if 'cnpj' not in cols: # Ignores datasources with no cnpj definition
-#             result["stats_estab"] = json.loads(
-#                 self.get_thematic_handler().find_dataset({
-#                     **options,
-#                     **{
-#                         "categorias": [cols.get('cnpj')],
-#                         "ordenacao": [cols.get('cnpj')]
-#                     }
-#                 }).set_index(cols.get('cnpj')).to_json(orient="index")
-#             )
-#         # Get statistics partitioning by timeframe
-#         ds_no_compet = [
-#             'sisben', 'sisben_c', 'auto', 'rfb', 'rfbsocios',
-#             'rfbparticipacaosocietaria', 'aeronaves', 'renavam'
-#         ]
-#         ds_displaced_compet = ['catweb', 'catweb_c']
-#         # Ignores datasources with no timeframe definition
-#         if options.get('theme') not in ds_no_compet:
-#             # Get statistics partitioning by timeframe
-#             compet_attrib = 'compet' # Single timeframe, no need to group
-#             if 'compet' in cols and options.get('theme') not in ds_displaced_compet:
-#                 # Changes lookup for tables with timeframe values
-#                 compet_attrib = cols.get('compet')
-#                 current_df = self.get_thematic_handler.find_dataset({
-#                     **options,
-#                     **{
-#                         "categorias": [compet_attrib],
-#                         "ordenacao":[f"-{compet_attrib}"]
-#                     }
-#                 })
-#             else:
-#                 current_df = self.get_thematic_handler.find_dataset({
-#                     **options,
-#                     **{
-#                         "categorias": [f"\'{original_options.get('column')}\'-compet"],
-#                         "ordenacao": ["-compet"]
-#                     }
-#                 })
-#             current_df[compet_attrib] = current_df[compet_attrib].apply(str).replace(
-#                 {'\.0': ''}, regex=True
-#             )
-#             result["stats_compet"] = json.loads(
-#                 current_df.set_index(compet_attrib).to_json(orient="index")
-#             )
-#             # Get statistics partitioning by timeframe and units
-#             if 'compet' in cols and options.get('theme') not in ds_displaced_compet:
-#                 # Changes lookup for tables with timeframe values
-#                 df_local_result = self.get_thematic_handler.find_dataset({
-#                     **options,
-#                     **{"categorias": [cols.get('cnpj'), compet_attrib]}
-#                 })
-#             else:
-#                 df_local_result = self.get_thematic_handler.find_dataset({
-#                     **options,
-#                     **{
-#                         "categorias": [cols.get('cnpj'),
-#                         f"\'{original_options.get('column')}\'-compet"]
-#                     }
-#                 })
-#             df_local_result['idx'] = df_local_result[compet_attrib].apply(str).replace(
-#                 {'\.0': ''}, regex=True) + '_' + \
-#                 df_local_result[cols.get('cnpj')].apply(str).replace({'\.0': ''}, regex=True)
-#             result["stats_estab_compet"] = json.loads(
-#                 df_local_result.set_index('idx').to_json(orient="index")
-#             )
-#         ## RETIRADO pois a granularidade torna imviável a performance
-#         # metadata['stats_pf'] = dataframe[
-#         #     [col_pf_name, 'col_compet']
-#         # ].groupby(col_pf_name).describe(include='all')
-#         ## RETIRADO pois a granularidade torna inviável a performance
-#         # metadata['stats_pf_compet'] = dataframe[
-#         #     [col_pf_name, 'col_compet']
-#         # ].groupby(
-#         #     ['col_compet', col_cnpj_name]
-#         # ).describe(include='all')
-#         return result
+    def test_get_statistic_from_perspective_perspective(self):
+        ''' Tests basic grouped perspective stats retrieval '''
+        self.assertEqual(
+            StubEmpresa().get_statistics_from_perspective(
+                'mytheme', 'mypersp', {}, 
+                {"categorias": ['cnpj'], 'where': []},
+                {"categorias": ['cnpj']}
+            ),
+            {
+                **{
+                    'stats': {'cnpj': '12345678000101', 'compet': 2047, 'agr_count': 100}
+                },
+                **StubEmpresa.EXPECTED_GROUPED_STATS
+            }
+        )

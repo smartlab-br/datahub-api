@@ -24,6 +24,7 @@ class Empresa(BaseModel):
     def __init__(self):
         ''' Construtor '''
         self.repo = None
+        self.thematic_handler = None
         self.__set_repo()
 
     def get_repo(self):
@@ -31,6 +32,12 @@ class Empresa(BaseModel):
         if self.repo is None:
             self.repo = EmpresaRepository()
         return self.repo
+
+    def get_thematic_handler(self):
+        ''' Gets single instance of Thematic model to delegate query execution '''
+        if self.thematic_handler is None:
+            self.thematic_handler = Thematic()
+        return self.thematic_handler
 
     def __set_repo(self):
         ''' Setter invoked in Construtor '''
@@ -174,10 +181,9 @@ class Empresa(BaseModel):
 
         # TODO 99 - Add threads to run impala queries
         result = {}
-        thematic_handler = Thematic()
         for dataframe in dataframes:
             # Get statistics for dataset
-            cols = thematic_handler.get_column_defs(dataframe)
+            cols = self.get_thematic_handler.get_column_defs(dataframe)
             local_cols = cols.copy()
 
             # Autos and Catweb need a timeframe to filter
@@ -185,7 +191,7 @@ class Empresa(BaseModel):
                 raise AttributeError(f'{dataframe} demanda uma competência')
 
             # If the dataset doesn't have a unique column to identify a company
-            perspectives = thematic_handler.get_persp_values(dataframe)
+            perspectives = self.get_thematic_handler.get_persp_values(dataframe)
             if isinstance(cols.get('cnpj_raiz'), dict) and perspectives:
                 local_result = {}
 
@@ -201,7 +207,7 @@ class Empresa(BaseModel):
                     }
 
                 for each_persp_key, each_persp_value in perspectives.items():
-                    local_cols = thematic_handler.decode_column_defs(cols, dataframe, each_persp_key)
+                    local_cols = self.get_thematic_handler.decode_column_defs(cols, dataframe, each_persp_key)
                     local_options = self.get_stats_local_options(
                         options,
                         local_cols,
@@ -216,7 +222,7 @@ class Empresa(BaseModel):
                 result[dataframe]['stats_persp'] = local_result
             else:
                 if isinstance(cols.get('cnpj_raiz'), dict):
-                    local_cols = thematic_handler.decode_column_defs(
+                    local_cols = self.get_thematic_handler.decode_column_defs(
                         local_cols,
                         dataframe,
                         options.get('perspective')
@@ -235,14 +241,13 @@ class Empresa(BaseModel):
         return result
 
     def get_statistics_from_perspective(self, dataframe, each_persp_value, local_cols, local_options, options):
-        thematic_handler = Thematic()
         if dataframe not in ['catweb', 'catweb_c'] and each_persp_value is not None:
             local_options["where"].extend([
                 f"and",
-                f"eq-{thematic_handler.get_persp_columns(dataframe)}-{each_persp_value}"
+                f"eq-{self.get_thematic_handler.get_persp_columns(dataframe)}-{each_persp_value}"
             ])
 
-        base_stats = thematic_handler.find_dataset({
+        base_stats = self.get_thematic_handler.find_dataset({
             **local_options,
             **{'as_pandas': False, 'no_wrap': False}
         })
@@ -261,8 +266,7 @@ class Empresa(BaseModel):
 
         return {
             **result,
-            **self.get_grouped_stats(
-                thematic_handler, options, local_options, local_cols
+            **self.get_grouped_stats(options, local_options, local_cols
             )
         }
 
@@ -273,8 +277,7 @@ class Empresa(BaseModel):
             options, local_cols, dataframe, persp
         )
 
-    @staticmethod
-    def get_grouped_stats(thematic_handler, original_options, options, cols):
+    def get_grouped_stats(self, original_options, options, cols):
         ''' Get stats for dataframe partitions '''
         result = {}
 
@@ -284,7 +287,7 @@ class Empresa(BaseModel):
         # Get statistics partitioning by unit
         if 'cnpj' not in cols: # Ignores datasources with no cnpj definition
             result["stats_estab"] = json.loads(
-                thematic_handler.find_dataset({
+                self.get_thematic_handler.find_dataset({
                     **options,
                     **{
                         "categorias": [cols.get('cnpj')],
@@ -307,7 +310,7 @@ class Empresa(BaseModel):
             if 'compet' in cols and options.get('theme') not in ds_displaced_compet:
                 # Changes lookup for tables with timeframe values
                 compet_attrib = cols.get('compet')
-                current_df = thematic_handler.find_dataset({
+                current_df = self.get_thematic_handler.find_dataset({
                     **options,
                     **{
                         "categorias": [compet_attrib],
@@ -315,7 +318,7 @@ class Empresa(BaseModel):
                     }
                 })
             else:
-                current_df = thematic_handler.find_dataset({
+                current_df = self.get_thematic_handler.find_dataset({
                     **options,
                     **{
                         "categorias": [f"\'{original_options.get('column')}\'-compet"],
@@ -333,12 +336,12 @@ class Empresa(BaseModel):
             # Get statistics partitioning by timeframe and units
             if 'compet' in cols and options.get('theme') not in ds_displaced_compet:
                 # Changes lookup for tables with timeframe values
-                df_local_result = thematic_handler.find_dataset({
+                df_local_result = self.get_thematic_handler.find_dataset({
                     **options,
                     **{"categorias": [cols.get('cnpj'), compet_attrib]}
                 })
             else:
-                df_local_result = thematic_handler.find_dataset({
+                df_local_result = self.get_thematic_handler.find_dataset({
                     **options,
                     **{
                         "categorias": [cols.get('cnpj'),

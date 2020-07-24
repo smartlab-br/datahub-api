@@ -291,10 +291,10 @@ class Empresa(BaseModel):
                 self.get_thematic_handler().find_dataset({
                     **options,
                     **{
-                        "categorias": [cols.get('cnpj')],
-                        "ordenacao": [cols.get('cnpj')]
+                        "categorias": [cols.get('cnpj', 'cnpj')],
+                        "ordenacao": [cols.get('cnpj', 'cnpj')]
                     }
-                }).set_index(cols.get('cnpj')).to_json(orient="index")
+                }).set_index(cols.get('cnpj', 'cnpj')).to_json(orient="index")
             )
 
         # Get statistics partitioning by timeframe
@@ -311,7 +311,7 @@ class Empresa(BaseModel):
             if 'compet' in cols and options.get('theme') not in ds_displaced_compet:
                 # Changes lookup for tables with timeframe values
                 compet_attrib = cols.get('compet')
-                current_df = self.get_thematic_handler.find_dataset({
+                current_df = self.get_thematic_handler().find_dataset({
                     **options,
                     **{
                         "categorias": [compet_attrib],
@@ -319,7 +319,7 @@ class Empresa(BaseModel):
                     }
                 })
             else:
-                current_df = self.get_thematic_handler.find_dataset({
+                current_df = self.get_thematic_handler().find_dataset({
                     **options,
                     **{
                         "categorias": [f"\'{original_options.get('column')}\'-compet"],
@@ -337,12 +337,12 @@ class Empresa(BaseModel):
             # Get statistics partitioning by timeframe and units
             if 'compet' in cols and options.get('theme') not in ds_displaced_compet:
                 # Changes lookup for tables with timeframe values
-                df_local_result = self.get_thematic_handler.find_dataset({
+                df_local_result = self.get_thematic_handler().find_dataset({
                     **options,
                     **{"categorias": [cols.get('cnpj'), compet_attrib]}
                 })
             else:
-                df_local_result = self.get_thematic_handler.find_dataset({
+                df_local_result = self.get_thematic_handler().find_dataset({
                     **options,
                     **{
                         "categorias": [cols.get('cnpj'),
@@ -352,7 +352,7 @@ class Empresa(BaseModel):
 
             df_local_result['idx'] = df_local_result[compet_attrib].apply(str).replace(
                 {'\.0': ''}, regex=True) + '_' + \
-                df_local_result[cols.get('cnpj')].apply(str).replace({'\.0': ''}, regex=True)
+                df_local_result[cols.get('cnpj', 'cnpj')].apply(str).replace({'\.0': ''}, regex=True)
             result["stats_estab_compet"] = json.loads(
                 df_local_result.set_index('idx').to_json(orient="index")
             )

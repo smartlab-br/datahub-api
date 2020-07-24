@@ -152,9 +152,9 @@ class ViewConfReader():
             return default
         if options.get('type') == 'multiple-charts':
             for chart in options.get('charts'):
-                if chart.get('id') == options.get('chart_id'):
-                    if chart.get('options', {}).get(attribute, default):
-                        return chart.get('options', {}).get(attribute, default)
+                if (chart.get('id') == options.get('chart_id') and
+                        chart.get('options', {}).get(attribute, default)):
+                    return chart.get('options', {}).get(attribute, default)
             return default
         return options.get('chart_options', {}).get(attribute, default)
         

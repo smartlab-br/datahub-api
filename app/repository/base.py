@@ -454,13 +454,6 @@ class HadoopRepository(BaseRepository):
 
     def build_filter_string(self, where=None, joined=None, is_on=False):
         ''' Builds WHERE clauses or added ON conditions '''
-        simple_operators = {
-            'EQ': "=", "NE": "!=", "LE": "<=", "LT": "<", "GE": ">=",
-            "GT": ">", "LK": "LIKE"
-        }
-        boolean_operators = {
-            "NL": "IS NULL", "NN": "IS NOT NULL"
-        }
         suffix = ''
         if joined is not None:
             suffix = self.get_join_suffix(joined)
@@ -476,24 +469,26 @@ class HadoopRepository(BaseRepository):
                 continue
             if not QueryBuilder.validate_clause(w_clause, joined, is_on, suffix):
                 continue
-            if w_clause[0].upper() in simple_operators:
-                arr_result.append(
-                    f'{w_clause[1]} '
-                    f'{simple_operators[w_clause[0].upper()]} '
-                    f'{w_clause[2]}'
-                )
-            elif w_clause[0].upper() in boolean_operators:
-                arr_result.append(
-                    f'{w_clause[1]} '
-                    f'{boolean_operators[w_clause[0].upper()]}'
-                )
-            elif w_clause[0].upper() == 'IN':
-                arr_result.append(f'{w_clause[1]} IN ({",".join(w_clause[2:])})')
-            else:
-                complex_criteria = self.build_complex_criteria(w_clause, simple_operators)
-                if complex_criteria is not None:
-                    arr_result.append(complex_criteria)
+            criteria = self.build_criteria(w_clause)
+            if criteria:
+                arr_result.append(criteria)
         return ' '.join(arr_result)
+
+    def build_criteria(self, w_clause):
+        simple_operators = {
+            'EQ': "=", "NE": "!=", "LE": "<=", "LT": "<", "GE": ">=",
+            "GT": ">", "LK": "LIKE"
+        }
+        boolean_operators = {
+            "NL": "IS NULL", "NN": "IS NOT NULL"
+        }
+        if w_clause[0].upper() in simple_operators:
+            return f'{w_clause[1]} {simple_operators[w_clause[0].upper()]} {w_clause[2]}'
+        if w_clause[0].upper() in boolean_operators:
+            return f'{w_clause[1]} {boolean_operators[w_clause[0].upper()]}'
+        if w_clause[0].upper() == 'IN':
+            return f'{w_clause[1]} IN ({",".join(w_clause[2:])})'
+        return self.build_complex_criteria(w_clause, simple_operators)
 
     @staticmethod
     def build_complex_criteria(w_clause, simple_op):

@@ -933,3 +933,33 @@ class HadoopRepositoryBuildFilterStringTest(unittest.TestCase):
             StubHadoopRepository().build_filter_string(self.FILTER_LIST, 'municipio'),
             self.EXPECTED
         )
+
+class HadoopRepositoryBuildCriteriaTest(unittest.TestCase):
+    ''' Tests simple criteria string builder '''
+    def test_build_criteria_simple_op(self):
+        ''' Tests if a simple op string is correctly built '''
+        self.assertEqual(
+            StubHadoopRepository().build_criteria(['eq','field','value']),
+            'field = value'
+        )
+
+    def test_build_criteria_boolean_op(self):
+        ''' Tests if a boolean op string is correctly built '''
+        self.assertEqual(
+            StubHadoopRepository().build_criteria(['nn','field']),
+            'field IS NOT NULL'
+        )
+    
+    def test_build_criteria_in_op(self):
+        ''' Tests if a IN operator string is correctly built '''
+        self.assertEqual(
+            StubHadoopRepository().build_criteria(['in','field','a', 'b']),
+            'field IN (a,b)'
+        )
+
+    def test_invoke_complex_criteria(self):
+        ''' Tests if a complex op is correctly built '''
+        self.assertEqual(
+            StubHadoopRepository().build_criteria(['ltsz', 'column', 'value']),
+            "LENGTH(CAST(column AS STRING)) < value"
+        )

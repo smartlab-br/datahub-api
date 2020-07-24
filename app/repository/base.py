@@ -473,24 +473,26 @@ class HadoopRepository(BaseRepository):
             w_clause = [f.replace('|', '-') for f in w_clause]
             if w_clause[0].upper() == 'AND' or w_clause[0].upper() == 'OR':
                 arr_result.append(w_clause[0])
-            elif QueryBuilder.validate_clause(w_clause, joined, is_on, suffix):
-                if w_clause[0].upper() in simple_operators:
-                    arr_result.append(
-                        f'{w_clause[1]} '
-                        f'{simple_operators[w_clause[0].upper()]} '
-                        f'{w_clause[2]}'
-                    )
-                elif w_clause[0].upper() in boolean_operators:
-                    arr_result.append(
-                        f'{w_clause[1]} '
-                        f'{boolean_operators[w_clause[0].upper()]}'
-                    )
-                elif w_clause[0].upper() == 'IN':
-                    arr_result.append(f'{w_clause[1]} IN ({",".join(w_clause[2:])})')
-                else:
-                    complex_criteria = self.build_complex_criteria(w_clause)
-                    if complex_criteria is not None:
-                        arr_result.append(complex_criteria, simple_operators)
+                continue
+            if not QueryBuilder.validate_clause(w_clause, joined, is_on, suffix):
+                continue
+            if w_clause[0].upper() in simple_operators:
+                arr_result.append(
+                    f'{w_clause[1]} '
+                    f'{simple_operators[w_clause[0].upper()]} '
+                    f'{w_clause[2]}'
+                )
+            elif w_clause[0].upper() in boolean_operators:
+                arr_result.append(
+                    f'{w_clause[1]} '
+                    f'{boolean_operators[w_clause[0].upper()]}'
+                )
+            elif w_clause[0].upper() == 'IN':
+                arr_result.append(f'{w_clause[1]} IN ({",".join(w_clause[2:])})')
+            else:
+                complex_criteria = self.build_complex_criteria(w_clause, simple_operators)
+                if complex_criteria is not None:
+                    arr_result.append(complex_criteria)
         return ' '.join(arr_result)
 
     @staticmethod

@@ -893,3 +893,43 @@ class BaseRepositoryBuildAgrArrayTest(unittest.TestCase):
             'max(vl_indicador) AS agr_max_vl_indicador'
         ]
         self.assertEqual(result, expected)
+
+class HadoopRepositoryBuildFilterStringTest(unittest.TestCase):
+    ''' Tests complex criteria string builder '''
+    FILTER_LIST = [
+        'nl-field', 'and', 'eq-field-value', 'and',
+        'in-field-a-b', 'and', 'ltsz-column-value'
+    ]
+    EXPECTED = "field IS NULL and field = value and field IN (a,b) and LENGTH(CAST(column AS STRING)) < value"
+
+    def test_complete_string(self):
+        ''' Explores different possibilities in a single string building '''
+        self.assertEqual(
+            StubHadoopRepository().build_filter_string(
+                self.FILTER_LIST
+            ),
+            self.EXPECTED
+        )
+
+    def test_complete_string_no_where(self):
+        ''' Tests if empty string is returned when no filter list is received '''
+        self.assertEqual(StubHadoopRepository().build_filter_string(None), '')
+
+    def test_complete_string_is_on_no_join(self):
+        ''' Tests if empty string is returned when the flag of ON filter is
+            set, but no join info is given '''
+        self.assertEqual(
+            StubHadoopRepository().build_filter_string(
+                self.FILTER_LIST,
+                None,
+                True
+            ),
+            ''
+        )
+
+    def test_complete_string_on_join(self):
+        ''' Tests if empty string is returned when the join flag is set '''
+        self.assertEqual(
+            StubHadoopRepository().build_filter_string(self.FILTER_LIST, 'municipio'),
+            self.EXPECTED
+        )

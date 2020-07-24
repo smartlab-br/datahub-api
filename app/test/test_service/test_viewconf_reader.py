@@ -695,3 +695,79 @@ class ViewConfGetLayersNamesTest(unittest.TestCase):
             ]),
             {'layer_1': 'layer 1', 'layer_2': 'layer 2'}
         )
+
+class ViewConfGetAttributeFromCharttSpecTest(unittest.TestCase):
+    ''' Test behaviours linked to getting an atttribute from chart options '''
+    def test_no_options(self):
+        ''' Tests if no attribute is returned if no options and no default are
+            given '''
+        self.assertEqual(
+            ViewConfReader.get_attribute_from_chart_spec(None, 'colorArray'),
+            None
+        )
+
+    def test_no_attribute(self):
+        ''' Tests if no attribute is returned if no attribute is given '''
+        self.assertEqual(
+            ViewConfReader.get_attribute_from_chart_spec({}, None, 'default'),
+            None
+        )
+
+    def test_no_options_with_default(self):
+        ''' Tests if default value is returned if no options are given '''
+        self.assertEqual(
+            ViewConfReader.get_attribute_from_chart_spec(None, 'colorArray', 'default'),
+            'default'
+        )
+
+    def test_fetch_existing_attribute_among_multiple(self):
+        ''' Tests if existing attribute is returned from multiple charts'''
+        options_from_yaml = {
+            "type": "multiple-charts",
+            "charts": [
+                {"id": "wrong", "options": {'colorArray': ['blue', 'purple', 'orange']}},
+                {"id": "right", "options": {'colorArray': ['red', 'yellow', 'green']}}
+            ],
+            "chart_id": "right"
+        }
+        self.assertEqual(
+            ViewConfReader.get_attribute_from_chart_spec(
+                options_from_yaml,
+                'colorArray',
+                'default'
+            ),
+            ['red', 'yellow', 'green']
+        )
+
+    def test_fetch_existing_attribute_from_single(self):
+        ''' Tests if existing attribute is returned from simple card '''
+        options_from_yaml = {
+            "chart_options": {'colorArray': ['blue', 'purple', 'orange']}
+        }
+        self.assertEqual(
+            ViewConfReader.get_attribute_from_chart_spec(
+                options_from_yaml,
+                'colorArray',
+                'default'
+            ),
+            ['blue', 'purple', 'orange']
+        )
+
+    def test_fetch_existing_attribute_among_multiple_dafault(self):
+        ''' Tests if existing attribute is returned from multiple charts'''
+        options_from_yaml = {
+            "type": "multiple-charts",
+            "charts": [
+                {"id": "wrong", "options": {'colorArray': ['blue', 'purple', 'orange']}},
+                {"id": "right", "options": {'colorArray': ['red', 'yellow', 'green']}}
+            ],
+            "chart_id": "missing"
+        }
+        self.assertEqual(
+            ViewConfReader.get_attribute_from_chart_spec(
+                options_from_yaml,
+                'colorArray',
+                'default'
+            ),
+            'default'
+        )

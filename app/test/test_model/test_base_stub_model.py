@@ -49,6 +49,27 @@ class BaseModelWrapResultTest(unittest.TestCase):
         ''' Verifica se retorna dataset encapsulado corretamente '''
         model = StubModel()
 
+        dataset = [
+            {
+                "nm_indicador": "Ficticio",
+                "nu_competencia": 2099,
+                "vl_indicador": 1
+            }
+        ]
+
+        expected = {
+            "metadata": {
+                "fonte": "Instituto STUB"
+            },
+            "dataset": dataset
+        }
+
+        self.assertEqual(model.wrap_result(pd.DataFrame(dataset)), expected)
+
+    def test_as_string_dataframe(self):
+        ''' Verifica se retorna dataset encapsulado corretamente '''
+        model = StubModel()
+
         str_dataset = StringIO(
             """nm_indicador;nu_competencia;vl_indicador
                 Ficticio;2099;1
@@ -69,7 +90,7 @@ class BaseModelWrapResultTest(unittest.TestCase):
             ]
         }"""
 
-        result = "".join(model.wrap_result(dataset).split())
+        result = "".join(model.wrap_result(dataset, {"as_string": True}).split())
         expected = "".join(str_expected.split())
         self.assertEqual(result, expected)
 

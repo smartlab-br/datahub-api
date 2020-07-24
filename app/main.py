@@ -73,10 +73,17 @@ from resources.v1.ti.censo_agro_br import CensoAgroBrasilResource
 # Resources das organizações assistência social
 from resources.v1.orgs.orgs_assistencia_social import OrgsAssistenciaSocialResource
 
-# Endpoint para obter a estrutura de dados de um template de card
+# Resources para obter dados de pessoas
+from resources.v1.empresa.empresa import EmpresaResource
+from resources.v1.empresa.stats import EmpresaStatsResource
+from resources.v1.empresa.estabelecimento import EstabelecimentoResource
+from resources.v1.empresa.datasets import DatasetsResource
+from resources.v1.empresa.report import ReportResource
+
+# Resource para obter a estrutura de dados de um template de card
 from resources.v1.card_template import CardTemplateResource
 
-# Endpoint para obter um gráfico direto da API
+# Resource para obter um gráfico direto da API
 from resources.v1.charts import ChartsResource
 
 from resources.v1.healthchecks import HCAlive
@@ -98,6 +105,10 @@ def close_db_connection(_error):
     if hasattr(g, 'impala_connection'):
         g.impala_connection.close()
         g.impala_connection = None
+    # Encerra a conexão com o redis
+    if hasattr(g, 'redis_pool'):
+        del g.redis_pool
+        g.redis_pool = None
 
 CORS = CORS(application, resources={r"/*": {"origins": "*"}})
 api = Api(application, api_version='0.1', api_spec_url='/api/swagger') #pylint: disable=C0103
@@ -170,9 +181,15 @@ api.add_resource(CensoAgroBrasilResource, '/ti/censoagronacional')
 # Organizações de Assistência social
 api.add_resource(OrgsAssistenciaSocialResource, '/orgs/assistenciasocial')
 
-# Resource para obter a estrutura de dados de um template de card
-api.add_resource(CardTemplateResource, '/cardtemplate/<string:cd_template>')
+## Resources para obter datasets de empresa e estabelecimento
+api.add_resource(DatasetsResource, '/datasets')
+api.add_resource(ReportResource, '/report/<string:cnpj_raiz>')
+api.add_resource(EmpresaResource, '/empresa/<string:cnpj_raiz>')
+api.add_resource(EmpresaStatsResource, '/estatisticas/empresa/<string:cnpj_raiz>')
+api.add_resource(EstabelecimentoResource, '/estabelecimento/<string:cnpj>')
 
+## Resources para obter a estrutura de dados de um template de card ou gráfico
+api.add_resource(CardTemplateResource, '/cardtemplate/<string:cd_template>')
 api.add_resource(ChartsResource, '/charts/<string:chart_type>')
 
 if __name__ == '__main__':

@@ -42,3 +42,29 @@ class QueryOptionsBuilder():
                 params.get(param_name)):
             return params.get(param_name).split(',')
         return None
+
+    @staticmethod
+    def build_person_options(r_args, mod='empresa'):
+        ''' Constrói as opções da pesquisa '''
+        options = {}
+
+        if 'dados' in r_args:
+            options['column_family'] = r_args['dados']
+        if 'competencia' in r_args:
+            options['column'] = r_args['competencia']
+        if 'id_pf' in r_args:
+            options['id_pf'] = r_args['id_pf']
+        if 'perspective' in r_args:
+            options['perspective'] = r_args['perspective']
+        if 'only_meta' in r_args and r_args['only_meta'] == 'S':
+            options['only_meta'] = True
+        if 'reduzido' in r_args and r_args['reduzido'] == 'S':
+            options['reduzido'] = True
+
+        if mod == 'estabelecimento':
+            options['cnpj_raiz'] = r_args['id_inv'][:-6]
+            options['cnpj'] = r_args['id_inv']
+        else:
+            options['cnpj_raiz'] = r_args['id_inv']
+
+        return options

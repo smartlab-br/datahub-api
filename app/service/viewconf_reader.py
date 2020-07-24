@@ -143,20 +143,34 @@ class ViewConfReader():
         return options.get('title', {}).get('fixed', 'background')
 
     @staticmethod
+    def get_attribute_from_chart_spec(options, attribute, default=None):
+        ''' Gets an attribute from a chart option or a specific chart in
+            a card with multiple charts '''
+        if attribute is None:
+            return None
+        if options is None:
+            return default
+        if options.get('type') == 'multiple-charts':
+            for chart in options.get('charts'):
+                if (chart.get('id') == options.get('chart_id') and
+                        chart.get('options', {}).get(attribute, default)):
+                    return chart.get('options', {}).get(attribute, default)
+            return default
+        return options.get('chart_options', {}).get(attribute, default)
+
+    @staticmethod
     def get_color_scale(options, vmin=0, vmax=1):
         ''' Gets a color array as given by options or builds a linear scale '''
         # Check if color list is given, escaping if true
-        if options and options.get('chart_options', {}).get('colorArray'):
-            return options.get('chart_options', {}).get('colorArray')
-        scale_def = {'name': 'Blues'}
-        if options is not None:
-            scale_def = options.get('chart_options', {}).get('colorScale', {'name': 'Blues'})
-            if options.get('type') == 'multiple-charts':
-                for chart in options.get('charts'):
-                    if chart.get('id') == options.get('chart_id'):
-                        if chart.get('options', {}).get('colorArray'):
-                            return chart.get('options', {}).get('colorArray')
-                        scale_def = chart.get('options', {}).get('colorScale', {'name': 'Blues'})
+        color_array = ViewConfReader.get_attribute_from_chart_spec(options, 'colorArray')
+        if color_array:
+            return color_array
+
+        scale_def = ViewConfReader.get_attribute_from_chart_spec(
+            options,
+            'colorScale',
+            {'name': 'Blues'}
+        )
 
         plt = brewer2mpl.get_map(
             scale_def.get("name"),

@@ -200,15 +200,16 @@ class Empresa(BaseModel):
         else:
             dataframes = self.TOPICS
 
+        # Autos and Catweb need a timeframe to filter
+        if ('column' not in options and 
+                any([dataframe in ['auto', 'catweb'] for dataframe in dataframes])):
+            raise AttributeError(f'Fontes de dados demandam uma competência')
+
         result = {}
         for dataframe in dataframes:
             # Get statistics for dataset
             cols = self.get_thematic_handler().get_column_defs(dataframe)
             local_cols = cols.copy()
-
-            # Autos and Catweb need a timeframe to filter
-            if dataframe in ['auto', 'catweb'] and 'column' not in options:
-                raise AttributeError(f'{dataframe} demanda uma competência')
 
             # If the dataset doesn't have a unique column to identify a company
             perspectives = self.get_thematic_handler().get_persp_values(dataframe)

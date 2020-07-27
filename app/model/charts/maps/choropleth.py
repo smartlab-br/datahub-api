@@ -53,22 +53,14 @@ class Choropleth(BaseMap):
             dataframe[chart_options['value_field']].min(),
             dataframe[chart_options['value_field']].max()
         )
-        def get_color(feature):
-            if feature is None:
-                return '#8c8c8c' # MISSING -> gray
-            value = None
-            if chart_options['value_field'] in feature.get('properties', {}):
-                value = feature.get('properties', {}).get(chart_options['value_field'])
-            if value is None:
-                return '#8c8c8c' # MISSING -> gray
-            return color_scale(value)
-
+        
+        color_function = self.get_feature_color
         chart = folium.TopoJson(
             state_geo,
             'objects.data',
             name=ViewConfReader.get_chart_title(options),
             style_function=lambda feature: {
-                'fillColor': get_color(feature),
+                'fillColor': color_function(feature),
                 'fillOpacity': 0.8,
                 'color' : 'black',
                 'stroke' : 'black',
@@ -119,6 +111,17 @@ class Choropleth(BaseMap):
         result.fit_bounds([lower_left, upper_right])
 
         return result
+
+    @staticmethod
+    def get_feature_color(feature):
+        if feature is None:
+            return '#8c8c8c' # MISSING -> gray
+        value = None
+        if chart_options['value_field'] in feature.get('properties', {}):
+            value = feature.get('properties', {}).get(chart_options['value_field'])
+        if value is None:
+            return '#8c8c8c' # MISSING -> gray
+        return color_scale(value)
 
     def get_geometry(self, options, analysis_unit):
         ''' Gets the topojson from external resource '''

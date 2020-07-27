@@ -209,23 +209,22 @@ class Empresa(BaseModel):
         for dataframe in dataframes:
             # Get statistics for dataset
             cols = self.get_thematic_handler().get_column_defs(dataframe)
-            local_cols = cols.copy()
 
             # If the dataset doesn't have a unique column to identify a company
             perspectives = self.get_thematic_handler().get_persp_values(dataframe)
-            if isinstance(cols.get('cnpj_raiz'), dict) and perspectives:
-                local_result = {}
+            if perspectives and options.get('perspective'):
+                perspectives = {
+                    k: v
+                    for
+                    k, v
+                    in
+                    perspectives.items()
+                    if
+                    k == options.get('perspective')
+                }
 
-                if options.get('perspective'):
-                    perspectives = {
-                        k: v
-                        for
-                        k, v
-                        in
-                        perspectives.items()
-                        if
-                        k == options.get('perspective')
-                    }
+            if perspectives: # If the source demands a perspective or one is provided in options
+                local_result = {}
 
                 for each_persp_key in perspectives:
                     local_cols = self.get_thematic_handler().decode_column_defs(
@@ -246,23 +245,56 @@ class Empresa(BaseModel):
 
                 result[dataframe]['stats_persp'] = local_result
             else:
-                if isinstance(cols.get('cnpj_raiz'), dict):
-                    local_cols = self.get_thematic_handler().decode_column_defs(
-                        local_cols, options.get('perspective')
-                    )
-
                 result[dataframe] = self.get_statistics_from_perspective(
                     dataframe,
-                    options.get('perspective'),
+                    None,
                     cols,
-                    self.get_stats_local_options(
-                        options,
-                        local_cols,
-                        dataframe,
-                        options.get('perspective')
-                    ),
+                    self.get_stats_local_options(options, cols, dataframe, None),
                     options
                 )
+
+
+
+
+            # if isinstance(cols.get('cnpj_raiz'), dict) and perspectives:
+            #     local_result = {}
+
+            #     for each_persp_key in perspectives:
+            #         local_cols = self.get_thematic_handler().decode_column_defs(
+            #             cols, each_persp_key
+            #         )
+            #         local_result[each_persp_key] = self.get_statistics_from_perspective(
+            #             dataframe,
+            #             each_persp_key,
+            #             local_cols,
+            #             self.get_stats_local_options(
+            #                 options,
+            #                 local_cols,
+            #                 dataframe,
+            #                 each_persp_key
+            #             ),
+            #             options
+            #         )
+
+            #     result[dataframe]['stats_persp'] = local_result
+            # else:
+            #     if isinstance(cols.get('cnpj_raiz'), dict):
+            #         local_cols = self.get_thematic_handler().decode_column_defs(
+            #             local_cols, options.get('perspective')
+            #         )
+
+            #     result[dataframe] = self.get_statistics_from_perspective(
+            #         dataframe,
+            #         options.get('perspective'),
+            #         cols,
+            #         self.get_stats_local_options(
+            #             options,
+            #             local_cols,
+            #             dataframe,
+            #             options.get('perspective')
+            #         ),
+            #         options
+            #     )
 
         return result
 
@@ -319,6 +351,7 @@ class Empresa(BaseModel):
                 "ordenacao": [cols.get('cnpj', 'cnpj')]
             }
         })
+
         if cols.get('cnpj', 'cnpj') in stats_unit.columns:
             result["stats_estab"] = stats_unit.set_index(
                 cols.get('cnpj', 'cnpj')).to_dict(orient="index")

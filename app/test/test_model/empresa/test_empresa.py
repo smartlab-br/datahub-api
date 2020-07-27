@@ -290,6 +290,7 @@ class StubGetStatisticsTest(unittest.TestCase):
             }),
             {
                 "catweb_c": {
+                    'fonte': 'Fonte',
                     'stats': {'agr_count': 100,
                         'cnpj': '12345678000101',
                         'cnpj_raiz': '12345678',

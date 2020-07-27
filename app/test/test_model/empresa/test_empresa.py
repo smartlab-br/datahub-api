@@ -1,5 +1,6 @@
 '''Main tests in API'''
 import unittest
+from datetime import datetime
 from model.empresa.empresa import Empresa
 from test.stubs.empresa import StubEmpresa
 
@@ -198,3 +199,242 @@ class StubGetStatisticsFromPerspectiveTest(unittest.TestCase):
                 **StubEmpresa.EXPECTED_GROUPED_STATS
             }
         )
+
+class StubGetIsValidLoadingEntryTest(unittest.TestCase):
+    ''' Tests the loading entry validation method '''
+    def test_is_valid_loading_entry_no_options(self):
+        ''' Tests if error is raised when no options is given '''
+        self.assertRaises(
+            ValueError,
+            StubEmpresa().is_valid_loading_entry,
+            '12345678',
+            None
+        )
+
+    def test_is_valid_loading_entry_no_column_family(self):
+        ''' Tests if error is raised when no column family is given '''
+        self.assertRaises(
+            ValueError,
+            StubEmpresa().is_valid_loading_entry,
+            '12345678',
+            {}
+        )
+
+    def test_is_valid_loading_entry_wrong_column_family(self):
+        ''' Tests if error is raised when an incorrect column family is given '''
+        self.assertRaises(
+            ValueError,
+            StubEmpresa().is_valid_loading_entry,
+            '12345678',
+            {'column_family': 'non-existent'}
+        )
+
+    def test_is_valid_loading_entry_wrong_column(self):
+        ''' Tests if error is raised when an incorrect column is given
+            to filter the data from a row '''
+        self.assertRaises(
+            ValueError,
+            StubEmpresa().is_valid_loading_entry,
+            '12345678',
+            {'column_family': 'test', 'column': '2099'}
+        )
+
+    def test_is_valid_loading_entry(self):
+        ''' Tests if validation passes whe no falseability conditions are
+            met '''
+        self.assertEqual(
+            StubEmpresa().is_valid_loading_entry(
+                '12345678',
+                {'column_family': 'test'}
+            ),
+            True
+        )
+
+    def test_is_valid_loading_entry_false_column(self):
+        ''' Tests if validation fails when the requires column is not in the
+            available list '''
+        self.assertEqual(
+            StubEmpresa().is_valid_loading_entry(
+                '12345678',
+                {'column_family': 'another'}
+            ),
+            False
+        )
+
+    def test_is_valid_loading_entry_false_by_status(self):
+        ''' Tests if validation fails '''
+        self.assertEqual(
+            StubEmpresa().is_valid_loading_entry(
+                '12345678',
+                {'column_family': 'failed_status', 'column': '2017'}
+            ),
+            False
+        )
+
+    def test_is_valid_loading_entry_false_expired(self):
+        ''' Tests if validation fails '''
+        self.assertEqual(
+            StubEmpresa().is_valid_loading_entry(
+                '12345678',
+                {'column_family': 'expired', 'column': '2018'}
+            ),
+            False
+        )
+
+class StubGetLoadingEntryTest(unittest.TestCase):
+    ''' Tests the loading entry validation method '''
+    EXPECTED = {
+        "2017": f'INGESTED|{datetime.strftime(datetime.now(), "%Y-%m-%d")}',
+        "2018": f'INGESTED|{datetime.strftime(datetime.now(), "%Y-%m-%d")}',
+        "when": f'{datetime.strftime(datetime.now(), "%Y-%m-%d")}'
+    }
+
+    def get_expected_status_dict(self):
+        ''' Method to avoid duplicate code for default test expected dictionary '''
+        return {
+            "another": self.EXPECTED,
+            "expired": {
+                "2017": "INGESTED|2000-01-01",
+                "2018": "INGESTED|2000-01-01",
+                "when": "2000-01-01"
+            },
+            "failed_status": {
+                "2017": f'FAILED|{datetime.strftime(datetime.now(), "%Y-%m-%d")}',
+                "2018": f'INGESTED|{datetime.strftime(datetime.now(), "%Y-%m-%d")}',
+                "when": f'{datetime.strftime(datetime.now(), "%Y-%m-%d")}'
+            },
+            "skip": self.EXPECTED,
+            "test": self.EXPECTED
+        }
+
+    def test_get_loading_entry_no_options(self):
+        ''' Tests if no column status is returned when no options is given '''
+        self.assertEqual(
+            StubEmpresa().get_loading_entry('12345678', None),
+            (
+                self.get_expected_status_dict(),
+                None
+            )
+        )
+
+    def test_get_loading_entry_empty_options(self):
+        ''' Tests if no column status is returned when an empty options is given '''
+        self.assertEqual(
+            StubEmpresa().get_loading_entry('12345678', {}),
+            (
+                self.get_expected_status_dict(),
+                None
+            )
+        )
+
+    def test_valid_loading_entry(self):
+        ''' Tests return of valid ingested loading entry '''
+        self.assertEqual(
+            StubEmpresa().get_loading_entry(
+                '12345678',
+                {'column_family': 'test', 'column': '2017'}
+            ),
+            (
+                self.get_expected_status_dict(),
+                f'INGESTED|{datetime.strftime(datetime.now(), "%Y-%m-%d")}'
+            )
+        )
+
+    def test_valid_loading_entry_no_column_in_options(self):
+        ''' Tests return of valid loading entry when no column is given '''
+        self.assertEqual(
+            StubEmpresa().get_loading_entry(
+                '12345678',
+                {'column_family': 'failed_status'}
+            ),
+            (
+                self.get_expected_status_dict(),
+                None
+            )
+        )
+
+class StubAssessColumnStatusTest(unittest.TestCase):
+    ''' Tests the column status assessor '''
+    def test_assess_column_status_no_column_args(self):
+        ''' Tests if UNAVAILABLE is returned when no column args are provided '''
+        self.assertEqual(
+            StubEmpresa.assess_column_status(
+                ['2017', '2018'],
+                None,
+                None
+            ),
+            'UNAVAILABLE'
+        )
+
+    def test_assess_column_status_empty_available_column_arg(self):
+        ''' Tests if UNAVAILABLE is returned when no column and an empty
+            columns_available args are provided '''
+        self.assertEqual(
+            StubEmpresa.assess_column_status(
+                ['2017', '2018'],
+                {},
+                None
+            ),
+            'UNAVAILABLE'
+        )
+
+    def test_assess_column_status_missing(self):
+        ''' Tests if MISSING is returned when a given column is expected but
+            not present in the columns_available (from REDIS) '''
+        self.assertEqual(
+            StubEmpresa.assess_column_status(
+                ['2017', '2018'],
+                {"2017": 'INGESTED'},
+                '2018'
+            ),
+            'MISSING'
+        )
+
+    def test_assess_column_status_deprecated(self):
+        ''' Tests if MISSING is returned when a given column is not expected
+            (removed from the datalake reference, but is retrieved from REDIS '''
+        self.assertEqual(
+            StubEmpresa.assess_column_status(
+                ['2017', '2018'],
+                {"2019": 'INGESTED'},
+                '2019'
+            ),
+            'DEPRECATED'
+        )
+
+    def test_assess_column_status_unavailable_deprecated_not_ingested(self):
+        ''' Tests if MISSING is returned when a given column is not expected
+            (removed from the datalake reference, but is retrieved from REDIS
+            with a non-INGESTED status '''
+        self.assertEqual(
+            StubEmpresa.assess_column_status(
+                ['2017', '2018'],
+                {"2019": 'FAILED|2000-01-01'},
+                '2019'
+            ),
+            'UNAVAILABLE'
+        )
+
+    def test_assess_column_status_from_data(self):
+        ''' Tests if a regular status is passed AS-IS if guard conditions
+            are not met '''
+        self.assertEqual(
+            StubEmpresa.assess_column_status(
+                ['2017', '2018'],
+                {"2018": 'FAILED|2000-01-01'},
+                '2018'
+            ),
+            'FAILED|2000-01-01'
+        )
+# ==================
+    # @staticmethod
+    # def assess_column_status(slot_list, columns_available, column):
+    #     ''' Checks the status of a defined column '''
+    #     if column in slot_list:
+    #         if column in columns_available.keys():
+    #             return columns_available[column]
+    #         return 'MISSING'
+    #     if (column in columns_available.keys() and
+    #             'INGESTED' in columns_available[column]):
+    #         return 'DEPRECATED'
+    #     return 'UNAVAILABLE'

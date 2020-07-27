@@ -24,6 +24,8 @@ class Empresa(BaseModel):
     def __init__(self):
         ''' Construtor '''
         self.repo = None
+        self.dataset_repo = None
+        self.pessoa_dataset_repo = None
         self.thematic_handler = None
         self.__set_repo()
 
@@ -32,6 +34,16 @@ class Empresa(BaseModel):
         if self.repo is None:
             self.repo = EmpresaRepository()
         return self.repo
+
+    def get_dataset_repo(self):
+        if self.dataset_repo is None:
+            self.dataset_repo = DatasetsRepository()
+        return self.dataset_repo
+
+    def get_pessoa_dataset_repo(self):
+        if self.pessoa_dataset_repo is None:
+            self.pessoa_dataset_repo = PessoaDatasetsRepository()
+        return self.pessoa_dataset_repo
 
     def get_thematic_handler(self):
         ''' Gets single instance of Thematic model to delegate query execution '''
@@ -45,10 +57,8 @@ class Empresa(BaseModel):
 
     def find_datasets(self, options):
         ''' Localiza um todos os datasets de uma empresa pelo CNPJ Raiz '''
-        (loading_entry, loading_entry_is_valid, column_status) = self.get_loading_entry(
-            options['cnpj_raiz'],
-            options
-        )
+        loading_entry_is_valid = self.is_valid_loading_entry(options['cnpj_raiz'], options)
+        (loading_entry, column_status) = self.get_loading_entry(options['cnpj_raiz'], options)
         result = {'status': loading_entry}
         try:
             dataset = self.get_repo().find_datasets(options)
@@ -106,21 +116,43 @@ class Empresa(BaseModel):
 
     def get_loading_entry(self, cnpj_raiz, options=None):
         ''' Verifica se há uma entrada ainda válida para ingestão de dados da empresa '''
-        rules_dao = DatasetsRepository()
-        if (not options.get('column_family') or
-                not rules_dao.DATASETS.get((options.get('column_family')))):
+        loading_entry = {}
+        column_status = None
+        column_status_specific = None
+        for dataframe, slot_list in self.get_dataset_repo().DATASETS.items():
+            columns_available = self.get_pessoa_dataset_repo().retrieve(cnpj_raiz, dataframe)
+            if (options is not None and 'column_family' in options and
+                    options.get('column_family', dataframe) == dataframe and
+                    'column' in options):
+                column_status = self.assess_column_status(
+                    slot_list.split(','),
+                    columns_available,
+                    options.get('column')
+                )
+                column_status_specific = column_status
+            # if options.get('column_family') == dataframe:
+            #     column_status_specific = column_status
+            if columns_available:
+                loading_entry[dataframe] = columns_available
+
+        # Overrides if there's a specific column status
+        if column_status_specific is not None:
+            column_status = column_status_specific
+
+        return (loading_entry, column_status)
+
+    def is_valid_loading_entry(self, cnpj_raiz, options=None):
+        ''' Checks if a loading entry is valid '''
+        rules = self.get_dataset_repo().DATASETS
+        if (options is None or not options.get('column_family') or
+                not rules.get((options.get('column_family')))):
             raise ValueError('Dataset inválido')
         if (options.get('column') and
-                options.get('column') not in rules_dao.DATASETS.get(
+                options.get('column') not in rules.get(
                     (options.get('column_family'))).split(',')):
             raise ValueError('Competência inválida para o dataset informado')
-        loading_status_dao = PessoaDatasetsRepository()
-        is_valid = True
-        loading_entry = {}
-        column_status = 'INGESTED'
-        column_status_specific = None
-        for dataframe, slot_list in rules_dao.DATASETS.items():
-            columns_available = loading_status_dao.retrieve(cnpj_raiz, dataframe)
+        for dataframe, slot_list in rules.items():
+            columns_available = self.get_pessoa_dataset_repo().retrieve(cnpj_raiz, dataframe)
             if options.get('column_family', dataframe) == dataframe:
                 # Aquela entrada já existe no REDIS (foi carregada)?
                 # A entrada é compatível com o rol de datasources?
@@ -133,36 +165,23 @@ class Empresa(BaseModel):
                             in
                             slot_list.split(',')
                         ])):
-                    is_valid = False
+                    return False
                 else:
                     for col_key, col_val in columns_available.items():
                         if (options.get('column', col_key) == col_key and
                                 'INGESTED' in col_val and
                                 len(col_val.split('|')) > 1 and
-                                (datetime.strptime(col_val.split('|')[1], "%Y-%m-%d") -
-                                 datetime.now()).days > 30):
-                            is_valid = False
-
-                if 'column' in options:
-                    column_status = self.assess_column_status(
-                        slot_list.split(','),
-                        columns_available,
-                        options.get('column')
-                    )
-                    if options.get('column_family') == dataframe:
-                        column_status_specific = column_status
-            if columns_available:
-                loading_entry[dataframe] = columns_available
-
-        # Overrides if there's a specific column status
-        if column_status_specific is not None:
-            column_status = column_status_specific
-
-        return (loading_entry, is_valid, column_status)
+                                (datetime.now() - 
+                                 datetime.strptime(col_val.split('|')[1], "%Y-%m-%d")
+                                ).days > 30):
+                            return False
+        return True
 
     @staticmethod
     def assess_column_status(slot_list, columns_available, column):
         ''' Checks the status of a defined column '''
+        if columns_available is None:
+            columns_available = {}
         if column in slot_list:
             if column in columns_available.keys():
                 return columns_available[column]
@@ -177,7 +196,7 @@ class Empresa(BaseModel):
         if options.get('column_family'):
             dataframes = [options.get('column_family')]
         else:
-            dataframes = self.TOPICS # TODO 1 - Check if tables and topics names match
+            dataframes = self.TOPICS
 
         # TODO 99 - Add threads to run impala queries
         result = {}
@@ -210,15 +229,17 @@ class Empresa(BaseModel):
                     local_cols = self.get_thematic_handler().decode_column_defs(
                         cols, each_persp_key
                     )
-                    local_options = self.get_stats_local_options(
-                        options,
-                        local_cols,
-                        dataframe,
-                        each_persp_key
-                    )
-
                     local_result[each_persp_key] = self.get_statistics_from_perspective(
-                        dataframe, each_persp_key, local_cols, local_options, options
+                        dataframe,
+                        each_persp_key,
+                        local_cols,
+                        self.get_stats_local_options(
+                            options,
+                            local_cols,
+                            dataframe,
+                            each_persp_key
+                        ),
+                        options
                     )
 
                 result[dataframe]['stats_persp'] = local_result
@@ -227,15 +248,18 @@ class Empresa(BaseModel):
                     local_cols = self.get_thematic_handler().decode_column_defs(
                         local_cols, options.get('perspective')
                     )
-                local_options = self.get_stats_local_options(
-                    options,
-                    local_cols,
-                    dataframe,
-                    options.get('perspective')
-                )
 
                 result[dataframe] = self.get_statistics_from_perspective(
-                    dataframe, options.get('perspective'), cols, local_options, options
+                    dataframe,
+                    options.get('perspective'),
+                    cols,
+                    self.get_stats_local_options(
+                        options,
+                        local_cols,
+                        dataframe,
+                        options.get('perspective')
+                    ),
+                    options
                 )
 
         return result

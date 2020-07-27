@@ -1,6 +1,9 @@
 ''' Stubs for model testing '''
 import pandas as pd
+from datetime import datetime
 from model.empresa.empresa import Empresa
+from repository.empresa.pessoadatasets import PessoaDatasetsRepository
+from repository.empresa.datasets import DatasetsRepository
 
 class StubThematicModel():
     ''' Class to return a constant dataset when find_dataset is invoked '''
@@ -20,7 +23,51 @@ class StubThematicModel():
     def get_persp_columns(self, dataframe):
         ''' Returns a fixed perspective column for testing '''
         return 'persp_column'
-        
+
+class StubDatasetRepository(DatasetsRepository):
+    ''' Class to unlock Empresa model testing that uses REDIS data '''
+    DATASETS = {
+        'skip': '2016',
+        'test': '2017,2018',
+        'failed_status': '2017,2099',
+        'expired': '2017,2018',
+        'another': '2019'
+    }
+    def load_and_prepare(self):
+        ''' Avoids the application context '''
+
+class StubPessoaDatasetRepository(PessoaDatasetsRepository):
+    ''' Class to unlock Empresa model testing that uses REDIS data '''
+    def load_and_prepare(self):
+        ''' Avoids the application context '''
+
+    def retrieve(self, _id_pfpj, dataframe, _pfpj='pj'):
+        ''' Fakes a REDIS call and return static data '''
+        str_now = datetime.strftime(datetime.now(), "%Y-%m-%d")
+        if dataframe == 'unavailable':
+            return {
+                "2017": f"INGESTED|{str_now}",
+                "2099": f"INGESTED|{str_now}",
+                "when": f"{str_now}"
+            }
+        if dataframe == 'failed_status':
+            return {
+                "2017": f"FAILED|{str_now}",
+                "2018": f"INGESTED|{str_now}",
+                "when": f"{str_now}"
+            }
+        if dataframe == 'expired':
+            return {
+                "2017": "INGESTED|2000-01-01",
+                "2018": "INGESTED|2000-01-01",
+                "when": "2000-01-01"
+            }
+        return { # Valid
+            "2017": f"INGESTED|{str_now}",
+            "2018": f"INGESTED|{str_now}",
+            "when": f"{str_now}"
+        }
+
 class StubEmpresa(Empresa):
     ''' Class to enable model testing without repository access '''
     EXPECTED_GROUPED_STATS = {
@@ -44,3 +91,11 @@ class StubEmpresa(Empresa):
     def get_thematic_handler(self):
         ''' Gets the stub thematic model instead of the real one '''
         return StubThematicModel()
+
+    def get_dataset_repo(self):
+        ''' Gets the stub dataset repo instead of the real one '''
+        return StubDatasetRepository()
+
+    def get_pessoa_dataset_repo(self):
+        ''' Gets the stub pessoa_dataset repo instead of the real one '''
+        return StubPessoaDatasetRepository()

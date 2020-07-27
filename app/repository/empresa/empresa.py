@@ -10,45 +10,45 @@ class EmpresaRepository(HBaseRepository):
 
     def find_datasets(self, options):
         ''' Localiza um município pelo código do IBGE '''
-        if 'cnpj_raiz' in options and options['cnpj_raiz'] is not None:
-            result = self.find_row(
-                'empresa',
-                options['cnpj_raiz'],
-                options.get('column_family'),
-                options.get('column')
-            )
+        if 'cnpj_raiz' not in options or options['cnpj_raiz'] is None:
+            return None
 
-            # Result splitting according to perspectives
-            result = {**result, **self.split_dataframe_by_perspective(result, options)}
+        result = self.find_row(
+            'empresa',
+            options['cnpj_raiz'],
+            options.get('column_family'),
+            options.get('column')
+        )
 
-            for ds_key in result:
-                col_cnpj_name = 'cnpj'
-                if ds_key in self.CNPJ_COLUMNS:
-                    col_cnpj_name = self.CNPJ_COLUMNS[ds_key]
-                col_pf_name = None
-                if ds_key in self.PF_COLUMNS:
-                    col_pf_name = self.PF_COLUMNS[ds_key]
+        # Result splitting according to perspectives
+        result = {**result, **self.split_dataframe_by_perspective(result, options)}
 
-                if not result[ds_key].empty:
-                    result[ds_key] = self.filter_by_person(
-                        result[ds_key], options, col_cnpj_name, col_pf_name
-                    )
+        for ds_key in result:
+            col_cnpj_name = 'cnpj'
+            if ds_key in self.CNPJ_COLUMNS:
+                col_cnpj_name = self.CNPJ_COLUMNS[ds_key]
+            col_pf_name = None
+            if ds_key in self.PF_COLUMNS:
+                col_pf_name = self.PF_COLUMNS[ds_key]
 
-                # Redução de dimensionalidade (simplified)
-                if not result[ds_key].empty and options.get('simplified'):
-                    list_dimred = ['nu_cnpj_cei', 'nu_cpf', 'col_compet']
-                    if ds_key in self.SIMPLE_COLUMNS:
-                        list_dimred = self.SIMPLE_COLUMNS[ds_key]
-                        # Garantir que col_compet sempre estará na lista
-                        if 'col_compet' not in list_dimred:
-                            list_dimred.append('col_compet')
-                    result[ds_key] = result[ds_key][list_dimred]
+            if not result[ds_key].empty:
+                result[ds_key] = self.filter_by_person(
+                    result[ds_key], options, col_cnpj_name, col_pf_name
+                )
 
-                # Conversão dos datasets em json
-                result[ds_key] = json.loads(result[ds_key].to_json(orient="records"))
+            # Redução de dimensionalidade (simplified)
+            if not result[ds_key].empty and options.get('simplified'):
+                list_dimred = ['nu_cnpj_cei', 'nu_cpf', 'col_compet']
+                if ds_key in self.SIMPLE_COLUMNS:
+                    list_dimred = self.SIMPLE_COLUMNS[ds_key]
+                    # Garantir que col_compet sempre estará na lista
+                    if 'col_compet' not in list_dimred:
+                        list_dimred.append('col_compet')
+                result[ds_key] = result[ds_key][list_dimred]
 
-            return result
-        return None
+            # Conversão dos datasets em json
+            result[ds_key] = json.loads(result[ds_key].to_json(orient="records"))
+        return result
 
     def split_dataframe_by_perspective(self, dataframe, options):
         ''' Splits a dataframe by perpectives '''

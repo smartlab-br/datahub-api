@@ -213,7 +213,7 @@ class Empresa(BaseModel):
             # If the dataset doesn't have a unique column to identify a company
             perspectives = self.get_thematic_handler().get_persp_values(dataframe)
             if perspectives and options.get('perspective'):
-                perspectives = {
+                tmp_perspectives = {
                     k: v
                     for
                     k, v
@@ -222,6 +222,9 @@ class Empresa(BaseModel):
                     if
                     k == options.get('perspective')
                 }
+                if not bool(tmp_perspectives):
+                    raise AttributeError(f'Perspectiva inválida. Deve ser: {perspectives.keys()}')
+                perspectives = tmp_perspectives
 
             if perspectives: # If the source demands a perspective or one is provided in options
                 local_result = {}
@@ -243,7 +246,7 @@ class Empresa(BaseModel):
                         options
                     )
 
-                result[dataframe]['stats_persp'] = local_result
+                result[dataframe] = {'stats_persp': local_result}
             else:
                 result[dataframe] = self.get_statistics_from_perspective(
                     dataframe,
@@ -252,50 +255,6 @@ class Empresa(BaseModel):
                     self.get_stats_local_options(options, cols, dataframe, None),
                     options
                 )
-
-
-
-
-            # if isinstance(cols.get('cnpj_raiz'), dict) and perspectives:
-            #     local_result = {}
-
-            #     for each_persp_key in perspectives:
-            #         local_cols = self.get_thematic_handler().decode_column_defs(
-            #             cols, each_persp_key
-            #         )
-            #         local_result[each_persp_key] = self.get_statistics_from_perspective(
-            #             dataframe,
-            #             each_persp_key,
-            #             local_cols,
-            #             self.get_stats_local_options(
-            #                 options,
-            #                 local_cols,
-            #                 dataframe,
-            #                 each_persp_key
-            #             ),
-            #             options
-            #         )
-
-            #     result[dataframe]['stats_persp'] = local_result
-            # else:
-            #     if isinstance(cols.get('cnpj_raiz'), dict):
-            #         local_cols = self.get_thematic_handler().decode_column_defs(
-            #             local_cols, options.get('perspective')
-            #         )
-
-            #     result[dataframe] = self.get_statistics_from_perspective(
-            #         dataframe,
-            #         options.get('perspective'),
-            #         cols,
-            #         self.get_stats_local_options(
-            #             options,
-            #             local_cols,
-            #             dataframe,
-            #             options.get('perspective')
-            #         ),
-            #         options
-            #     )
-
         return result
 
     def get_statistics_from_perspective(self, dataframe, each_persp_value, local_cols, local_options, options):

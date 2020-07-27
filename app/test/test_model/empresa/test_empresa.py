@@ -281,61 +281,81 @@ class StubGetStatisticsTest(unittest.TestCase):
         self.maxDiff = None
         self.assertEqual(
             StubEmpresa().get_statistics({
-                "theme": 'catweb_c',
-                "column_family": "catweb_c",
-                "perspective": 'empresa',
+                "theme": 'catweb',
+                "column_family": "catweb",
+                "perspective": 'empregador',
                 "categorias": ['cnpj'],
                 "column": '2047',
                 'where': []
             }),
             {
-                "catweb_c": {
-                    'fonte': 'Fonte',
-                    'stats': {'agr_count': 100,
-                        'cnpj': '12345678000101',
-                        'cnpj_raiz': '12345678',
-                        'compet': 2047,
-                        'nu_cnpj_empregador': '12345678000101',
-                        'tp_tomador': 0
-                    },
-                    'stats_estab': {
-                        '12345678000101': {
-                            'agr_count': 100, 'compet': 2047,
-                            'nu_cnpj_empregador': '12345678000101',
-                            'cnpj_raiz': '12345678', 'tp_tomador': 0
-                        },
-                        '12345678000202': {
-                            'agr_count': 200, 'compet': 2047,
-                            'nu_cnpj_empregador': '12345678000202',
-                            'cnpj_raiz': '12345678', 'tp_tomador': 0
-                        }
-                    },
-                    'stats_compet': {
-                        '2047': {
-                            'cnpj': '12345678000202',
-                            'agr_count': 200,
-                            'nu_cnpj_empregador': '12345678000202',
-                            'cnpj_raiz': '12345678', 'tp_tomador': 0
-                        },
-                    },
-                    'stats_estab_compet': {
-                        '2047_12345678000101': {
-                            'cnpj': '12345678000101',
-                            'agr_count': 100, 'compet': 2047,
-                            'nu_cnpj_empregador': '12345678000101',
-                            'cnpj_raiz': '12345678', 'tp_tomador': 0
-                        },
-                        '2047_12345678000202': {
-                            'cnpj': '12345678000202',
-                            'agr_count': 200, 'compet': 2047,
-                            'nu_cnpj_empregador': '12345678000202',
-                            'cnpj_raiz': '12345678', 'tp_tomador': 0
+                "catweb": {
+                    'stats_persp': {
+                        'empregador': {
+                            'stats': {
+                                'agr_count': 100,
+                                'cnpj': '12345678000101',
+                                'cnpj_raiz': '12345678',
+                                'compet': 2047,
+                                'nu_cnpj_empregador': '12345678000101',
+                                'tp_tomador': 0
+                            },
+                            'stats_estab': {
+                                '12345678000101': {
+                                    'agr_count': 100, 'compet': 2047,
+                                    'cnpj': '12345678000101',
+                                    'cnpj_raiz': '12345678', 'tp_tomador': 0
+                                },
+                                '12345678000202': {
+                                    'agr_count': 200, 'compet': 2047,
+                                    'cnpj': '12345678000202',
+                                    'cnpj_raiz': '12345678', 'tp_tomador': 0
+                                }
+                            },
+                            'stats_compet': {
+                                '2047': {
+                                    'cnpj': '12345678000202',
+                                    'agr_count': 200,
+                                    'nu_cnpj_empregador': '12345678000202',
+                                    'cnpj_raiz': '12345678', 'tp_tomador': 0
+                                },
+                            },
+                            'stats_estab_compet': {
+                                '2047_12345678000101': {
+                                    'cnpj': '12345678000101',
+                                    'agr_count': 100, 'compet': 2047,
+                                    'nu_cnpj_empregador': '12345678000101',
+                                    'cnpj_raiz': '12345678', 'tp_tomador': 0
+                                },
+                                '2047_12345678000202': {
+                                    'cnpj': '12345678000202',
+                                    'agr_count': 200, 'compet': 2047,
+                                    'nu_cnpj_empregador': '12345678000202',
+                                    'cnpj_raiz': '12345678', 'tp_tomador': 0
+                                }
+                            }
                         }
                     }
                 }
             }
         )
 
+    def test_get_statistic_column_family_with_perspective_invalid_value(self):
+        ''' Tests statistics retrieval for a specific dataset with
+            perspective and timeframe definitions '''
+        self.assertRaises(
+            AttributeError,
+            StubEmpresa().get_statistics,
+            {
+                "theme": 'catweb',
+                "column_family": "catweb",
+                "perspective": 'invalid',
+                "categorias": ['cnpj'],
+                "column": '2047',
+                'where': []
+            }
+        )
+    
     # def test_get_statistic_overall(self):
     #     ''' Tests basic grouped perspective stats retrieval '''
     #     self.assertEqual(

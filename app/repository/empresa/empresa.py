@@ -19,16 +19,7 @@ class EmpresaRepository(HBaseRepository):
             )
 
             # Result splitting according to perspectives
-            nu_results = {}
-            for ds_key in result:
-                if not result[ds_key].empty and ds_key in self.PERSP_COLUMNS:
-                    for nu_persp_key, nu_persp_val in self.PERSP_VALUES[ds_key].items():
-                        if options.get('perspective', nu_persp_key) == nu_persp_key:
-                            nu_key = ds_key + "_" + nu_persp_key
-                            nu_results[nu_key] = result[ds_key][
-                                result[ds_key][self.PERSP_COLUMNS[ds_key]] == nu_persp_val
-                            ]
-            result = {**result, **nu_results}
+            result = {**result, **self.split_dataframe_by_perspective(result, options)}
 
             for ds_key in result:
                 col_cnpj_name = 'cnpj'
@@ -58,6 +49,21 @@ class EmpresaRepository(HBaseRepository):
 
             return result
         return None
+
+    def split_dataframe_by_perspective(self, dataframe, options):
+        ''' Splits a dataframe by perpectives '''
+        result = {}
+        if dataframe is None:
+            return result    
+        for ds_key in dataframe:
+            if not dataframe[ds_key].empty and ds_key in self.PERSP_COLUMNS:
+                for nu_persp_key, nu_persp_val in self.PERSP_VALUES[ds_key].items():
+                    if options.get('perspective', nu_persp_key) == nu_persp_key:
+                        nu_key = ds_key + "_" + nu_persp_key
+                        result[nu_key] = dataframe[ds_key][
+                            dataframe[ds_key][self.PERSP_COLUMNS[ds_key]] == nu_persp_val
+                        ].to_dict(orient="records")
+        return result
 
     @staticmethod
     def filter_by_person(dataframe, options, col_cnpj_name, col_pf_name):

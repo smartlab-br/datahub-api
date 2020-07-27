@@ -224,7 +224,6 @@ class StubGetStatisticsTest(unittest.TestCase):
     def test_get_statistic_column_family_no_perspective(self):
         ''' Tests statistics retrieval for a specific dataset with no
             perspective definition, but an existing timeframe rule '''
-        self.maxDiff = None
         self.assertEqual(
             StubEmpresa().get_statistics({
                 "cnpj_raiz": '12345678',
@@ -278,7 +277,6 @@ class StubGetStatisticsTest(unittest.TestCase):
     def test_get_statistic_column_family_with_perspective(self):
         ''' Tests statistics retrieval for a specific dataset with
             perspective and timeframe definitions '''
-        self.maxDiff = None
         self.assertEqual(
             StubEmpresa().get_statistics({
                 "theme": 'catweb',

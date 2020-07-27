@@ -200,6 +200,181 @@ class StubGetStatisticsFromPerspectiveTest(unittest.TestCase):
             }
         )
 
+class StubGetStatisticsTest(unittest.TestCase):
+    ''' Tests the grouped perspective statistics fetching using static
+        data as source '''
+    def test_get_statistic_column_family_no_perspective_no_timeframe(self):
+        ''' Tests statistics retrieval for a specific dataset with no
+            perspective and timeframe definition '''
+        self.assertEqual(
+            StubEmpresa().get_statistics({
+                "cnpj_raiz": '12345678',
+                "theme": 'rfb',
+                "column_family": "rfb",
+                "categorias": ['cnpj']
+            }),
+            {
+                "rfb": {
+                    'fonte': 'Fonte',
+                    'stats': {'cnpj': '12345678000101', 'compet': 2047, 'agr_count': 100}
+                }
+            }
+        )
+
+    def test_get_statistic_column_family_no_perspective(self):
+        ''' Tests statistics retrieval for a specific dataset with no
+            perspective definition, but an existing timeframe rule '''
+        self.maxDiff = None
+        self.assertEqual(
+            StubEmpresa().get_statistics({
+                "cnpj_raiz": '12345678',
+                "theme": 'rais',
+                "column_family": "rais",
+                "categorias": ['nu_cnpj_cei']
+            }),
+            {
+                "rais": {
+                    'fonte': 'Fonte',
+                    'stats': {'nu_cnpj_cei': '12345678000101', 'nu_ano_rais': 2047, 'agr_count': 100},
+                    'stats_estab': {
+                        '12345678000101': {'agr_count': 100, 'nu_ano_rais': 2047},
+                        '12345678000202': {'agr_count': 200, 'nu_ano_rais': 2099}
+                    },
+                    'stats_compet': {
+                        '2047': {'agr_count': 100, 'nu_cnpj_cei': '12345678000101'},
+                        '2099': {'agr_count': 200, 'nu_cnpj_cei': '12345678000202'}
+                    },
+                    'stats_estab_compet': {
+                        '2047_12345678000101': {
+                            'agr_count': 100, 'nu_cnpj_cei': '12345678000101', 'nu_ano_rais': 2047
+                        },
+                        '2099_12345678000202': {
+                            'agr_count': 200, 'nu_cnpj_cei': '12345678000202', 'nu_ano_rais': 2099
+                        }
+                    }
+                }
+            }
+        )
+
+    # def test_get_statistic_column_family_with_perspective_no_timeframe(self):
+    #     ''' Tests statistics retrieval for a specific dataset with no
+    #         timeframe definition, but an existing perspective rule '''
+    #     self.assertEqual(
+    #         StubEmpresa().get_statistics({
+    #             "theme": 'mytheme',
+    #             "column_family": "rais",
+    #             "perspective": 'mypersp',
+    #             "categorias": ['cnpj'],
+    #             'where': []
+    #         }),
+    #         {
+    #             **{
+    #                 'stats': {'cnpj': '12345678000101', 'compet': 2047, 'agr_count': 100}
+    #             },
+    #             **StubEmpresa.EXPECTED_GROUPED_STATS
+    #         }
+    #     )
+
+    def test_get_statistic_column_family_with_perspective(self):
+        ''' Tests statistics retrieval for a specific dataset with
+            perspective and timeframe definitions '''
+        self.maxDiff = None
+        self.assertEqual(
+            StubEmpresa().get_statistics({
+                "theme": 'catweb_c',
+                "column_family": "catweb_c",
+                "perspective": 'empresa',
+                "categorias": ['cnpj'],
+                "column": '2047',
+                'where': []
+            }),
+            {
+                "catweb_c": {
+                    'stats': {'agr_count': 100,
+                        'cnpj': '12345678000101',
+                        'cnpj_raiz': '12345678',
+                        'compet': 2047,
+                        'nu_cnpj_empregador': '12345678000101',
+                        'tp_tomador': 0
+                    },
+                    'stats_estab': {
+                        '12345678000101': {
+                            'agr_count': 100, 'compet': 2047,
+                            'nu_cnpj_empregador': '12345678000101',
+                            'cnpj_raiz': '12345678', 'tp_tomador': 0
+                        },
+                        '12345678000202': {
+                            'agr_count': 200, 'compet': 2047,
+                            'nu_cnpj_empregador': '12345678000202',
+                            'cnpj_raiz': '12345678', 'tp_tomador': 0
+                        }
+                    },
+                    'stats_compet': {
+                        '2047': {
+                            'cnpj': '12345678000202',
+                            'agr_count': 200,
+                            'nu_cnpj_empregador': '12345678000202',
+                            'cnpj_raiz': '12345678', 'tp_tomador': 0
+                        },
+                    },
+                    'stats_estab_compet': {
+                        '2047_12345678000101': {
+                            'cnpj': '12345678000101',
+                            'agr_count': 100, 'compet': 2047,
+                            'nu_cnpj_empregador': '12345678000101',
+                            'cnpj_raiz': '12345678', 'tp_tomador': 0
+                        },
+                        '2047_12345678000202': {
+                            'cnpj': '12345678000202',
+                            'agr_count': 200, 'compet': 2047,
+                            'nu_cnpj_empregador': '12345678000202',
+                            'cnpj_raiz': '12345678', 'tp_tomador': 0
+                        }
+                    }
+                }
+            }
+        )
+
+    # def test_get_statistic_overall(self):
+    #     ''' Tests basic grouped perspective stats retrieval '''
+    #     self.assertEqual(
+    #         StubEmpresa().get_statistics({
+    #             "categorias": ['cnpj'],
+    #             "column": '2099',
+    #             'where': []
+    #         }),
+    #         {
+    #             **{
+    #                 'stats': {'cnpj': '12345678000101', 'compet': 2047, 'agr_count': 100}
+    #             },
+    #             **StubEmpresa.EXPECTED_GROUPED_STATS
+    #         }
+    #     )
+
+    def test_get_statistic_overall_timeframe_validation(self):
+        ''' Tests if timeframe requirement is forced on overall request '''
+        self.assertRaises(
+            AttributeError,
+            StubEmpresa().get_statistics,
+            {
+                "categorias": ['cnpj'],
+                'where': []
+            }
+        )
+
+    def test_get_statistic_raise_on_timeframe_validation_error(self):
+        ''' Tests if timeframe requirement is forced '''
+        self.assertRaises(
+            AttributeError,
+            StubEmpresa().get_statistics,
+            {
+                "theme": "auto",
+                "column_family": "auto",
+                "categorias": ['cnpj'],
+                'where': []
+            }
+        )
+
 class StubGetIsValidLoadingEntryTest(unittest.TestCase):
     ''' Tests the loading entry validation method '''
     def test_is_valid_loading_entry_no_options(self):
@@ -426,15 +601,3 @@ class StubAssessColumnStatusTest(unittest.TestCase):
             ),
             'FAILED|2000-01-01'
         )
-# ==================
-    # @staticmethod
-    # def assess_column_status(slot_list, columns_available, column):
-    #     ''' Checks the status of a defined column '''
-    #     if column in slot_list:
-    #         if column in columns_available.keys():
-    #             return columns_available[column]
-    #         return 'MISSING'
-    #     if (column in columns_available.keys() and
-    #             'INGESTED' in columns_available[column]):
-    #         return 'DEPRECATED'
-    #     return 'UNAVAILABLE'

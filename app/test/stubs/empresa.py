@@ -2,17 +2,38 @@
 import pandas as pd
 from datetime import datetime
 from model.empresa.empresa import Empresa
+from model.thematic import Thematic
 from repository.empresa.pessoadatasets import PessoaDatasetsRepository
 from repository.empresa.datasets import DatasetsRepository
+from test.stubs.repository import StubThematicRepository
 
-class StubThematicModel():
+class StubThematicModel(Thematic):
     ''' Class to return a constant dataset when find_dataset is invoked '''
+    def load_and_prepare(self):
+        ''' Avoids the application context '''
+
+    def get_repo(self):
+        ''' Avoids the application context '''
+        return StubThematicRepository()
+
     def find_dataset(self, options):
         ''' Method to return a fixed collection '''
         dataframe = [
             {'cnpj': '12345678000101', 'compet': 2047, 'agr_count': 100},
             {'cnpj': '12345678000202', 'compet': 2099, 'agr_count': 200}
         ]
+        if (options is not None and 'theme' in options and
+                options.get('theme') == 'rais'):
+            dataframe = [
+                {'nu_cnpj_cei': '12345678000101', 'nu_ano_rais': 2047, 'agr_count': 100},
+                {'nu_cnpj_cei': '12345678000202', 'nu_ano_rais': 2099, 'agr_count': 200}
+            ]
+        if (options is not None and 'theme' in options and
+                options.get('theme') in ['catweb_c']):
+            dataframe = [
+                {'cnpj_raiz': '12345678', 'cnpj': '12345678000101', 'nu_cnpj_empregador': '12345678000101', 'compet': 2047, 'agr_count': 100, "tp_tomador": 0},
+                {'cnpj_raiz': '12345678', 'cnpj': '12345678000202', 'nu_cnpj_empregador': '12345678000202', 'compet': 2047, 'agr_count': 200, "tp_tomador": 0}
+            ]
         if not options.get('as_pandas', True) and not options.get('no_wrap', True):
             return {
                 "metadata": {"fonte": "Fonte"},
@@ -23,6 +44,17 @@ class StubThematicModel():
     def get_persp_columns(self, dataframe):
         ''' Returns a fixed perspective column for testing '''
         return 'persp_column'
+
+    # def get_column_defs(self, table_name):
+    #     ''' Get the column definitions from a dataframe '''
+    #     return {
+    #         'cnpj_raiz': 'cnpj_raiz',
+    #         'cnpj': 'cnpj',
+    #         'pf': 'cpf',
+    #         'persp': None,
+    #         'persp_options': None,
+    #         'compet': None
+    #     }
 
 class StubDatasetRepository(DatasetsRepository):
     ''' Class to unlock Empresa model testing that uses REDIS data '''

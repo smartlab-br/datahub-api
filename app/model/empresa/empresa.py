@@ -130,8 +130,6 @@ class Empresa(BaseModel):
                     options.get('column')
                 )
                 column_status_specific = column_status
-            # if options.get('column_family') == dataframe:
-            #     column_status_specific = column_status
             if columns_available:
                 loading_entry[dataframe] = columns_available
 
@@ -166,15 +164,14 @@ class Empresa(BaseModel):
                             slot_list.split(',')
                         ])):
                     return False
-                else:
-                    for col_key, col_val in columns_available.items():
-                        if (options.get('column', col_key) == col_key and
-                                'INGESTED' in col_val and
-                                len(col_val.split('|')) > 1 and
-                                (datetime.now() - 
-                                 datetime.strptime(col_val.split('|')[1], "%Y-%m-%d")
-                                ).days > 30):
-                            return False
+                for col_key, col_val in columns_available.items():
+                    if (options.get('column', col_key) == col_key and
+                            'INGESTED' in col_val and
+                            len(col_val.split('|')) > 1 and
+                            (datetime.now() - 
+                                datetime.strptime(col_val.split('|')[1], "%Y-%m-%d")
+                            ).days > 30):
+                        return False
         return True
 
     @staticmethod
@@ -198,7 +195,6 @@ class Empresa(BaseModel):
         else:
             dataframes = self.TOPICS
 
-        # TODO 99 - Add threads to run impala queries
         result = {}
         for dataframe in dataframes:
             # Get statistics for dataset
@@ -310,16 +306,16 @@ class Empresa(BaseModel):
         options['no_wrap'] = True
 
         # Get statistics partitioning by unit
-        if 'cnpj' not in cols: # Ignores datasources with no cnpj definition
-            result["stats_estab"] = json.loads(
-                self.get_thematic_handler().find_dataset({
-                    **options,
-                    **{
-                        "categorias": [cols.get('cnpj', 'cnpj')],
-                        "ordenacao": [cols.get('cnpj', 'cnpj')]
-                    }
-                }).set_index(cols.get('cnpj', 'cnpj')).to_json(orient="index")
-            )
+        stats_unit = self.get_thematic_handler().find_dataset({
+            **options,
+            **{
+                "categorias": [cols.get('cnpj', 'cnpj')],
+                "ordenacao": [cols.get('cnpj', 'cnpj')]
+            }
+        })
+        if cols.get('cnpj', 'cnpj') in stats_unit.columns:
+            result["stats_estab"] = stats_unit.set_index(
+                cols.get('cnpj', 'cnpj')).to_dict(orient="index")
 
         # Get statistics partitioning by timeframe
         ds_no_compet = [
@@ -354,9 +350,7 @@ class Empresa(BaseModel):
             current_df[compet_attrib] = current_df[compet_attrib].apply(str).replace(
                 {'\.0': ''}, regex=True
             )
-            result["stats_compet"] = json.loads(
-                current_df.set_index(compet_attrib).to_json(orient="index")
-            )
+            result["stats_compet"] = current_df.set_index(compet_attrib).to_dict(orient="index")
 
             # Get statistics partitioning by timeframe and units
             if 'compet' in cols and options.get('theme') not in ds_displaced_compet:
@@ -377,9 +371,7 @@ class Empresa(BaseModel):
             df_local_result['idx'] = df_local_result[compet_attrib].apply(str).replace(
                 {'\.0': ''}, regex=True) + '_' + \
                 df_local_result[cols.get('cnpj', 'cnpj')].apply(str).replace({'\.0': ''}, regex=True)
-            result["stats_estab_compet"] = json.loads(
-                df_local_result.set_index('idx').to_json(orient="index")
-            )
+            result["stats_estab_compet"] = df_local_result.set_index('idx').to_dict(orient="index")
 
         ## RETIRADO pois a granularidade torna imviável a performance
         # metadata['stats_pf'] = dataframe[

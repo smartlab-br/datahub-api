@@ -97,6 +97,10 @@ class Thematic(BaseModel):
 
     def __init__(self):
         ''' Construtor '''
+        self.repo = None
+        self.load_and_prepare()
+
+    def load_and_prepare(self):
         self.repo = ThematicRepository()
 
     def get_repo(self):

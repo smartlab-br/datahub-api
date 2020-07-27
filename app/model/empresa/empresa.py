@@ -211,21 +211,10 @@ class Empresa(BaseModel):
             cols = self.get_thematic_handler().get_column_defs(dataframe)
 
             # If the dataset doesn't have a unique column to identify a company
-            perspectives = self.get_thematic_handler().get_persp_values(dataframe)
-            if perspectives and options.get('perspective'):
-                tmp_perspectives = {
-                    k: v
-                    for
-                    k, v
-                    in
-                    perspectives.items()
-                    if
-                    k == options.get('perspective')
-                }
-                if not bool(tmp_perspectives):
-                    raise AttributeError(f'Perspectiva inválida. Deve ser: {perspectives.keys()}')
-                perspectives = tmp_perspectives
-
+            perspectives = self.get_thematic_handler().get_persp_values(
+                dataframe, options.get('perspective')
+            )
+            
             if perspectives: # If the source demands a perspective or one is provided in options
                 local_result = {}
 

@@ -125,9 +125,23 @@ class Thematic(BaseModel):
         ''' Get the column name definitions, according to the table and the perspective '''
         return self.get_repo().decode_column_defs(original, perspective)
 
-    def get_persp_values(self, theme):
+    def get_persp_values(self, theme, perspective=None):
         ''' Get the perspective values for a theme '''
-        return self.get_repo().PERSP_VALUES.get(theme)
+        perspectives = self.get_repo().PERSP_VALUES.get(theme)
+        if perspectives and perspective:
+            tmp_perspectives = {
+                k: v
+                for
+                k, v
+                in
+                perspectives.items()
+                if
+                k == perspective
+            }
+            if not bool(tmp_perspectives):
+                raise AttributeError(f'Perspectiva inválida. Deve ser: {perspectives.keys()}')
+            return tmp_perspectives
+        return perspectives
 
     def get_persp_columns(self, theme):
         ''' Get the perspective values for a theme '''

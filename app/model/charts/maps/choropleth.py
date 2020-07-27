@@ -60,7 +60,7 @@ class Choropleth(BaseMap):
             'objects.data',
             name=ViewConfReader.get_chart_title(options),
             style_function=lambda feature: {
-                'fillColor': color_function(feature),
+                'fillColor': color_function(color_scale, feature, chart_options.get('value_field')),
                 'fillOpacity': 0.8,
                 'color' : 'black',
                 'stroke' : 'black',
@@ -113,12 +113,12 @@ class Choropleth(BaseMap):
         return result
 
     @staticmethod
-    def get_feature_color(feature):
+    def get_feature_color(color_scale, feature, value_field):
         if feature is None:
             return '#8c8c8c' # MISSING -> gray
         value = None
-        if chart_options['value_field'] in feature.get('properties', {}):
-            value = feature.get('properties', {}).get(chart_options['value_field'])
+        if value_field in feature.get('properties', {}):
+            value = feature.get('properties', {}).get(value_field)
         if value is None:
             return '#8c8c8c' # MISSING -> gray
         return color_scale(value)

@@ -164,14 +164,19 @@ class Empresa(BaseModel):
                             slot_list.split(',')
                         ])):
                     return False
-                for col_key, col_val in columns_available.items():
-                    if (options.get('column', col_key) == col_key and
-                            'INGESTED' in col_val and
-                            len(col_val.split('|')) > 1 and
+                if any(
+                    [
+                        options.get('column', col_key) == col_key and
+                            'INGESTED' in col_val and len(col_val.split('|')) > 1 and
                             (datetime.now() - 
                                 datetime.strptime(col_val.split('|')[1], "%Y-%m-%d")
-                            ).days > 30):
-                        return False
+                            ).days > 30
+                        for
+                        col_key, col_val
+                        in
+                        columns_available.items()
+                    ]):
+                    return False
         return True
 
     @staticmethod

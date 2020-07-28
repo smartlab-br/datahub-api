@@ -10,7 +10,7 @@ class EmpresaRepository(HBaseRepository):
 
     def find_datasets(self, options):
         ''' Localiza um município pelo código do IBGE '''
-        if 'cnpj_raiz' not in options or options['cnpj_raiz'] is None:
+        if options is None or options.get('cnpj_raiz') is None:
             return None
 
         result = self.find_row(
@@ -43,7 +43,7 @@ class EmpresaRepository(HBaseRepository):
                 result[ds_key] = result[ds_key][list_dimred]
 
             # Conversão dos datasets em json
-            result[ds_key] = json.loads(result[ds_key].to_json(orient="records"))
+            result[ds_key] = result[ds_key].to_dict(orient="records")
         return result
 
     def split_dataframe_by_perspective(self, dataframe, options):
@@ -58,7 +58,7 @@ class EmpresaRepository(HBaseRepository):
                         nu_key = ds_key + "_" + nu_persp_key
                         result[nu_key] = dataframe[ds_key][
                             dataframe[ds_key][self.PERSP_COLUMNS[ds_key]] == nu_persp_val
-                        ].to_dict(orient="records")
+                        ]
         return result
 
     @staticmethod

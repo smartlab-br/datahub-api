@@ -1,4 +1,6 @@
 # SmartLab Flask
+![QA](https://github.com/smartlab-br/datahub-api/workflows/QA/badge.svg)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=smartlab-br_datahub-api&metric=alert_status)](https://sonarcloud.io/dashboard?id=smartlab-br_datahub-api)
 
 Flask for SmartLab developers 
 

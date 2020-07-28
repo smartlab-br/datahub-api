@@ -64,25 +64,23 @@ class EmpresaRepository(HBaseRepository):
     @staticmethod
     def filter_by_person(dataframe, options, col_cnpj_name, col_pf_name):
         ''' Filter dataframe by person identification, according to options data '''
-        cnpj = options.get('cnpj')
-        id_pf = options.get('id_pf')
-        # Filtrar cnpj e id_pf nos datasets pandas
-        if cnpj is not None and id_pf is not None and col_pf_name is not None:
-            if dataframe[col_cnpj_name].dtype == 'int64':
-                cnpj = int(cnpj)
-            if dataframe[col_pf_name].dtype == 'int64':
-                id_pf = int(id_pf)
-            dataframe = dataframe[
-                (dataframe[col_cnpj_name] == cnpj) & (dataframe[col_pf_name] == id_pf)
-            ]
+        if dataframe is None or options is None:
+            return None
+        result = dataframe.copy()
+
         # Filtrar apenas cnpj nos datasets pandas
-        elif cnpj is not None:
-            if dataframe[col_cnpj_name].dtype == 'int64':
+        cnpj = options.get('cnpj')
+        if col_cnpj_name is None:
+            col_cnpj_name = 'cnpj'
+        if cnpj is not None and col_cnpj_name is not None:
+            if result[col_cnpj_name].dtype == 'int64':
                 cnpj = int(cnpj)
-            dataframe = dataframe[dataframe[col_cnpj_name] == cnpj]
+            result = result[result[col_cnpj_name] == cnpj]
+
         # Filtrar apenas id_pf nos datasets pandas
-        elif (id_pf is not None and col_pf_name is not None):
-            if dataframe[col_pf_name].dtype == 'int64':
+        id_pf = options.get('id_pf')
+        if id_pf is not None and col_pf_name is not None:
+            if result[col_pf_name].dtype == 'int64':
                 id_pf = int(id_pf)
-            dataframe = dataframe[dataframe[col_pf_name] == id_pf]
-        return dataframe
+            result = result[result[col_pf_name] == id_pf]
+        return result

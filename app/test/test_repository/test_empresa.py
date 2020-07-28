@@ -147,7 +147,6 @@ class EmpresaRepositoryFindDatasetTest(unittest.TestCase):
 
     def test_find_dataset_empty_options(self):
         ''' Tests if None is returned when empty options are sent '''
-        self.maxDiff = None
         self.assertEqual(
             StubEmpresaRepository().find_datasets({}),
             None
@@ -155,7 +154,6 @@ class EmpresaRepositoryFindDatasetTest(unittest.TestCase):
 
     def test_find_dataset(self):
         ''' Tests if the dataset is returned correctly '''
-        self.maxDiff = None
         self.assertEqual(
             StubEmpresaRepository().find_datasets({'cnpj_raiz': '12345678'}),
             {
@@ -235,40 +233,155 @@ class EmpresaRepositoryFindDatasetTest(unittest.TestCase):
                 ]
             }
         )
-# def find_datasets(self, options):
-#         ''' Localiza um município pelo código do IBGE '''
-#         if 'cnpj_raiz' not in options or options['cnpj_raiz'] is None:
-#             return None
 
-#         result = self.find_row(
-#             'empresa',
-#             options['cnpj_raiz'],
-#             options.get('column_family'),
-#             options.get('column')
-#         )
 
-#         # Result splitting according to perspectives
-#         result = {**result, **self.split_dataframe_by_perspective(result, options)}
+class EmpresaRepositoryFilterByPersonTest(unittest.TestCase):
+    ''' Tests company dataset filtering by person '''
+    SOURCE_DATA = pd.DataFrame([
+        {
+            "cnpj": '12345678000101',
+            'nu_cpf': '12345678900',
+            'col_compet': 2099
+        },
+        {
+            "cnpj": '12345678000101',
+            'nu_cpf': '98765432100',
+            'col_compet': 2099
+        },
+        {
+            "cnpj": '12345678000202',
+            'nu_cpf': '19283746500',
+            'col_compet': 2099
+        },
+        {
+            "cnpj": '12345678000202',
+            'nu_cpf': '12345678900',
+            'col_compet': 2099
+        }
+    ])
+    def test_filter_by_person_no_data(self):
+        ''' Tests if None is returned when no data is sent '''
+        self.assertEqual(
+            EmpresaRepository().filter_by_person(None, None, None, None), None
+        )
 
-#         for ds_key in result:
-#             col_cnpj_name = self.CNPJ_COLUMNS.get(ds_key, 'cnpj')
-#             col_pf_name = self.PF_COLUMNS.get(ds_key)
+    def test_filter_by_person_no_options(self):
+        ''' Tests if None is returned when no options are sent '''
+        self.assertEqual(
+            EmpresaRepository().filter_by_person(self.SOURCE_DATA, None, None, None),
+            None
+        )
 
-#             if not result[ds_key].empty:
-#                 result[ds_key] = self.filter_by_person(
-#                     result[ds_key], options, col_cnpj_name, col_pf_name
-#                 )
+    def test_filter_by_person_no_person_id_column(self):
+        ''' Tests if the dataframe is returned AS-IS when no column ID is given
+            for the person '''
+        self.assertEqual(
+            EmpresaRepository().filter_by_person(
+                self.SOURCE_DATA, {"id_pf": '12345678900'}, None, None
+            ).to_dict(orient="records"),
+            self.SOURCE_DATA.to_dict(orient="records")
+        )
 
-#             # Redução de dimensionalidade (simplified)
-#             if not result[ds_key].empty and options.get('simplified'):
-#                 list_dimred = self.SIMPLE_COLUMNS.get(
-#                     ds_key, ['nu_cnpj_cei', 'nu_cpf', 'col_compet']
-#                 )
-#                 # Garantir que col_compet sempre estará na lista
-#                 if 'col_compet' not in list_dimred:
-#                     list_dimred.append('col_compet')
-#                 result[ds_key] = result[ds_key][list_dimred]
+    def test_filter_by_person(self):
+        ''' Tests if the dataframe is filtered correctly '''
+        self.assertEqual(
+            EmpresaRepository().filter_by_person(
+                self.SOURCE_DATA, {"id_pf": '12345678900'}, 'cnpj', 'nu_cpf'
+            ).to_dict(orient="records"),
+            [
+                {
+                    "cnpj": '12345678000101',
+                    'nu_cpf': '12345678900',
+                    'col_compet': 2099
+                },
+                {
+                    "cnpj": '12345678000202',
+                    'nu_cpf': '12345678900',
+                    'col_compet': 2099
+                }
+            ]
+        )
 
-#             # Conversão dos datasets em json
-#             result[ds_key] = json.loads(result[ds_key].to_json(orient="records"))
-#         return result
+    def test_filter_by_company(self):
+        ''' Tests if the dataframe is filtered correctly '''
+        self.assertEqual(
+            EmpresaRepository().filter_by_person(
+                self.SOURCE_DATA, {"cnpj": '12345678000101'}, 'cnpj', 'nu_cpf'
+            ).to_dict(orient="records"),
+            [
+                {
+                    "cnpj": '12345678000101',
+                    'nu_cpf': '12345678900',
+                    'col_compet': 2099
+                },
+                {
+                    "cnpj": '12345678000101',
+                    'nu_cpf': '98765432100',
+                    'col_compet': 2099
+                }
+            ]
+        )
+
+    def test_filter_by_person_default_company_id_column(self):
+        ''' Tests if the dataframe is filtered correctly '''
+        self.assertEqual(
+            EmpresaRepository().filter_by_person(
+                self.SOURCE_DATA, {"cnpj": '12345678000101'}, None, 'nu_cpf'
+            ).to_dict(orient="records"),
+            [
+                {
+                    "cnpj": '12345678000101',
+                    'nu_cpf': '12345678900',
+                    'col_compet': 2099
+                },
+                {
+                    "cnpj": '12345678000101',
+                    'nu_cpf': '98765432100',
+                    'col_compet': 2099
+                }
+            ]
+        )
+
+    def test_filter_by_company_and_person(self):
+        ''' Tests if the dataframe is filtered correctly '''
+        dataframe = self.SOURCE_DATA.copy()
+        dataframe = dataframe.rename(columns={"cnpj": "cnpj_cei"})
+        self.assertEqual(
+            EmpresaRepository().filter_by_person(
+                dataframe,
+                {"id_pf": '12345678900', "cnpj": '12345678000202'},
+                'cnpj_cei',
+                'nu_cpf'
+            ).to_dict(orient="records"),
+            [{
+                "cnpj_cei": '12345678000202',
+                'nu_cpf': '12345678900',
+                'col_compet': 2099
+            }]
+        )
+
+# @staticmethod
+#     def filter_by_person(dataframe, options, col_cnpj_name, col_pf_name):
+#         ''' Filter dataframe by person identification, according to options data '''
+#         cnpj = options.get('cnpj')
+#         id_pf = options.get('id_pf')
+#         # Filtrar cnpj e id_pf nos datasets pandas
+#         if cnpj is not None and id_pf is not None and col_pf_name is not None:
+#             if dataframe[col_cnpj_name].dtype == 'int64':
+#                 cnpj = int(cnpj)
+#             if dataframe[col_pf_name].dtype == 'int64':
+#                 id_pf = int(id_pf)
+#             dataframe = dataframe[
+#                 (dataframe[col_cnpj_name] == cnpj) & (dataframe[col_pf_name] == id_pf)
+#             ]
+#         # Filtrar apenas cnpj nos datasets pandas
+#         elif cnpj is not None:
+#             if dataframe[col_cnpj_name].dtype == 'int64':
+#                 cnpj = int(cnpj)
+#             dataframe = dataframe[dataframe[col_cnpj_name] == cnpj]
+#         # Filtrar apenas id_pf nos datasets pandas
+#         elif (id_pf is not None and col_pf_name is not None):
+#             if dataframe[col_pf_name].dtype == 'int64':
+#                 id_pf = int(id_pf)
+#             dataframe = dataframe[dataframe[col_pf_name] == id_pf]
+#         return dataframe

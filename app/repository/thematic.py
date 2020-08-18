@@ -57,7 +57,11 @@ class ThematicRepository(ImpalaRepository):
         'casoscovid19': 'casos_covid_19',
         'estabelecimentocnes': 'estabelecimento_cnes',
         'arranjoregic': 'arranjo_regic',
-        'srag': 'srag'
+        'srag': 'srag',
+        'classemptcovid19': 'classe_mpt_covid_19',
+        'denunciamptcovid19': 'denuncia_mpt_covid_19',
+        'documentomptcovid19': 'documento_mpt_covid_19',
+        'temamptcovid19': 'tema_mpt_covid_19'
     }
     DEFAULT_PARTITIONING = {
         'MAIN': 'cd_indicador',

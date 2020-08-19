@@ -54,14 +54,15 @@ class ThematicRepository(ImpalaRepository):
         'temlexposicaonaturais': 'te_exposicao_nat_mun',
         'temlexposicaonaturaisfeatures': 'te_exposicao_nat_feat_importance_mun',
 
-        'casoscovid19': 'casos_covid_19',
         'estabelecimentocnes': 'estabelecimento_cnes',
-        'arranjoregic': 'arranjo_regic',
         'srag': 'srag',
-        'classemptcovid19': 'classe_mpt_covid_19',
-        'denunciamptcovid19': 'denuncia_mpt_covid_19',
-        'documentomptcovid19': 'documento_mpt_covid_19',
-        'temamptcovid19': 'tema_mpt_covid_19'
+        'covidcasos': 'covid_casos',
+        'covidarranjoregic': 'covid_arranjo_regic',
+        'covidclassempt': 'covid_classe_mpt',
+        'coviddenunciampt': 'covid_denuncia_mpt',
+        'coviddocumentompt': 'covid_documento_mpt',
+        'covidtemampt': 'covid_tema_mpt',
+        'coviddestinacaompt': 'covid_destinacao_mpt'
     }
     DEFAULT_PARTITIONING = {
         'MAIN': 'cd_indicador',

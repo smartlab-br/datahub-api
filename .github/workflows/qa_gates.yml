@@ -46,5 +46,6 @@ jobs:
         uses: toko-bifrost/ms-teams-deploy-card@master #  or "./" if in a local set-up
         # if: always()
         with:
-          # github-token: ${{ github.token }}
+          github-token: ${{ github.token }}
           webhook-uri: ${{ secrets.ACTION_TEAMS_WEBHOOK }}
+          show-on-exit: true

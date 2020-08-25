@@ -68,7 +68,8 @@ class ThematicRepository(ImpalaRepository):
         'MAIN': 'cd_indicador',
         'NONE': [
             'municipio', 'assistenciasocial', 'sisben', 'catweb',
-            'censoagronacional', 'censoagroestadual', 'censoagromunicipal'
+            'censoagronacional', 'censoagroestadual', 'censoagromunicipal',
+            'coviddenunciampt','coviddocumentompt'
         ],
         'provabrasil': 'cd_tr_fora'
     }

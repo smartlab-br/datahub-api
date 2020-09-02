@@ -60,6 +60,7 @@ class ThematicRepository(ImpalaRepository):
         'covidarranjoregic': 'covid_arranjo_regic',
         'covidclassempt': 'covid_classe_mpt',
         'coviddenunciampt': 'covid_denuncia_mpt',
+        'coviddenunciacnpjmpt': 'covid_denuncia_cnpj_mpt',
         'coviddocumentompt': 'covid_documento_mpt',
         'covidtemampt': 'covid_tema_mpt',
         'coviddestinacaompt': 'covid_destinacao_mpt'

@@ -1,5 +1,6 @@
 ''' Repository para recuperar informações da CEE '''
 import numpy as np
+import json
 
 from model.base import BaseModel
 from repository.thematic import ThematicRepository
@@ -27,12 +28,12 @@ class MigracoesEscravo(BaseModel):
         ''' Getting sankey data '''
         options['no_wrap'] = True
         options['theme'] = 'migracoesescravos'
-        dataset = super().find_dataset(options)
+        dataset = self.find_dataset(options)
         self.sankey_ds = dataset.to_dict('records')
 
         snk_nodes = []
         snk_links = []
-        if (self.sankey_ds is not None and len(self.sankey_ds) > 0):
+        if self.sankey_ds is not None and len(self.sankey_ds) > 0:
             nu_data = self.sankey_ds.pop(0)
             (snk_nodes, snk_links) = self.traverse(
                 nu_data,
@@ -56,11 +57,11 @@ class MigracoesEscravo(BaseModel):
                     "metadata": metadata,
                     "dataset": dataset,
                 }
-            if 'as_dict' in options and options['as_dict']:
-                return {
-                    "metadata": metadata,
-                    "dataset": dataset.to_dict('records'),
-                }
+            if options.get('as_string', False):
+                return f'{{ \
+                    "metadata": {json.dumps(metadata)}, \
+                    "dataset": {dataset.to_json(orient="records")} \
+                }}'
         return {
             "metadata": metadata,
             "dataset": dataset.replace({np.nan: None}).to_dict('records')

@@ -1,5 +1,5 @@
 ''' Repository para recuperar informações da CEE '''
-import json
+import numpy as np
 
 from model.base import BaseModel
 from repository.thematic import ThematicRepository
@@ -61,10 +61,10 @@ class MigracoesEscravo(BaseModel):
                     "metadata": metadata,
                     "dataset": dataset.to_dict('records'),
                 }
-        return f'{{ \
-            "metadata": {json.dumps(metadata)}, \
-            "dataset": {dataset.to_json(orient="records")} \
-            }}'
+        return {
+            "metadata": metadata,
+            "dataset": dataset.replace({np.nan: None}).to_dict('records')
+        }
 
     def traverse(self, current_data=None, past_path=None, nodes=None, links=None):
         ''' Builds links and nodes for sankey network '''

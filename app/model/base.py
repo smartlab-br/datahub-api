@@ -69,7 +69,7 @@ class BaseModel():
                 }}'
         return {
             "metadata": self.fetch_metadata(options),
-            "dataset": dataset.to_dict('records')
+            "dataset": dataset.replace({np.nan: None}).to_dict('records')
         }
 
     def get_repo(self):

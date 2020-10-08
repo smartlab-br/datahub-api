@@ -58,6 +58,7 @@ def img_parent_pull() {
 
 def executeUnitTests() {
     //dir ("app") {
+    sh "pip3 install -r requirements.txt"
     sh "pip3 install nose2"
     sh "nose2 --config app/test/nose2.cfg --with-cov --coverage-report xml --coverage-config app/test/coverage/.coveragerc"
     //}

@@ -9,9 +9,9 @@ class FLPORequestHandler(WSGIRequestHandler):
     def log(self, _type, message, *args):
         ''' Silences some endpoints '''
         silent_endpoints = ["/hcalive", "/static", "/favicon.ico"]
-        if (isinstance(args[1], str) or not isinstance(args[1], Iterable) or (
-                not any(slnt in args[1] for slnt in silent_endpoints) and
-                args[1] != '/')):
+        if any([slnt in args[1] for slnt in silent_endpoints]):
+            return
+        if isinstance(args[1], str) or not isinstance(args[1], Iterable):
             if len(args) >= 5:
                 log_params = [
                     ('host', self.address_string(), 'red'),

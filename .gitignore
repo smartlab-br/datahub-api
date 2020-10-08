@@ -4,10 +4,10 @@
 .idea
 .vscode
 .scannerwork
-app/test/report.xml
 app/.scannerwork
-start.sh
 Dockerfile
 **/__pycache__
 setenv.sh
 app/.coverage
+report/*
+venv

@@ -1,6 +1,6 @@
 ''' Controller para fornecer dados da CEE '''
-from flask_restful_swagger_2 import swagger
 from flask import request
+from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
 from model.municipio import Municipio
 
@@ -59,7 +59,7 @@ class MunicipioResource(BaseResource):
     })
     def get(self, cd_municipio_ibge):
         ''' Obtém o registro de estabelecimento com um determinado cnpj '''
-        return self.get_domain().find_by_cd_ibge(cd_municipio_ibge).to_json(orient='records')
+        return self.get_domain().find_by_cd_ibge(cd_municipio_ibge).to_dict(orient='records')
 
     def get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''

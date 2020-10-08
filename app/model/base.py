@@ -14,15 +14,17 @@ from service.template_helper import TemplateHelper
 class BaseModel():
     ''' Definição do repo '''
     METADATA = {}
-    
+
     def find_dataset(self, options=None):
         ''' Obtém todos, sem tratamento '''
         result = self.get_repo().find_dataset(options)
         if options.get('pivot') is not None:
-            if options.get('calcs') is not None and options.get('calcs'):
+            if options.get('calcs'):
                 nu_val = 'api_calc_' + options['calcs'][0]
             elif options.get('valor') is None:
-                nu_val = self.get_repo().get_agr_string(options['agregacao'][0], '*').split()[-1]
+                nu_val = self.get_repo().get_agr_string(
+                    options.get('agregacao')[0], '*'
+                ).split()[-1]
             else:
                 nu_val = self.get_repo().get_agr_string(
                     options.get('agregacao')[0], options.get('valor')[0]
@@ -55,20 +57,20 @@ class BaseModel():
         if dataset is None:
             return None
         if options is not None:
-            if 'as_pandas' in options and options['as_pandas']:
+            if options.get('as_pandas', False):
                 return {
                     "metadata": self.fetch_metadata(options),
                     "dataset": dataset
                 }
-            if 'as_dict' in options and options['as_dict']:
-                return {
-                    "metadata": self.fetch_metadata(options),
-                    "dataset": dataset.to_dict('records')
-                }
-        return f'{{ \
-            "metadata": {json.dumps(self.fetch_metadata(options))}, \
-            "dataset": {dataset.to_json(orient="records")} \
-            }}'
+            if options.get('as_string', False):
+                return f'{{ \
+                    "metadata": {json.dumps(self.fetch_metadata(options))}, \
+                    "dataset": {dataset.to_json(orient="records")} \
+                }}'
+        return {
+            "metadata": self.fetch_metadata(options),
+            "dataset": dataset.replace({np.nan: None}).to_dict('records')
+        }
 
     def get_repo(self):
         ''' Método abstrato para carregamento do repositório '''
@@ -108,7 +110,7 @@ class BaseModel():
 
         data_collection = {}
         any_nodata = False
-        
+
         # Adding theme by datasource
         options["theme"] = options.get('datasource', 'indicadores')
 
@@ -150,7 +152,7 @@ class BaseModel():
         for each_obj_struct in structure:
             each_options = self.remove_templates(each_obj_struct['endpoint'], options)
             if each_options.get('theme') is None:
-               each_options["theme"] = options.get("theme") 
+                each_options["theme"] = options.get("theme")
 
             # Adds complimentary options
             each_options = QueryOptionsBuilder.build_options(each_options)
@@ -211,7 +213,7 @@ class BaseModel():
                     "type": "text",
                     "title": "",
                     "content": {
-                        "fixed": struct.get('msgNoData',{}).get('desc','no data')
+                        "fixed": struct.get('msgNoData', {}).get('desc', 'no data')
                     }
                 }]
             elif isinstance(each_arg, list):
@@ -336,29 +338,40 @@ class BaseModel():
 
     def find_and_operate(self, operation, options=None):
         ''' Obtém um conjunto de dados e opera em cima deles '''
-        ejected_filters = options.pop('where')
+        if options is None:
+            return self.find_dataset(options)
+        local_options = options.copy()
+        ejected_filters = []
+        if 'where' in local_options:
+            ejected_filters = local_options.pop('where')
 
         # Convert filter strings to actionable list
         (reinserted_filters, ejected_filters) = self.reform_filters_for_pandas(ejected_filters)
 
-        options['as_pandas'] = True
-        options['no_wrap'] = True
-        options['where'] = reinserted_filters
+        local_options['as_pandas'] = True
+        local_options['no_wrap'] = True
+        local_options['where'] = reinserted_filters
 
         # Gets base dataset
-        base_dataset = self.find_dataset(options)
+        base_dataset = self.find_dataset(local_options)
 
         # Operates the dataset
-        base_dataset = PandasOperator.operate(base_dataset, operation)
+        base_dataset = PandasOperator.operate(
+            base_dataset,
+            operation,
+            local_options.get('categorias')
+        )
 
         # Apply ejected filters
         result = self.filter_pandas_dataset(base_dataset, ejected_filters)
 
         # Reapply sorting
-        if 'ordenacao' in options:
+        if 'ordenacao' in local_options:
             result = self.resort_dataset(result, options['ordenacao'])
 
-        return self.wrap_result(result)
+        if options.get('no_wrap'):
+            return result
+        return self.wrap_result(result, options)
 
     @staticmethod
     def reform_filters_for_pandas(filters):

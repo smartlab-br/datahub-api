@@ -20,6 +20,7 @@ class ThematicRepository(ImpalaRepository):
 
         'sisben': 'sst_beneficio',
         'catweb': 'sst_cat',
+        'sstcats': 'sst_cat',
         'sstindicadoresnacionais': 'sst_indicadores_br',
         'sstindicadoresmunicipais': 'sst_indicadores_mun',
         'sstindicadoresestaduais': 'sst_indicadores_mun',
@@ -41,6 +42,20 @@ class ThematicRepository(ImpalaRepository):
         'ticensoagromunicipal': 'censo_agro',
         'ticensoagroestadual': 'censo_agro_uf',
         'ticensoagronacional': 'censo_agro_br',
+
+        'rais': 'compliance.tb_rais',
+        'rfb': "compliance.rfb_dados_cadastrais_2018",
+        'sisben_c': "compliance.concessao_2018",
+        'catweb_c': "compliance.catweb",
+        'auto': "compliance.tb_auto",
+        'caged': "compliance.tb_caged_estab",
+        'rfbsocios': "compliance.rfb_dados_socios_tratado",
+        'rfbparticipacaosocietaria': "compliance.rfb_dados_socios_tratado",
+        'aeronaves': "compliance.tb_aeronaves",
+        'renavam': "compliance.tb_renavam_2018",
+        'cagedsaldo': "compliance.tb_caged_saldos",
+        'cagedtrabalhador': "compliance.tb_caged_trabalhador",
+        'cagedtrabalhadorano': "compliance.tb_caged_trabalhador",
 
         'incidenciaescravidao': 'incidencia_trabalho_escravo',
         'migracoesescravos': 'te_migracoes',
@@ -83,10 +98,12 @@ class ThematicRepository(ImpalaRepository):
 
     def get_default_partitioning(self, options):
         ''' Gets default partitioning from thematic datasets' definition '''
-        if 'theme' not in options:
+        if options is None:
             return self.DEFAULT_PARTITIONING['MAIN']
-        if options['theme'] in self.DEFAULT_PARTITIONING:
-            return self.DEFAULT_PARTITIONING[options['theme']]
-        if options['theme'] in self.DEFAULT_PARTITIONING['NONE']:
+        if 'theme' not in options:
+            return self.DEFAULT_PARTITIONING.get('MAIN')
+        if options.get('theme') in self.DEFAULT_PARTITIONING:
+            return self.DEFAULT_PARTITIONING.get(options.get('theme'))
+        if options.get('theme') in self.DEFAULT_PARTITIONING.get('NONE'):
             return ''
-        return self.DEFAULT_PARTITIONING['MAIN']
+        return self.DEFAULT_PARTITIONING.get('MAIN')

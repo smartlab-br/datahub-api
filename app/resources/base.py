@@ -67,11 +67,60 @@ class BaseResource(Resource):
         rank_uf, rank_uf_total, vl_indicador_br, vl_indicador_min_br \
         vl_indicador_max_br, media_br, pct_br, rank_br e \
         rank_br_total. " + CAT_DETAIL
+    EMPRESA_DEFAULT_SWAGGER_PARAMS = [
+        {
+            "name": "dados",
+            "description": "Fonte de dados para consulta (rais, caged, catweb etc)",
+            "required": False,
+            "type": 'string',
+            "in": "query"
+        },
+        {
+            "name": "competencia",
+            "description": "Competência a ser retornada. Depende da fonte de dados \
+                (ex. para uma fonte pode ser AAAA, enquanto para outras AAAAMM)",
+            "required": False,
+            "type": 'string',
+            "in": "query"
+        },
+        {
+            "name": "id_pf",
+            "description": "Identificador da Pessoa Física, dentro da empresa. \
+                Tem que informar o dataset (param 'dados')",
+            "required": False,
+            "type": 'string',
+            "in": "query"
+        },
+        {
+            "name": "perspectiva",
+            "description": "Valor que filtra uma perspectiva predefinida de um dataset \
+                (ex. No catweb, 'Empregador'). Nem todos os datasets tem essa opção.",
+            "required": False,
+            "type": 'string',
+            "in": "query"
+        },
+        {
+            "name": "reduzido",
+            "description": "Sinalizador que indica conjunto reduzido de colunas (S para sim)",
+            "required": False,
+            "type": 'string',
+            "in": "query"
+        },
+        {
+            "name": "cnpj_raiz", "required": True, "type": 'string', "in": "path",
+            "description": "CNPJ Raiz da empresa consultada"
+        }
+    ]
 
     @staticmethod
     def build_options(r_args, rules='query'):
         ''' Constrói as opções da pesquisa '''
         return QueryOptionsBuilder.build_options(r_args, rules)
+
+    @staticmethod
+    def build_person_options(r_args, mod='empresa'):
+        ''' Constrói as opções da pesquisa '''
+        return QueryOptionsBuilder.build_person_options(r_args, mod)
 
     def __init__(self):
         ''' Construtor'''

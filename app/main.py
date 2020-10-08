@@ -1,8 +1,8 @@
 """API Base """
 import os
+from flask import Flask, g
 from flask_cors import CORS
 from flask_restful_swagger_2 import Api
-from flask import Flask, g
 
 from service.request_handler import FLPORequestHandler
 
@@ -23,10 +23,10 @@ from resources.v1.indicadores.indicadores_mpt_unidades \
 from resources.v1.indicadores.indicadores_municipais \
     import IndicadoresMunicipaisResource
 
-# Endpoints genéricos de temáticos
+# Resources genéricos de temáticos
 from resources.v1.thematic import ThematicResource
 
-# Endpoints temáticos de Saúde e Segurança
+# Resources temáticos de Saúde e Segurança
 from resources.v1.sst.beneficio import BeneficiosResource
 from resources.v1.sst.cat import CatsResource, CatsOpResource
 from resources.v1.sst.indicadores_br import IndicadoresSSTBrasilResource
@@ -34,7 +34,7 @@ from resources.v1.sst.indicadores_mun import IndicadoresSSTMunicipiosResource
 from resources.v1.sst.indicadores_uf import IndicadoresSSTEstadosResource
 from resources.v1.sst.indicadores_mpt_unidades import IndicadoresSSTMptUnidadesResource
 
-# Endpoints temáticos de Trabalho Escravo
+# Resources temáticos de Trabalho Escravo
 from resources.v1.te.incidencia import IncidenciaEscravoResource
 from resources.v1.te.operacoes import OperacoesEscravoResource
 from resources.v1.te.migracoes import MigracoesEscravoResource
@@ -52,29 +52,39 @@ from resources.v1.te.ml.exposicao_nat import MLExposicaoNaturalidadeResource
 from resources.v1.te.ml.exposicao_nat_feat_importance \
     import MLExposicaoNaturalidadeFeatureImportanceResource
 
-# Endpoints de EstadicMunic
+# Resources de EstadicMunic
 from resources.v1.estadic_munic.estadic_munic import EstadicMunicResource
 from resources.v1.estadic_munic.estadic_munic_uf import EstadicMunicUfResource
 from resources.v1.estadic_munic.estadic_munic_mpt_unidades import EstadicMunicMptUnidadesResource
 
-# Endpoints temáticos do Trabalho Infantil
+# Resources temáticos do Trabalho Infantil
 from resources.v1.ti.indicadores_br import IndicadoresTIBrasilResource
 from resources.v1.ti.indicadores_mun import IndicadoresTIMunicipiosResource
 from resources.v1.ti.indicadores_uf import IndicadoresTIEstadosResource
 from resources.v1.ti.indicadores_mpt_unidades import IndicadoresTIMptUnidadesResource
-# Endpoints do Mapear - Trabalho Infantil
+# Resources do Mapear - Trabalho Infantil
 from resources.v1.ti.mapear import MapearInfantilResource
-# Endpoints da Prova Brasil - Trabalho Infantil
+# Resources da Prova Brasil - Trabalho Infantil
 from resources.v1.ti.prova_brasil import ProvaBrasilInfantilResource
-# Endpoints do Censo Agro
+# Resources do Censo Agro
 from resources.v1.ti.censo_agro import CensoAgroMunicipiosResource
 from resources.v1.ti.censo_agro_uf import CensoAgroEstadosResource
 from resources.v1.ti.censo_agro_br import CensoAgroBrasilResource
-# Endpoints das organizações assistência social
+# Resources das organizações assistência social
 from resources.v1.orgs.orgs_assistencia_social import OrgsAssistenciaSocialResource
 
-# Endpoint para obter a estrutura de dados de um template de card
+# Resources para obter dados de pessoas
+from resources.v1.empresa.empresa import EmpresaResource
+from resources.v1.empresa.stats import EmpresaStatsResource
+from resources.v1.empresa.estabelecimento import EstabelecimentoResource
+from resources.v1.empresa.datasets import DatasetsResource
+from resources.v1.empresa.report import ReportResource
+
+# Resource para obter a estrutura de dados de um template de card
 from resources.v1.card_template import CardTemplateResource
+
+# Resource para obter um gráfico direto da API
+from resources.v1.charts import ChartsResource
 
 from resources.v1.healthchecks import HCAlive
 
@@ -95,6 +105,10 @@ def close_db_connection(_error):
     if hasattr(g, 'impala_connection'):
         g.impala_connection.close()
         g.impala_connection = None
+    # Encerra a conexão com o redis
+    if hasattr(g, 'redis_pool'):
+        del g.redis_pool
+        g.redis_pool = None
 
 CORS = CORS(application, resources={r"/*": {"origins": "*"}})
 api = Api(application, api_version='0.1', api_spec_url='/api/swagger') #pylint: disable=C0103
@@ -104,7 +118,7 @@ api.add_resource(HCAlive, '/hcalive')
 api.add_resource(MunicipiosResource, '/municipios')
 api.add_resource(MunicipioResource, '/municipio/<int:cd_municipio_ibge>')
 
-# Endpoints de buscas por datasets de indicadores
+# Resources de buscas por datasets de indicadores
 api.add_resource(IndicadoresMunicipaisResource, '/indicadoresmunicipais')
 api.add_resource(IndicadoresEstaduaisResource, '/indicadoresestaduais')
 api.add_resource(IndicadoresMicrorregionaisResource, '/indicadoresmicrorregionais')
@@ -113,13 +127,13 @@ api.add_resource(IndicadoresRegionaisResource, '/indicadoresregionais')
 api.add_resource(IndicadoresNacionaisResource, '/indicadoresnacionais')
 api.add_resource(IndicadoresMptUnidadesResource, '/indicadoresmptunidades')
 
-# Endpoints de estadic-munic
+# Resources de estadic-munic
 api.add_resource(EstadicMunicResource, '/estadicmunic')
 api.add_resource(EstadicMunicUfResource, '/estadicuf')
 api.add_resource(EstadicMunicMptUnidadesResource, '/estadicunidadempt')
 
-## Endpoints temáticos
-# Endpoint temático genérico
+## Resources temáticos
+# Resource temático genérico
 api.add_resource(ThematicResource, '/thematic/<string:theme>')
 
 # Saúde e Segurança no Trabalho
@@ -167,10 +181,15 @@ api.add_resource(CensoAgroBrasilResource, '/ti/censoagronacional')
 # Organizações de Assistência social
 api.add_resource(OrgsAssistenciaSocialResource, '/orgs/assistenciasocial')
 
-# Endpoint para obter a estrutura de dados de um template de card
-api.add_resource(CardTemplateResource, '/cardtemplate/<string:cd_template>')
+## Resources para obter datasets de empresa e estabelecimento
+api.add_resource(DatasetsResource, '/datasets')
+api.add_resource(ReportResource, '/report/<string:cnpj_raiz>')
+api.add_resource(EmpresaResource, '/empresa/<string:cnpj_raiz>')
+api.add_resource(EmpresaStatsResource, '/estatisticas/empresa/<string:cnpj_raiz>')
+api.add_resource(EstabelecimentoResource, '/estabelecimento/<string:cnpj>')
 
-from resources.v1.charts import ChartsResource
+## Resources para obter a estrutura de dados de um template de card ou gráfico
+api.add_resource(CardTemplateResource, '/cardtemplate/<string:cd_template>')
 api.add_resource(ChartsResource, '/charts/<string:chart_type>')
 
 if __name__ == '__main__':

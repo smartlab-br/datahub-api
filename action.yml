@@ -1,0 +1,22 @@
+# action.yml
+name: 'qa_image_build'
+description: 'Build the image to go through the qa pipeline'
+inputs:
+  check:
+    description: 'Type of check to perform'
+    required: true
+    default: 'lint'
+  dest:
+    description: 'Destination directory inside workspace to output QA reports.'
+    default: 'report'
+    required: false
+outputs:
+  time: # id of output
+    description: 'The time we greeted you'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    PYTHONPATH: "$PYTHONPATH:/github/workspace/app"
+  args:
+    - ${{ inputs.check }}

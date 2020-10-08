@@ -1,12 +1,17 @@
 <head>
+    <link href='https://fonts.googleapis.com/css?family=Palanquin' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Calibri' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Pathway+Gothic+One' rel='stylesheet'>
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-1.4.0.min.js"></script>
-    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-1.4.0.min.js"></script>
-    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-1.4.0.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.0.1.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.0.1.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.0.1.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-api-2.0.1.min.js"></script>
 </head>
 <body>
-    <div id='teste'></div>
+    <div id='teste' style="background-color: black;"></div>
 
     <script>
         /* In the api, install pip dependencies:
@@ -21,7 +26,11 @@
                 phantomjs --version
         */
 
-        var url = "http://localhost:5000/charts/scatter?theme=sstindicadoresnacionais&categorias=ds_agreg_primaria-v,ds_agreg_secundaria-x,vl_indicador-y&filtros=eq-nu_competencia-2017,and,eq-cd_indicador-%27sst_bene_sexo_idade_dias_perdidos%27&as_image=N"
+        // var url = "http://localhost:5000/charts/scatter?theme=sstindicadoresnacionais&categorias=ds_agreg_primaria-v,ds_agreg_secundaria-x,vl_indicador-y&filtros=eq-nu_competencia-2017,and,eq-cd_indicador-%27sst_bene_sexo_idade_dias_perdidos%27&as_image=N"
+        // var url = "http://localhost:5000/charts/bar?from_viewconf=S&au=2927408&card_id=bar_serie_resgate&dimension=prevalencia&observatory=te&as_image=N"
+        // var url = "http://localhost:5000/charts/bar?from_viewconf=S&au=2927408&card_id=cat_piramide_idade_sexo&dimension=perfilCasosAcidentes&observatory=sst&as_image=N"
+        var url = "http://localhost:5000/charts/line?from_viewconf=S&au=2927408&card_id=line_perda_empregos&dimension=estabilidade&as_image=N"
+        
         $.get( url, function( data ) {
             // Creates elements
             $( "#teste" ).html( data.div );

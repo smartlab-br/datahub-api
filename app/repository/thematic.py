@@ -68,15 +68,24 @@ class ThematicRepository(ImpalaRepository):
         'temlexposicaoresgatefeatures': 'te_exposicao_rgt_feat_importance_mun',
         'temlexposicaonaturais': 'te_exposicao_nat_mun',
         'temlexposicaonaturaisfeatures': 'te_exposicao_nat_feat_importance_mun',
-        'casoscovid19': 'casos_covid_19',
+
         'estabelecimentocnes': 'estabelecimento_cnes',
-        'arranjoregic': 'arranjo_regic'
+        'srag': 'srag',
+        'covidcasos': 'covid_casos',
+        'covidarranjoregic': 'covid_arranjo_regic',
+        'covidclassempt': 'covid_classe_mpt',
+        'coviddenunciampt': 'covid_denuncia_mpt',
+        'coviddenunciacnpjmpt': 'covid_denuncia_cnpj_mpt',
+        'coviddocumentompt': 'covid_documento_mpt',
+        'covidtemampt': 'covid_tema_mpt',
+        'coviddestinacaompt': 'covid_destinacao_mpt'
     }
     DEFAULT_PARTITIONING = {
         'MAIN': 'cd_indicador',
         'NONE': [
             'municipio', 'assistenciasocial', 'sisben', 'catweb',
-            'censoagronacional', 'censoagroestadual', 'censoagromunicipal'
+            'censoagronacional', 'censoagroestadual', 'censoagromunicipal',
+            'coviddenunciampt', 'coviddocumentompt', 'coviddestinacaompt'
         ],
         'provabrasil': 'cd_tr_fora'
     }

@@ -10,3 +10,4 @@ Dockerfile
 setenv.sh
 app/.coverage
 report/*
+venv

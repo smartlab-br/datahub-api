@@ -2,6 +2,7 @@
 import json
 import base64
 import gzip
+import pandas
 import requests
 from decimal import Decimal
 from impala.util import as_pandas
@@ -204,6 +205,8 @@ class HadoopRepository(BaseRepository):
                     lst_objs = dataframe[col].dropna()
                     if len(lst_objs) > 0 and isinstance(lst_objs.iloc[0], Decimal):
                         dataframe[col] = dataframe[col].astype(float)
+                if dataframe[col].dtype.name == 'datetime64[ns]':
+                    dataframe[col] = pandas.to_numeric(dataframe[col])/1000000
         return dataframe
 
     @staticmethod

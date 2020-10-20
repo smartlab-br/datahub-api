@@ -84,7 +84,8 @@ class BaseRepository():
         'renavam': 'proprietario_cpfcnpj',
         'rfb': 'nu_cpf_responsavel',
         'rfbsocios': 'cnpj_cpf_socio',
-        'rfbparticipacaosocietaria': 'cnpj_cpf_socio'
+        'rfbparticipacaosocietaria': 'cnpj_cpf_socio',
+        'auto': 'nrauto'
     } # Dados que possuem nomes diferentes para a coluna de identificação da Pessoa Física
     PERSP_COLUMNS = { # Colunas que indicam diferentes perspectivas em um mesmo dataset
         'catweb': 'origem_busca'

@@ -59,7 +59,7 @@ class MunicipioResource(BaseResource):
     })
     def get(self, cd_municipio_ibge):
         ''' Obtém o registro de estabelecimento com um determinado cnpj '''
-        return self.get_domain().find_by_cd_ibge(cd_municipio_ibge).to_json(orient='records')
+        return self.get_domain().find_by_cd_ibge(cd_municipio_ibge).to_dict(orient='records')
 
     def get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''

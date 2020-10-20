@@ -8,10 +8,16 @@ on:
       
 jobs:
   test:
-    name: Run tests
+    # name: Run tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+      - uses: toko-bifrost/ms-teams-deploy-card@master #  DO NOT set name.
+        if: always()
+        with:
+          github-token: ${{ github.token }}
+          webhook-uri: ${{ secrets.ACTION_TEAMS_WEBHOOK }}
+          show-on-exit: true
       - name: Linting (pylint)
         uses: ./
         with:

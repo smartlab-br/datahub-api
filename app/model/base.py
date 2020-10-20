@@ -69,7 +69,7 @@ class BaseModel():
                 }}'
         return {
             "metadata": self.fetch_metadata(options),
-            "dataset": dataset.to_dict('records')
+            "dataset": dataset.replace({np.nan: None}).to_dict('records')
         }
 
     def get_repo(self):
@@ -234,19 +234,19 @@ class BaseModel():
     def build_derivatives(cls, each_obj_struct, options, each_obj, data_collection):
         ''' Gets derivetive attributes from configs '''
         any_nodata = False
-        for each_inst in each_obj_struct['instances']:
+        for each_inst in each_obj_struct.get('instances'):
             try:
-                data_collection[each_inst['name']] = cls.get_collection_from_type(
-                    each_obj['dataset'],
-                    each_inst['type'],
-                    each_inst['named_prop'],
-                    options['cd_analysis_unit']
+                data_collection[each_inst.get('name')] = cls.get_collection_from_type(
+                    each_obj.get('dataset'),
+                    each_inst.get('type'),
+                    each_inst.get('named_prop'),
+                    options.get('cd_analysis_unit')
                 )
             except (ValueError, KeyError, TypeError, IndexError):
-                data_collection[each_inst['name']] = None
+                data_collection[each_inst.get('name')] = None
                 any_nodata = True
-            if each_inst['name'] not in data_collection:
-                data_collection[each_inst['name']] = None
+            if each_inst.get('name') not in data_collection:
+                data_collection[each_inst.get('name')] = None
                 any_nodata = True
         return (data_collection, any_nodata)
 

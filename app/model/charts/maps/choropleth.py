@@ -157,7 +157,7 @@ class Choropleth(BaseMap):
                     json.loads(json.dumps(df_row)),
                     headers=options.get('headers')
                 )
-            if str(each_au.get('properties', {}).get(chart_options.get('id_field'))) == str(analysis_unit):
+            if str(each_au.get('properties', {}).get(options.get('chart_options', {}).get('id_field'))) == str(options.get('au')):
                 centroid = each_au.get('properties', {}).get('centroide')
                 if centroid:
                     centroid.reverse()

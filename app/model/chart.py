@@ -19,6 +19,7 @@ class Chart(BaseModel):
     } # Defaults to BOKEH
     def get_chart(self, options):
         ''' Selects if the chart should be static or dynamic '''
+        mixed_type = None
         options['as_pandas'] = True
         options['no_wrap'] = True
 
@@ -55,6 +56,7 @@ class Chart(BaseModel):
             # "ne-cd_tipo_sexo_empregado_cat-'Não informado',and,ne-idade_cat-0"
 
             if struct.get('chart_type') == 'MIXED_MAP':
+                mixed_type = options.get('chart_type')
                 options = [{
                     **options,
                     **ViewConfReader.api_to_options(
@@ -87,12 +89,21 @@ class Chart(BaseModel):
                 dataframe = self.get_dataframe(options, struct, added_options)
                 # Runs dataframe modifiers from viewconf
                 dataframe = ViewConfReader().generate_columns(dataframe, options)
+        elif options.get('chart_type') == 'MIXED_MAP':
+            mixed_type = options.get('chart_type')
+            dataframe = []
+            for each_options in options.get('layers'):
+                each_df = self.get_dataframe({}, each_options)
+                # Runs dataframe modifiers from viewconf
+                each_df = ViewConfReader().generate_columns(each_df, each_options)
+                dataframe.append(each_df)
+            options = options.get('layers')
         else:
-            dataframe = Thematic().find_dataset(options)
+            dataframe = self.get_dataframe({}, options)
             # Runs dataframe modifiers from viewconf
             dataframe = ViewConfReader().generate_columns(dataframe, options)
 
-        chart = ChartFactory().create(options).draw(dataframe, options)
+        chart = ChartFactory().create(options, mixed_type).draw(dataframe, options)
 
         chart_lib = 'BOKEH'
         for chart_key, chart_types in self.CHART_LIB_DEF.items():
@@ -146,7 +157,7 @@ class Chart(BaseModel):
             return {'div': chart._repr_html_(), 'mime': 'text/html'}
         return None
 
-    def get_dataframe(self, options, struct, added_options):
+    def get_dataframe(self, options, struct={}, added_options={}):
         if options.get('operation'):
             return Thematic().find_and_operate(
                 options.get('operation'),

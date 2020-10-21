@@ -4,29 +4,31 @@ from model.charts.maps.base import BaseMap
 
 class Mixed(BaseMap):
     """ Mixed map building class """
+    def __init__(self, layers):
+        self.layers = layers
+
     def draw(self, dataframe, options):
         """ Generates a base map and add layers according to config """
-        # http://localhost:5000/charts/choropleth?from_viewconf=S&au=2927408&card_id=mapa_pib_brasil&dimension=socialeconomico&as_image=S
-        analysis_unit = options.get('au')
-
         # Creating map instance
         result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
 
         # Generates layers
-        for each_df, each_option in zip(dataframe, options):
+        for each_layer, each_df, each_option in zip(self.layers, dataframe, options):
+            analysis_unit = each_option.get('au')
+
             if each_option.get('chart_type') == 'MAP_TOPOJSON':
                 # Join dataframe and state_geo
-                (state_geo, centroid) = self.join_df_geo(
-                    dataframe,
-                    self.get_geometry(options, analysis_unit),
-                    options
+                (state_geo, centroid) = each_layer.join_df_geo(
+                    each_df,
+                    each_layer.get_geometry(each_option, analysis_unit),
+                    each_option
                 )
                 # Generating choropleth layer
-                self.layer_gen(each_df, each_option, state_geo, each_option).add_to(result)
+                each_layer.layer_gen(each_df, each_option.get('chart_options'), state_geo, each_option).add_to(result)
             elif each_option.get('chart_type') == 'MAP_BUBBLES':
-                grouped = dataframe.groupby(each_option.get('layer_id', 'cd_indicador'))
+                grouped = each_df.groupby(each_option.get('layer_id', 'cd_indicador'))
                 for group_id, group in grouped:
-                    self.layer_gen(each_option, group, group_id, True, options).add_to(result)
+                    each_layer.layer_gen(each_option.get('chart_options'), group, group_id, True, each_option).add_to(result)
 
         folium.LayerControl().add_to(result)
 

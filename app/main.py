@@ -190,7 +190,7 @@ api.add_resource(EstabelecimentoResource, '/estabelecimento/<string:cnpj>')
 
 ## Resources para obter a estrutura de dados de um template de card ou gráfico
 api.add_resource(CardTemplateResource, '/cardtemplate/<string:cd_template>')
-api.add_resource(ChartsResource, '/charts/<string:chart_type>')
+api.add_resource(ChartsResource, '/chart')
 
 if __name__ == '__main__':
     application.run(request_handler=FLPORequestHandler)

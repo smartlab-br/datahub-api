@@ -37,74 +37,8 @@ class Bubbles(BaseMap):
         show = True # Shows only the first layer
         for group_id, group in grouped:
             # Get the color of the bubble according to layer definitions
-            color = 'blue'
-            for ind_index in range(len(chart_options.get('indicadores', []))):
-                if chart_options.get('indicadores')[ind_index] == group_id:
-                    color = chart_options.get('colorArray')[ind_index]
-                    break
-
-            if 'timeseries' not in chart_options:
-                # Creating a layer for the group
-                layer = FeatureGroup(
-                    name=ViewConfReader.get_layers_names(options.get('headers')).get(group_id),
-                    show=show
-                )
-                show = False
-
-                # Generating circles
-                for _row_index, row in group.iterrows():
-                    CircleMarker(
-                        location=[
-                            row[chart_options.get('lat', 'latitude')],
-                            row[chart_options.get('long', 'longitude')]
-                        ],
-                        radius=row['radius'],
-                        popup=row['tooltip'],
-                        color=color,
-                        fill=True,
-                        fill_color=color
-                    ).add_to(layer)
-
-                # Adding layer to map
-                layer.add_to(result)
-            else:
-                features = []
-                for _row_index, row in group.iterrows():
-                    features.append({
-                        'type': 'Feature',
-                        'geometry': {
-                            'type':'Point',
-                            'coordinates':[
-                                row[chart_options.get('long', 'longitude')],
-                                row[chart_options.get('lat', 'latitude')]
-                            ]
-                        },
-                        'properties': {
-                            'time': pd.to_datetime(
-                                row[chart_options.get('timeseries', 'nu_competencia')],
-                                format='%Y'
-                            ).__str__(),
-                            'style': {'color' : color},
-                            'icon': 'circle',
-                            'iconstyle':{
-                                'fillColor': color,
-                                'fillOpacity': 0.8,
-                                'stroke': 'true',
-                                'radius': row['radius']
-                            }
-                        }
-                    })
-
-                TimestampedGeoJson(
-                    features,
-                    period='P1Y',
-                    duration='P1Y',
-                    date_options='YYYY',
-                    transition_time=1000,
-                    auto_play=True
-                ).add_to(result)
-
-                show = False
+            self.layer_gen(chart_options, group, group_id, show, options).add_to(result)
+            show = False
 
         result = self.add_au_marker(
             result, options.get('au'),
@@ -114,3 +48,72 @@ class Bubbles(BaseMap):
         )
         result = self.post_adjustments(result, dataframe, chart_options)
         return result
+
+    def layer_gen(self, chart_options, group, group_id, show, options):
+        """ Generates a bubbles layer """
+        # Get the color of the bubble according to layer definitions
+        color = 'blue'
+        for ind_index in range(len(chart_options.get('indicadores', []))):
+            if chart_options.get('indicadores')[ind_index] == group_id:
+                color = chart_options.get('colorArray')[ind_index]
+                break
+
+        if 'timeseries' not in chart_options:
+            # Creating a layer for the group
+            layer = FeatureGroup(
+                name=ViewConfReader.get_layers_names(options.get('headers')).get(group_id),
+                show=show
+            )
+
+            # Generating circles
+            for _row_index, row in group.iterrows():
+                CircleMarker(
+                    location=[
+                        row[chart_options.get('lat', 'latitude')],
+                        row[chart_options.get('long', 'longitude')]
+                    ],
+                    radius=row['radius'],
+                    popup=row['tooltip'],
+                    color=color,
+                    fill=True,
+                    fill_color=color
+                ).add_to(layer)
+
+            # Adding layer to map
+            return layer
+        else:
+            features = []
+            for _row_index, row in group.iterrows():
+                features.append({
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [
+                            row[chart_options.get('long', 'longitude')],
+                            row[chart_options.get('lat', 'latitude')]
+                        ]
+                    },
+                    'properties': {
+                        'time': pd.to_datetime(
+                            row[chart_options.get('timeseries', 'nu_competencia')],
+                            format='%Y'
+                        ).__str__(),
+                        'style': {'color': color},
+                        'icon': 'circle',
+                        'iconstyle': {
+                            'fillColor': color,
+                            'fillOpacity': 0.8,
+                            'stroke': 'true',
+                            'radius': row['radius']
+                        }
+                    }
+                })
+
+            return TimestampedGeoJson(
+                features,
+                period='P1Y',
+                duration='P1Y',
+                date_options='YYYY',
+                transition_time=1000,
+                auto_play=True
+            )

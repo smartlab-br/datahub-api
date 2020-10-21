@@ -54,40 +54,43 @@ class Chart(BaseModel):
             # "filtros=eq-cd_municipio_ibge_dv-{0},and,"
             # "ne-cd_tipo_sexo_empregado_cat-'Não informado',and,ne-idade_cat-0"
 
-            options = {
-                **options,
-                **ViewConfReader.api_to_options(
-                    struct.get('api'),
-                    {**options, **added_options}
-                ),
-                **struct
-            }
-            if options.get('operation'):
-                dataframe = Thematic().find_and_operate(
-                    options.get('operation'),
+            if struct.get('chart_type') == 'MIXED_MAP':
+                options = [{
+                    **options,
+                    **ViewConfReader.api_to_options(
+                        layer.get('api'),
+                        {**options, **added_options}
+                    ),
+                    **layer
+                } for layer in struct.get('layers')]
+                dataframe = [self.get_dataframe(
                     {
-                        **{'as_pandas': True, 'no_wrap': True},
+                        **options,
                         **ViewConfReader.api_to_options(
-                            struct.get('api'),
+                            layer.get('api'),
                             {**options, **added_options}
-                        )
-                    }
-                )
+                        ),
+                        **layer
+                    },
+                    struct,
+                    added_options
+                ) for layer in struct.get('layers')]
             else:
-                dataframe = Thematic().find_dataset(
-                    {
-                        **{'as_pandas': True, 'no_wrap': True},
-                        **ViewConfReader.api_to_options(
-                            struct.get('api'),
-                            {**options, **added_options}
-                        )
-                    }
-                )
+                options = {
+                    **options,
+                    **ViewConfReader.api_to_options(
+                        struct.get('api'),
+                        {**options, **added_options}
+                    ),
+                    **struct
+                }
+                dataframe = self.get_dataframe(options, struct, added_options)
+                # Runs dataframe modifiers from viewconf
+                dataframe = ViewConfReader().generate_columns(dataframe, options)
         else:
             dataframe = Thematic().find_dataset(options)
-
-        # Runs dataframe modifiers from viewconf
-        dataframe = ViewConfReader().generate_columns(dataframe, options)
+            # Runs dataframe modifiers from viewconf
+            dataframe = ViewConfReader().generate_columns(dataframe, options)
 
         chart = ChartFactory().create(options).draw(dataframe, options)
 
@@ -142,6 +145,28 @@ class Chart(BaseModel):
         if lib == 'FOLIUM':
             return {'div': chart._repr_html_(), 'mime': 'text/html'}
         return None
+
+    def get_dataframe(self, options, struct, added_options):
+        if options.get('operation'):
+            return Thematic().find_and_operate(
+                options.get('operation'),
+                {
+                    **{'as_pandas': True, 'no_wrap': True},
+                    **ViewConfReader.api_to_options(
+                        struct.get('api'),
+                        {**options, **added_options}
+                    )
+                }
+            )
+        return Thematic().find_dataset(
+            {
+                **{'as_pandas': True, 'no_wrap': True},
+                **ViewConfReader.api_to_options(
+                    struct.get('api'),
+                    {**options, **added_options}
+                )
+            }
+        )
 
     @staticmethod
     def draw_scatter(dataframe, _options):

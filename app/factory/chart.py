@@ -3,6 +3,7 @@ from model.charts.maps.choropleth import Choropleth
 from model.charts.maps.heat import Heat
 from model.charts.maps.cluster import Cluster
 from model.charts.maps.bubbles import Bubbles
+from model.charts.maps.mixed import Mixed
 from model.charts.bar import BarHorizontal, BarVertical, \
     BarHorizontalStacked, BarVerticalStacked, \
     BarHorizontalPyramid, BarVerticalPyramid
@@ -14,6 +15,8 @@ class ChartFactory():
     def create(cls, options):
         ''' Factory method '''
         chart = None
+        if options.get('chart_type') == 'MIXED_MAP':
+            chart = Mixed([cls.create(each_option) for each_option in options])
         if options.get('chart_type') == 'MAP_TOPOJSON':
             chart = Choropleth()
         if options.get('chart_type') == 'MAP_HEAT':

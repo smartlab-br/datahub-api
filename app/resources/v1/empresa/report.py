@@ -28,7 +28,7 @@ class ReportResource(EmpresaResource):
         content = self.get_domain().find_report(cnpj_raiz)
         rsp_code = {'FAILED': 202, 'PROCESSING': 204, 'NOTFOUND': 202, 'RENEWING': 202, 'UNLOCKING': 202}
         if isinstance(content, dict):
-            return '', rsp_code[content['status']]
+            return rsp_code, rsp_code[content['status']]
         return Response(content, mimetype='text/html')
 
     @swagger.doc({

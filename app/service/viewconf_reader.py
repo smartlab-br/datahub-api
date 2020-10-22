@@ -20,8 +20,10 @@ class ViewConfReader():
             return api_call_obj.get('fixed')
         if 'template' in api_call_obj:
             api_url = api_call_obj.get('template')
-            if custom_args is None:
-                return api_url
+            if not custom_args:
+                if not api_call_obj.get('custom_args', {}):
+                    return api_url
+                custom_args = api_call_obj.get('custom_args')
             for arg_i, arg in enumerate(api_call_obj.get('args')):
                 rplc = arg.get('fixed')
                 if arg.get('named_prop'):
@@ -47,7 +49,7 @@ class ViewConfReader():
         )
 
     @classmethod
-    def api_to_options(cls, api_call_obj, custom_args):
+    def api_to_options(cls, api_call_obj, custom_args=None):
         ''' Transforms API string into datahub options '''
         url = cls.get_api_url(api_call_obj, custom_args)
         url_parts = urllib.parse.urlparse(url)

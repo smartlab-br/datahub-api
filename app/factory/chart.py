@@ -3,6 +3,7 @@ from model.charts.maps.choropleth import Choropleth
 from model.charts.maps.heat import Heat
 from model.charts.maps.cluster import Cluster
 from model.charts.maps.bubbles import Bubbles
+from model.charts.maps.mixed import Mixed
 from model.charts.bar import BarHorizontal, BarVertical, \
     BarHorizontalStacked, BarVerticalStacked, \
     BarHorizontalPyramid, BarVerticalPyramid
@@ -11,44 +12,48 @@ from model.charts.line import Line, LineArea
 class ChartFactory():
     ''' Factory to instantiate the correct chart implementation '''
     @classmethod
-    def create(cls, options):
+    def create(cls, options, mixed_type=None):
         ''' Factory method '''
         chart = None
-        if options.get('chart_type') == 'MAP_TOPOJSON':
-            chart = Choropleth()
-        if options.get('chart_type') == 'MAP_HEAT':
-            chart = Heat()
-        if options.get('chart_type') == 'MAP_CLUSTER':
-            chart = Cluster()
-        if options.get('chart_type') == 'MAP_BUBBLES':
-            chart = Bubbles()
-        if options.get('chart_type') == 'BAR':
-            # TODO - [REMOVE] Options for color testing
-            # options.get('chart_options')["colorArray"] = ["#FF0000", "blue", "green"]
+        if mixed_type:
+            if mixed_type == 'MIXED_MAP':
+                chart = Mixed([cls.create(each_option) for each_option in options])
+        else:
+            if options.get('chart_type') == 'MAP_TOPOJSON':
+                chart = Choropleth()
+            if options.get('chart_type') == 'MAP_HEAT':
+                chart = Heat()
+            if options.get('chart_type') == 'MAP_CLUSTER':
+                chart = Cluster()
+            if options.get('chart_type') == 'MAP_BUBBLES':
+                chart = Bubbles()
+            if options.get('chart_type') == 'BAR':
+                # TODO - [REMOVE] Options for color testing
+                # options.get('chart_options')["colorArray"] = ["#FF0000", "blue", "green"]
 
-            # TODO - [REMOVE] Options for horizontal bars
-            # options['chart_options']['orientation'] = "horizontal"
-            # options['chart_options']['y'] = "nu_competencia"
-            # options['chart_options']['x'] = "vl_indicador"
-            # options['chart_options']['show_x_axis'] = False
-            # options['chart_options']['show_y_axis'] = True
+                # TODO - [REMOVE] Options for horizontal bars
+                # options['chart_options']['orientation'] = "horizontal"
+                # options['chart_options']['y'] = "nu_competencia"
+                # options['chart_options']['x'] = "vl_indicador"
+                # options['chart_options']['show_x_axis'] = False
+                # options['chart_options']['show_y_axis'] = True
 
-            # TODO - [REMOVE] Options for stacked bars
-            # options.get('chart_options')['stacked'] = True
+                # TODO - [REMOVE] Options for stacked bars
+                # options.get('chart_options')['stacked'] = True
 
-            # TODO - [REMOVE] Options for horizontal pyramid bars
-            # options.get('chart_options')['left'] = ['Feminino']
-            # options['chart_options']['orientation'] = "horizontal"
-            # options['chart_options']['y'] = "cut"
-            # options['chart_options']['x'] = "agr_count"
-            # options['chart_options']['show_x_axis'] = False
-            # options['chart_options']['show_y_axis'] = True
-            # del options['chart_options']['legend_field']
-            chart = cls.select_bar_by_options(options)
-        if options.get('chart_type') == 'LINE':
-            # TODO - [REMOVE] Options for stacked lines
-            # options.get('chart_options')['stacked'] = True
-            chart = cls.select_line_by_options(options)
+                # TODO - [REMOVE] Options for horizontal pyramid bars
+                # options.get('chart_options')['left'] = ['Feminino']
+                # options['chart_options']['orientation'] = "horizontal"
+                # options['chart_options']['y'] = "cut"
+                # options['chart_options']['x'] = "agr_count"
+                # options['chart_options']['show_x_axis'] = False
+                # options['chart_options']['show_y_axis'] = True
+                # del options['chart_options']['legend_field']
+                chart = cls.select_bar_by_options(options)
+            if options.get('chart_type') == 'LINE':
+                # TODO - [REMOVE] Options for stacked lines
+                # options.get('chart_options')['stacked'] = True
+                chart = cls.select_line_by_options(options)
         return chart
 
     @staticmethod

@@ -15,10 +15,12 @@ from factory.chart import ChartFactory
 class Chart(BaseModel):
     ''' Model for fetching dinamic and static charts '''
     CHART_LIB_DEF = {
-        'FOLIUM': ['MAP_TOPOJSON', 'MAP_HEAT', 'MAP_CLUSTER', 'MAP_BUBBLES']
+        'FOLIUM': ['MAP_TOPOJSON', 'MAP_HEAT', 'MAP_CLUSTER', 'MAP_BUBBLES', 'MIXED_MAP']
     } # Defaults to BOKEH
     def get_chart(self, options):
         ''' Selects if the chart should be static or dynamic '''
+        mixed_type = None
+        as_image = options.get('as_image')
         options['as_pandas'] = True
         options['no_wrap'] = True
 
@@ -54,49 +56,66 @@ class Chart(BaseModel):
             # "filtros=eq-cd_municipio_ibge_dv-{0},and,"
             # "ne-cd_tipo_sexo_empregado_cat-'Não informado',and,ne-idade_cat-0"
 
-            options = {
-                **options,
-                **ViewConfReader.api_to_options(
-                    struct.get('api'),
-                    {**options, **added_options}
-                ),
-                **struct
-            }
-            if options.get('operation'):
-                dataframe = Thematic().find_and_operate(
-                    options.get('operation'),
+            if struct.get('chart_type') == 'MIXED_MAP':
+                mixed_type = options.get('chart_type')
+                options = [{
+                    **options,
+                    **ViewConfReader.api_to_options(
+                        layer.get('api'),
+                        {**options, **added_options}
+                    ),
+                    **layer
+                } for layer in struct.get('layers')]
+                dataframe = [self.get_dataframe(
                     {
-                        **{'as_pandas': True, 'no_wrap': True},
+                        **options,
                         **ViewConfReader.api_to_options(
-                            struct.get('api'),
+                            layer.get('api'),
                             {**options, **added_options}
-                        )
-                    }
-                )
+                        ),
+                        **layer
+                    },
+                    struct,
+                    added_options
+                ) for layer in struct.get('layers')]
             else:
-                dataframe = Thematic().find_dataset(
-                    {
-                        **{'as_pandas': True, 'no_wrap': True},
-                        **ViewConfReader.api_to_options(
-                            struct.get('api'),
-                            {**options, **added_options}
-                        )
-                    }
-                )
+                options = {
+                    **options,
+                    **ViewConfReader.api_to_options(
+                        struct.get('api'),
+                        {**options, **added_options}
+                    ),
+                    **struct
+                }
+                dataframe = self.get_dataframe(options, struct, added_options)
+                # Runs dataframe modifiers from viewconf
+                dataframe = ViewConfReader().generate_columns(dataframe, options)
+        elif options.get('chart_type') == 'MIXED_MAP':
+            mixed_type = options.get('chart_type')
+            dataframe = []
+            for each_options in options.get('layers'):
+                each_df = self.get_dataframe({}, each_options)
+                # Runs dataframe modifiers from viewconf
+                each_df = ViewConfReader().generate_columns(each_df, each_options)
+                dataframe.append(each_df)
+            options = options.get('layers')
         else:
-            dataframe = Thematic().find_dataset(options)
+            dataframe = self.get_dataframe({}, options)
+            # Runs dataframe modifiers from viewconf
+            dataframe = ViewConfReader().generate_columns(dataframe, options)
 
-        # Runs dataframe modifiers from viewconf
-        dataframe = ViewConfReader().generate_columns(dataframe, options)
-
-        chart = ChartFactory().create(options).draw(dataframe, options)
+        chart = ChartFactory().create(options, mixed_type).draw(dataframe, options)
 
         chart_lib = 'BOKEH'
+        chart_type = mixed_type
+        if chart_type is None:
+            chart_type = options.get('chart_type')
+
         for chart_key, chart_types in self.CHART_LIB_DEF.items():
-            if options.get('chart_type') in chart_types:
+            if chart_type in chart_types:
                 chart_lib = chart_key
 
-        if options.get('as_image'):
+        if as_image:
             return self.get_image(chart, chart_lib)
         return self.get_dynamic_chart(chart, chart_lib)
 
@@ -142,6 +161,28 @@ class Chart(BaseModel):
         if lib == 'FOLIUM':
             return {'div': chart._repr_html_(), 'mime': 'text/html'}
         return None
+
+    def get_dataframe(self, options, struct={}, added_options={}):
+        if options.get('operation'):
+            return Thematic().find_and_operate(
+                options.get('operation'),
+                {
+                    **{'as_pandas': True, 'no_wrap': True},
+                    **ViewConfReader.api_to_options(
+                        struct.get('api'),
+                        {**options, **added_options}
+                    )
+                }
+            )
+        return Thematic().find_dataset(
+            {
+                **{'as_pandas': True, 'no_wrap': True},
+                **ViewConfReader.api_to_options(
+                    struct.get('api'),
+                    {**options, **added_options}
+                )
+            }
+        )
 
     @staticmethod
     def draw_scatter(dataframe, _options):

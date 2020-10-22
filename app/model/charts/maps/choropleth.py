@@ -16,58 +16,20 @@ class Choropleth(BaseMap):
         chart_options = options.get('chart_options')
 
         #Gets the geometry
-        state_geo = self.get_geometry(options, analysis_unit)
         dataframe = self.prepare_dataframe(dataframe, chart_options)
 
-        centroide = None
-        # for each_au in state_geo.get('features'):
-        for each_au in state_geo.get('objects', {}).get('data', {}).get('geometries', []):
-            # During topo conversion, all ID will be named smartlab_geo_id and
-            # all NAME will be in an attribute called smartlab_geo_name.
-            try:
-                df_row = dataframe.loc[int(each_au.get('properties').get("smartlab_geo_id"))]
-                each_au.get('properties').update(
-                    json.loads(df_row.to_json()),
-                    headers=options.get('headers')
-                )
-            except KeyError:
-                df_row = {hdr.get('value'): 'N/A' for hdr in options.get('headers')}
-                df_row[options.get('headers')[0].get('value')] = each_au.get(
-                    'properties'
-                ).get('smartlab_geo_name')
-                each_au.get('properties').update(
-                    json.loads(json.dumps(df_row)),
-                    headers=options.get('headers')
-                )
-            if str(each_au.get('properties', {}).get(chart_options.get('id_field'))) == str(analysis_unit):
-                centroide = each_au.get('properties', {}).get('centroide')
-                if centroide:
-                    centroide.reverse()
+        # Join dataframe and state_geo
+        (state_geo, centroid) = self.join_df_geo(
+            dataframe,
+            self.get_geometry(options, analysis_unit),
+            options
+        )
 
         # Creating map instance
         result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
 
-        # Creating the choropleth layer
-        color_scale = ViewConfReader.get_color_scale(
-            options,
-            dataframe[chart_options['value_field']].min(),
-            dataframe[chart_options['value_field']].max()
-        )
-        
-        color_function = self.get_feature_color
-        chart = folium.TopoJson(
-            state_geo,
-            'objects.data',
-            name=ViewConfReader.get_chart_title(options),
-            style_function=lambda feature: {
-                'fillColor': color_function(color_scale, feature, chart_options.get('value_field')),
-                'fillOpacity': 0.8,
-                'color' : 'black',
-                'stroke' : 'black',
-                'lineOpacity': 0.2,
-                'weight' : 0.2,
-            }
-        )
+        # Generating choropleth layer
+        chart = self.layer_gen(dataframe, chart_options, state_geo, options)
 
         # Adding tooltip to choropleth
         folium.features.GeoJsonTooltip(
@@ -84,14 +46,14 @@ class Choropleth(BaseMap):
         au_row = dataframe.loc[analysis_unit]
 
         if 'latitude' in list(dataframe.columns):
-            centroide = [au_row['latitude'], au_row['longitude']]
+            centroid = [au_row['latitude'], au_row['longitude']]
 
-        if centroide:
+        if centroid:
             marker_layer = folium.map.FeatureGroup(
                 name=self.get_au_title(au_row, options.get('headers'))
             )
             folium.map.Marker(
-                centroide,
+                centroid,
                 tooltip=self.tooltip_gen(au_row, headers=options.get('headers')),
                 icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
             ).add_to(marker_layer)
@@ -146,3 +108,57 @@ class Choropleth(BaseMap):
         if res == visao:
             return f'{self.BASE_TOPOJSON_REPO}/{visao}/{analysis_unit}_q{quality}.json'
         return f'{self.BASE_TOPOJSON_REPO}/{visao}/{res}/{analysis_unit}_q{quality}.json'
+
+    def layer_gen(self, dataframe, chart_options, state_geo, options):
+        """ Generates a choropleth layer """
+        # Creating the choropleth layer
+        color_scale = ViewConfReader.get_color_scale(
+            options,
+            dataframe[chart_options['value_field']].min(),
+            dataframe[chart_options['value_field']].max()
+        )
+
+        color_function = self.get_feature_color
+        chart = folium.TopoJson(
+            state_geo,
+            'objects.data',
+            name=ViewConfReader.get_chart_title(options),
+            style_function=lambda feature: {
+                'fillColor': color_function(color_scale, feature, chart_options.get('value_field')),
+                'fillOpacity': 0.8,
+                'color': 'black',
+                'stroke': 'black',
+                'lineOpacity': 0.2,
+                'weight': 0.2,
+            }
+        )
+
+        return chart
+
+    def join_df_geo(self, dataframe, state_geo, options):
+        """ Joins dataframe into geo data """
+        centroid = None
+        # for each_au in state_geo.get('features'):
+        for each_au in state_geo.get('objects', {}).get('data', {}).get('geometries', []):
+            # During topo conversion, all ID will be named smartlab_geo_id and
+            # all NAME will be in an attribute called smartlab_geo_name.
+            try:
+                df_row = dataframe.loc[int(each_au.get('properties').get("smartlab_geo_id"))]
+                each_au.get('properties').update(
+                    json.loads(df_row.to_json()),
+                    headers=options.get('headers')
+                )
+            except KeyError:
+                df_row = {hdr.get('value'): 'N/A' for hdr in options.get('headers')}
+                df_row[options.get('headers')[0].get('value')] = each_au.get(
+                    'properties'
+                ).get('smartlab_geo_name')
+                each_au.get('properties').update(
+                    json.loads(json.dumps(df_row)),
+                    headers=options.get('headers')
+                )
+            if str(each_au.get('properties', {}).get(options.get('chart_options', {}).get('id_field'))) == str(options.get('au')):
+                centroid = each_au.get('properties', {}).get('centroide')
+                if centroid:
+                    centroid.reverse()
+        return state_geo, centroid

@@ -21,17 +21,7 @@ class Bubbles(BaseMap):
         )
 
         # Adding circle radius to dataset
-        chart_options['base_radius'] = chart_options.get('base_radius', self.BASE_RADIUS)
-        chart_options['multiplier'] = chart_options.get('multiplier', self.RADIUS_MULTIPLIER)
-        def get_circle_radius(row, **kwargs):
-            chart_options = kwargs.get('chart_options')
-            value = row[chart_options.get('value_field', 'api_calc_ln_norm_pos_part')]
-            return chart_options.get('base_radius') + chart_options.get('multiplier') * value
-        dataframe['radius'] = dataframe.apply(
-            get_circle_radius,
-            chart_options=chart_options,
-            axis=1
-        )
+        dataframe['radius'] = self.assess_radius(dataframe, chart_options)
 
         grouped = dataframe.groupby(chart_options.get('layer_id', 'cd_indicador'))
         show = True # Shows only the first layer
@@ -49,6 +39,18 @@ class Bubbles(BaseMap):
         result = self.post_adjustments(result, dataframe, chart_options)
         return result
 
+    def assess_radius(self, dataframe, chart_options):
+        """ Generates a Series with bubbles radius for row in dataframe """
+        chart_options['base_radius'] = chart_options.get('base_radius', self.BASE_RADIUS)
+        chart_options['multiplier'] = chart_options.get('multiplier', self.RADIUS_MULTIPLIER)
+
+        def get_circle_radius(row, **kwargs):
+            chart_opts = kwargs.get('chart_options')
+            value = row[chart_opts.get('value_field', 'api_calc_ln_norm_pos_part')]
+            return chart_opts.get('base_radius') + chart_opts.get('multiplier') * value
+
+        return dataframe.apply(get_circle_radius, chart_options=chart_options, axis=1)
+
     def layer_gen(self, chart_options, group, group_id, show, options):
         """ Generates a bubbles layer """
         # Get the color of the bubble according to layer definitions
@@ -58,6 +60,10 @@ class Bubbles(BaseMap):
                 color = chart_options.get('colorArray')[ind_index]
                 break
 
+        # Adding circle radius to group, if it's not present in dataframe group
+        if 'radius' not in group.columns:
+            group['radius'] = self.assess_radius(group, chart_options)
+
         if 'timeseries' not in chart_options:
             # Creating a layer for the group
             layer = FeatureGroup(
@@ -65,15 +71,22 @@ class Bubbles(BaseMap):
                 show=show
             )
 
+            # Check if popup data is present
+            has_tooltip = 'tooltip' in group.columns
+
             # Generating circles
             for _row_index, row in group.iterrows():
+                tooltip_data = None
+                if has_tooltip:
+                    tooltip_data = row['tooltip']
+
                 CircleMarker(
                     location=[
                         row[chart_options.get('lat', 'latitude')],
                         row[chart_options.get('long', 'longitude')]
                     ],
                     radius=row['radius'],
-                    popup=row['tooltip'],
+                    popup=tooltip_data,
                     color=color,
                     fill=True,
                     fill_color=color

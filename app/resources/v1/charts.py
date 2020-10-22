@@ -10,11 +10,10 @@ class ChartsResource(BaseResource):
         ''' Construtor'''
         self.domain = Chart()
 
-    def get(self, chart_type):
+    def get(self):
         """ Obtém um gráfico a partir de um yaml identificado pelos parâmetros informados """
         options = request.args.copy()
         options = self.build_options(options, rules='charts')
-        options['chart_type'] = chart_type
         content = self.__get_domain().get_chart(options)
 
         if options.get('as_image'):

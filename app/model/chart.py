@@ -15,11 +15,12 @@ from factory.chart import ChartFactory
 class Chart(BaseModel):
     ''' Model for fetching dinamic and static charts '''
     CHART_LIB_DEF = {
-        'FOLIUM': ['MAP_TOPOJSON', 'MAP_HEAT', 'MAP_CLUSTER', 'MAP_BUBBLES']
+        'FOLIUM': ['MAP_TOPOJSON', 'MAP_HEAT', 'MAP_CLUSTER', 'MAP_BUBBLES', 'MIXED_MAP']
     } # Defaults to BOKEH
     def get_chart(self, options):
         ''' Selects if the chart should be static or dynamic '''
         mixed_type = None
+        as_image = options.get('as_image')
         options['as_pandas'] = True
         options['no_wrap'] = True
 
@@ -106,11 +107,15 @@ class Chart(BaseModel):
         chart = ChartFactory().create(options, mixed_type).draw(dataframe, options)
 
         chart_lib = 'BOKEH'
+        chart_type = mixed_type
+        if chart_type is None:
+            chart_type = options.get('chart_type')
+
         for chart_key, chart_types in self.CHART_LIB_DEF.items():
-            if options.get('chart_type') in chart_types:
+            if chart_type in chart_types:
                 chart_lib = chart_key
 
-        if options.get('as_image'):
+        if as_image:
             return self.get_image(chart, chart_lib)
         return self.get_dynamic_chart(chart, chart_lib)
 

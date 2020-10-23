@@ -57,27 +57,23 @@ class Chart(BaseModel):
             # "ne-cd_tipo_sexo_empregado_cat-'Não informado',and,ne-idade_cat-0"
 
             if struct.get('chart_type') == 'MIXED_MAP':
-                mixed_type = options.get('chart_type')
-                options = [{
-                    **options,
-                    **ViewConfReader.api_to_options(
-                        layer.get('api'),
-                        {**options, **added_options}
-                    ),
-                    **layer
-                } for layer in struct.get('layers')]
-                dataframe = [self.get_dataframe(
-                    {
+                mixed_type = struct.get('chart_type')
+                dataframe = []
+                nu_options = []
+                for layer in struct.get('chart_options').get('layers'):
+                    curr_option = {
                         **options,
+                        **struct,
                         **ViewConfReader.api_to_options(
                             layer.get('api'),
-                            {**options, **added_options}
+                            {**layer, **added_options}
                         ),
                         **layer
-                    },
-                    struct,
-                    ViewConfReader.set_custom_options(layer)
-                ) for layer in struct.get('layers')]
+                    }
+
+                    nu_options.append(curr_option)
+                    dataframe.append(self.get_dataframe({}, curr_option, added_options))
+                options = nu_options
             else:
                 added_options = ViewConfReader.set_custom_options(options)
                 options = {
@@ -94,7 +90,7 @@ class Chart(BaseModel):
         elif options.get('chart_type') == 'MIXED_MAP':
             mixed_type = options.get('chart_type')
             dataframe = []
-            for each_options in options.get('layers'):
+            for each_options in options.get('chart_options').get('layers'):
                 added_options = ViewConfReader.set_custom_options(each_options)
                 curr_options = {
                     **each_options,
@@ -108,7 +104,7 @@ class Chart(BaseModel):
                 # Runs dataframe modifiers from viewconf
                 each_df = ViewConfReader().generate_columns(each_df, curr_options)
                 dataframe.append(each_df)
-            options = options.get('layers')
+            options = options.get('chart_options').get('layers')
         else:
             added_options = ViewConfReader.set_custom_options(options)
             options = {

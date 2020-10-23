@@ -142,7 +142,9 @@ class ViewConfReader():
                 if chart.get('id') == options.get('chart_id'):
                     return chart.get('title', 'background')
             return options.get('charts')[0].get('title', 'background')
-        return options.get('title', {}).get('fixed', 'background')
+        if isinstance(options.get('title', {}), dict):
+            return options.get('title', {}).get('fixed', 'background')
+        return options.get('title', 'background')
 
     @staticmethod
     def get_attribute_from_chart_spec(options, attribute, default=None):

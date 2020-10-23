@@ -54,7 +54,7 @@ class EmpresaResource(BaseResource):
     @swagger.doc({
         'tags':['empresa'],
         'description':'Insere uma empresa na fila de análises.',
-        'parameters':[
+        'parameters': [
             {
                 "name": "cnpj_raiz",
                 "description": "CNPJ Raiz da empresa consultada",
@@ -62,6 +62,14 @@ class EmpresaResource(BaseResource):
                 "type": 'string',
                 "in": "path"
             },
+            {
+                "name": "dados", "required": False, "type": 'string', "in": "query",
+                "description": "Tipo de dado que deve ser recarregado. "
+            },
+            {
+                "name": "competencia", "required": False, "type": 'string', "in": "query",
+                "description": "Competência que deve ser recarregada. "
+            }
         ],
         'responses': {
             '201': {'description': 'Empresa'}
@@ -72,7 +80,7 @@ class EmpresaResource(BaseResource):
         if self.is_invalid_id(cnpj_raiz):
             return 400, 'Cnpj raiz inválido (deve ter 8 caracteres exclusivamente numéricos)'
         try:
-            self.get_domain().produce(cnpj_raiz)
+            self.get_domain().produce(cnpj_raiz, request.args.get('dados'), request.args.get('competencia'))
             return 'Análise em processamento', 201
         except TimeoutError as toe:
             print(toe)

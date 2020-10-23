@@ -76,9 +76,10 @@ class Chart(BaseModel):
                         **layer
                     },
                     struct,
-                    added_options
+                    ViewConfReader.set_custom_options(layer)
                 ) for layer in struct.get('layers')]
             else:
+                added_options = ViewConfReader.set_custom_options(options)
                 options = {
                     **options,
                     **ViewConfReader.api_to_options(
@@ -94,13 +95,30 @@ class Chart(BaseModel):
             mixed_type = options.get('chart_type')
             dataframe = []
             for each_options in options.get('layers'):
-                each_df = self.get_dataframe({}, each_options)
+                added_options = ViewConfReader.set_custom_options(each_options)
+                curr_options = {
+                    **each_options,
+                    **ViewConfReader.api_to_options(
+                        each_options.get('api'),
+                        {**options, **added_options}
+                    ),
+                }
+
+                each_df = self.get_dataframe({}, curr_options, added_options)
                 # Runs dataframe modifiers from viewconf
-                each_df = ViewConfReader().generate_columns(each_df, each_options)
+                each_df = ViewConfReader().generate_columns(each_df, curr_options)
                 dataframe.append(each_df)
             options = options.get('layers')
         else:
-            dataframe = self.get_dataframe({}, options)
+            added_options = ViewConfReader.set_custom_options(options)
+            options = {
+                **options,
+                **ViewConfReader.api_to_options(
+                    options.get('api'),
+                    {**options, **added_options}
+                ),
+            }
+            dataframe = self.get_dataframe({}, options, added_options)
             # Runs dataframe modifiers from viewconf
             dataframe = ViewConfReader().generate_columns(dataframe, options)
 

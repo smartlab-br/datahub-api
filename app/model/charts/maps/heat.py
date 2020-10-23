@@ -84,3 +84,7 @@ class Heat(BaseMap):
             marker_layer.add_to(result)
 
         return self.post_adjustments(result, dataframe, chart_options)
+
+    @staticmethod
+    def tooltip_gen(row, **kwargs):
+        pass

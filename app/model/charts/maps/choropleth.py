@@ -31,15 +31,6 @@ class Choropleth(BaseMap):
         # Generating choropleth layer
         chart = self.layer_gen(dataframe, chart_options, state_geo, options)
 
-        # Adding tooltip to choropleth
-        folium.features.GeoJsonTooltip(
-            fields=[hdr.get('value') for hdr in options.get('headers')],
-            aliases=[hdr.get('text') for hdr in options.get('headers')],
-            localize=True,
-            sticky=False,
-            labels=True
-        ).add_to(chart)
-
         # Adding marker to current analysis unit
         if np.issubdtype(dataframe.index.dtype, np.number):
             analysis_unit = int(analysis_unit)
@@ -132,6 +123,15 @@ class Choropleth(BaseMap):
                 'weight': 0.2,
             }
         )
+
+        # Adding tooltip to choropleth
+        folium.features.GeoJsonTooltip(
+            fields=[hdr.get('value') for hdr in options.get('headers')],
+            aliases=[hdr.get('text') for hdr in options.get('headers')],
+            localize=True,
+            sticky=False,
+            labels=True
+        ).add_to(chart)
 
         return chart
 

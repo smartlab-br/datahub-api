@@ -61,7 +61,7 @@ class Chart(BaseModel):
                 dataframe = []
                 nu_options = []
                 for layer in struct.get('chart_options').get('layers'):
-                    curr_option = {
+                    curr_options = {
                         **options,
                         **struct,
                         **ViewConfReader.api_to_options(
@@ -71,8 +71,11 @@ class Chart(BaseModel):
                         **layer
                     }
 
-                    nu_options.append(curr_option)
-                    dataframe.append(self.get_dataframe({}, curr_option, added_options))
+                    nu_options.append(curr_options)
+
+                    each_df = self.get_dataframe({}, curr_options, added_options)
+                    each_df = ViewConfReader().generate_columns(each_df, curr_options)
+                    dataframe.append(each_df)
                 options = nu_options
             else:
                 added_options = ViewConfReader.set_custom_options(options)

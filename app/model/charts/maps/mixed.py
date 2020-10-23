@@ -17,6 +17,8 @@ class Mixed(BaseMap):
             analysis_unit = each_option.get('au')
 
             if each_option.get('chart_type') == 'MAP_TOPOJSON':
+                # Gets the geometry
+                each_df = each_layer.prepare_dataframe(each_df, each_option.get('chart_options'))
                 # Join dataframe and state_geo
                 (state_geo, centroid) = each_layer.join_df_geo(
                     each_df,
@@ -26,6 +28,13 @@ class Mixed(BaseMap):
                 # Generating choropleth layer
                 each_layer.layer_gen(each_df, each_option.get('chart_options'), state_geo, each_option).add_to(result)
             elif each_option.get('chart_type') == 'MAP_BUBBLES':
+                # Adds tooltip data
+                each_df = each_layer.prepare_dataframe(
+                    each_df,
+                    each_option.get('chart_options'),
+                    self.get_tooltip_data(each_df, each_option.get('chart_options'), each_option)
+                )
+                # Get grouped dataframe
                 grouped = each_df.groupby(each_option.get('layer_id', 'cd_indicador'))
                 for group_id, group in grouped:
                     each_layer.layer_gen(each_option.get('chart_options'), group, group_id, True, each_option).add_to(result)

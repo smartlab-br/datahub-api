@@ -141,7 +141,7 @@ class Choropleth(BaseMap):
             # During topo conversion, all ID will be named smartlab_geo_id and
             # all NAME will be in an attribute called smartlab_geo_name.
             try:
-                df_row = self.dataframe.loc[int(each_au.get('properties').get("smartlab_geo_id"))]
+                df_row = self.dataframe.set_index('idx').loc[int(each_au.get('properties').get("smartlab_geo_id"))]
                 each_au.get('properties').update(
                     json.loads(df_row.to_json()),
                     headers=self.options.get('headers')

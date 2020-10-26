@@ -53,7 +53,7 @@ class Heat(BaseMap):
         if np.issubdtype(self.dataframe.index.dtype, np.number):
             analysis_unit = int(analysis_unit)
 
-        au_row = self.dataframe.loc[analysis_unit].pivot_table(
+        df = self.dataframe.pivot_table(
             index=[
                 chart_options.get('id_field', 'cd_mun_ibge'),
                 chart_options.get('name_field', 'nm_municipio'),
@@ -62,12 +62,19 @@ class Heat(BaseMap):
             ],
             columns='cd_indicador',
             values=chart_options.get('value_field', 'vl_indicador')
-        ).reset_index().iloc[0]
+        ).reset_index()
 
-        if chart_options.get('lat', 'latitude') in list(self.dataframe.columns):
+        if 'idx' in df.columns:
+            df.set_index('idx', inplace=True)
+        else:
+            df.set_index(chart_options.get('id_field', 'cd_mun_ibge'), inplace=True)
+
+        au_row = df.loc[analysis_unit].to_dict()
+
+        if chart_options.get('lat', 'latitude') in list(df.columns):
             centroide = [
-                au_row[chart_options.get('lat', 'latitude')],
-                au_row[chart_options.get('long', 'longitude')]
+                au_row.get(chart_options.get('lat', 'latitude')),
+                au_row.get(chart_options.get('long', 'longitude'))
             ]
 
         if centroide:

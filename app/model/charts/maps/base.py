@@ -40,11 +40,15 @@ class BaseMap:
 
     def add_au_marker(self, folium_map, analysis_unit):
         """ Adds a marker for current analysis unit in the map """
+        df = self.dataframe.copy()
+        if 'idx' in df.columns:
+            df.set_index('idx', inplace=True)
+
         # Adding marker to current analysis unit
-        if np.issubdtype(self.dataframe.index.dtype, np.number):
+        if np.issubdtype(df.index.dtype, np.number):
             analysis_unit = int(analysis_unit)
 
-        au_row = self.dataframe.loc[analysis_unit].reset_index().iloc[0]
+        au_row = df.loc[analysis_unit].reset_index().iloc[0]
 
         centroide = None
         if self.options.get('chart_options', {}).get('lat', 'latitude') in list(self.dataframe.columns):

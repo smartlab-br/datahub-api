@@ -45,7 +45,7 @@ class Cluster(BaseMap):
         show = True # Shows only the first layer
         for group_id, group in grouped:
             chart = MarkerCluster(
-                locations=group[self.get_location_columns(chart_options)].values.tolist(),
+                locations=group[self.get_location_columns()].values.tolist(),
                 name=ViewConfReader.get_layers_names(self.options.get('headers')).get(group_id),
                 show=show,
                 popups=group['tooltip'].tolist()
@@ -54,10 +54,4 @@ class Cluster(BaseMap):
             show = False
             chart.add_to(result)
 
-        result = self.add_au_marker(
-            result, self.options.get('au'),
-            dataframe=self.dataframe,
-            options=self.options,
-            chart_options=chart_options
-        )
-        return self.post_adjustments(result)
+        return self.add_au_marker(result, self.options.get('au'))

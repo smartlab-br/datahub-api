@@ -1,4 +1,4 @@
-''' Class for instantiating chart objects '''
+""" Class for instantiating chart objects """
 from model.charts.maps.choropleth import Choropleth
 from model.charts.maps.heat import Heat
 from model.charts.maps.cluster import Cluster
@@ -9,11 +9,12 @@ from model.charts.bar import BarHorizontal, BarVertical, \
     BarHorizontalPyramid, BarVerticalPyramid
 from model.charts.line import Line, LineArea
 
-class ChartFactory():
-    ''' Factory to instantiate the correct chart implementation '''
+
+class ChartFactory:
+    """ Factory to instantiate the correct chart implementation """
     @classmethod
     def create(cls, options, dataframe, mixed_type=None):
-        ''' Factory method '''
+        """ Factory method """
         chart = None
         if mixed_type:
             if mixed_type == 'MIXED_MAP':
@@ -58,7 +59,7 @@ class ChartFactory():
 
     @staticmethod
     def select_bar_by_options(options, dataframe):
-        ''' Select the adequate BAR implementation, according to options '''
+        """ Select the adequate BAR implementation, according to options """
         orientation = options.get('chart_options', {}).get('orientation', 'horizontal')
         is_stacked = options.get('chart_options', {}).get('stacked', False)
         is_pyramid = options.get('chart_options', {}).get('left', False)
@@ -76,7 +77,7 @@ class ChartFactory():
 
     @staticmethod
     def select_line_by_options(options, dataframe):
-        ''' Select the adequate LINE implementation, according to options '''
+        """ Select the adequate LINE implementation, according to options """
         is_stacked = options.get('chart_options', {}).get('stacked', False)
         if is_stacked:
             return LineArea(options, dataframe)

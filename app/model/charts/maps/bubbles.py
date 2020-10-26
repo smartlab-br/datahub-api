@@ -31,7 +31,7 @@ class Bubbles(BaseMap):
         result = self.post_adjustments(result)
         return result
 
-    def assess_radius(self):
+    def assess_radius(self, dataframe=None):
         """ Generates a Series with bubbles radius for row in dataframe """
         chart_options = self.options.get('chart_options', {})
         chart_options['base_radius'] = chart_options.get('base_radius', self.BASE_RADIUS)
@@ -42,7 +42,9 @@ class Bubbles(BaseMap):
             value = row[chart_opts.get('value_field', 'api_calc_ln_norm_pos_part')]
             return chart_opts.get('base_radius') + chart_opts.get('multiplier') * value
 
-        return self.dataframe.apply(get_circle_radius, chart_options=chart_options, axis=1)
+        if dataframe is None:
+            return self.dataframe.apply(get_circle_radius, chart_options=chart_options, axis=1)
+        return dataframe.apply(get_circle_radius, chart_options=chart_options, axis=1)
 
     def layer_gen(self, group, group_id, show):
         """ Generates a bubbles layer """
@@ -56,7 +58,7 @@ class Bubbles(BaseMap):
 
         # Adding circle radius to group, if it's not present in dataframe group
         if 'radius' not in group.columns:
-            group['radius'] = self.assess_radius(group, chart_options)
+            group['radius'] = self.assess_radius(group)
 
         if 'timeseries' not in chart_options:
             # Creating a layer for the group

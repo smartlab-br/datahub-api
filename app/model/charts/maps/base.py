@@ -5,7 +5,7 @@ import pandas as pd
 from service.viewconf_reader import ViewConfReader
 
 
-class BaseMap():
+class BaseMap:
     """ Base class for maps """
     TILES_URL = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
     TILES_ATTRIBUTION = 'Esri, USGS | Esri, HERE | Esri, Garmin, FAO, NOAA'
@@ -31,6 +31,12 @@ class BaseMap():
                 fill-opacity: 1;\
             }\
         </style>"
+
+    def __init__(self, options, dataframe, mixed_type=None):
+        self.options = options
+        self.dataframe = dataframe
+        if mixed_type is not None:
+            self.mixed_type = mixed_type
 
     def add_au_marker(self, folium_map, analysis_unit):
         """ Adds a marker for current analysis unit in the map """

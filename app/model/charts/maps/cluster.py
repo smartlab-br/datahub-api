@@ -1,14 +1,15 @@
-''' Model for fetching chart '''
+""" Model for fetching chart """
 from folium.plugins import MarkerCluster
 from model.charts.maps.base import BaseMap
 from service.viewconf_reader import ViewConfReader
 
+
 class Cluster(BaseMap):
-    ''' Heatmap building class '''
-    def draw(self, dataframe, options):
-        ''' Gera um mapa de cluster a partir das opções enviadas '''
+    """ Heatmap building class """
+    def draw(self):
+        """ Gera um mapa de cluster a partir das opções enviadas """
         # http://localhost:5000/charts/cluster?from_viewconf=S&au=2927408&card_id=mapa_prev_estado_cluster&observatory=te&dimension=prevalencia&as_image=N
-        chart_options = options.get('chart_options')
+        chart_options = self.options.get('chart_options')
         # TODO - [REMOVE] Used just for debugging
         # options["headers"] = [
         #     {'text': 'nm_municipio', "value": 'nm_municipio'},
@@ -38,17 +39,14 @@ class Cluster(BaseMap):
         #     }
         # ]
 
-        (dataframe, result, options) = self.pre_draw(
-            dataframe, chart_options, options,
-            self.get_tooltip_data(dataframe, chart_options, options)
-        )
+        result = self.pre_draw(self.get_tooltip_data())
 
-        grouped = dataframe.groupby(chart_options.get('layer_id', 'cd_indicador'))
+        grouped = self.dataframe.groupby(chart_options.get('layer_id', 'cd_indicador'))
         show = True # Shows only the first layer
         for group_id, group in grouped:
             chart = MarkerCluster(
                 locations=group[self.get_location_columns(chart_options)].values.tolist(),
-                name=ViewConfReader.get_layers_names(options.get('headers')).get(group_id),
+                name=ViewConfReader.get_layers_names(self.options.get('headers')).get(group_id),
                 show=show,
                 popups=group['tooltip'].tolist()
             )
@@ -57,10 +55,9 @@ class Cluster(BaseMap):
             chart.add_to(result)
 
         result = self.add_au_marker(
-            result, options.get('au'),
-            dataframe=dataframe,
-            options=options,
+            result, self.options.get('au'),
+            dataframe=self.dataframe,
+            options=self.options,
             chart_options=chart_options
         )
-        result = self.post_adjustments(result, dataframe, chart_options)
-        return result
+        return self.post_adjustments(result)

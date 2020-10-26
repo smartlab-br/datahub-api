@@ -1,11 +1,12 @@
-''' Base class for maps '''
+""" Base class for maps """
 import folium
 import numpy as np
 import pandas as pd
 from service.viewconf_reader import ViewConfReader
 
+
 class BaseMap():
-    ''' Base class for maps '''
+    """ Base class for maps """
     TILES_URL = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
     TILES_ATTRIBUTION = 'Esri, USGS | Esri, HERE | Esri, Garmin, FAO, NOAA'
 
@@ -31,72 +32,71 @@ class BaseMap():
             }\
         </style>"
 
-    def add_au_marker(self, folium_map, analysis_unit, **kwargs):
-        ''' Adds a marker for current analysis unit in the map '''
+    def add_au_marker(self, folium_map, analysis_unit):
+        """ Adds a marker for current analysis unit in the map """
         # Adding marker to current analysis unit
-        if np.issubdtype(kwargs.get('dataframe').index.dtype, np.number):
+        if np.issubdtype(self.dataframe.index.dtype, np.number):
             analysis_unit = int(analysis_unit)
 
-        au_row = kwargs.get('dataframe').loc[analysis_unit].reset_index().iloc[0]
+        au_row = self.dataframe.loc[analysis_unit].reset_index().iloc[0]
 
         centroide = None
-        if kwargs.get('chart_options', {}).get('lat', 'latitude') in list(kwargs.get('dataframe').columns):
+        if self.options.get('chart_options', {}).get('lat', 'latitude') in list(self.dataframe.columns):
             centroide = [
-                au_row[kwargs.get('chart_options', {}).get('lat', 'latitude')].item(),
-                au_row[kwargs.get('chart_options', {}).get('long', 'longitude')].item()
+                au_row[self.options.get('chart_options', {}).get('lat', 'latitude')].item(),
+                au_row[self.options.get('chart_options', {}).get('long', 'longitude')].item()
             ]
 
         if centroide:
             marker_layer = folium.map.FeatureGroup(
-                name=self.get_au_title(au_row, kwargs.get('options', {}).get('headers'))
+                name=self.get_au_title(au_row, self.options.get('headers'))
             )
             folium.map.Marker(
                 centroide,
                 tooltip=au_row.get('tooltip', "Tooltip!"),
-                icon=folium.Icon(color=ViewConfReader.get_marker_color(
-                    kwargs.get('options')
-                ))
+                icon=folium.Icon(color=ViewConfReader.get_marker_color(self.options))
             ).add_to(marker_layer)
             marker_layer.add_to(folium_map)
         return folium_map
 
-    def post_adjustments(self, folium_map, dataframe, chart_options):
-        ''' Adds final configurations to map, such as bounds and layer control '''
+    def post_adjustments(self, folium_map):
+        """ Adds final configurations to map, such as bounds and layer control """
         folium.LayerControl().add_to(folium_map)
         folium_map.get_root().header.add_child(folium.Element(self.STYLE_STATEMENT))
 
         # Getting bounds from dataframe
+        chart_options = self.options.get('chart_options', {})
         folium_map.fit_bounds([
             [
-                dataframe[chart_options.get('lat', 'latitude')].min(),
-                dataframe[chart_options.get('long', 'longitude')].min()
+                self.dataframe[chart_options.get('lat', 'latitude')].min(),
+                self.dataframe[chart_options.get('long', 'longitude')].min()
             ],
             [
-                dataframe[chart_options.get('lat', 'latitude')].max(),
-                dataframe[chart_options.get('long', 'longitude')].max()
+                self.dataframe[chart_options.get('lat', 'latitude')].max(),
+                self.dataframe[chart_options.get('long', 'longitude')].max()
             ]
         ])
         return folium_map
 
-    @staticmethod
-    def get_headers(chart_options, options):
-        ''' Chooses whether to use given headers config or infer from options '''
-        if 'headers' in options:
-            return options.get('headers')
-        if chart_options is None:
+    def get_headers(self):
+        """ Chooses whether to use given headers config or infer from options """
+        if 'headers' in self.options:
+            return self.options.get('headers')
+        if 'chart_options' in self.options:
             return [{'text': '', 'value': 'nm_municipio'}]
         return ViewConfReader.get_headers_from_options_descriptor(
-            options.get('description'),
+            self.options.get('description'),
             [{
                 'text': '',
-                'value': chart_options.get('name_field', 'nm_municipio')
+                'value': self.options.get('chart_options', {}).get('name_field', 'nm_municipio')
             }]
         )
 
-    def get_tooltip_data(self, dataframe, chart_options, options):
-        ''' Creates tooltip content series from given options and dataframe '''
+    def get_tooltip_data(self):
+        """ Creates tooltip content series from given options and dataframe """
         # Get pivoted dataframe for tooltip list creation
-        df_tooltip = dataframe.copy().pivot_table(
+        chart_options = self.options.get('chart_options', {})
+        df_tooltip = self.dataframe.copy().pivot_table(
             index=[
                 chart_options.get('id_field', 'cd_mun_ibge'),
                 chart_options.get('name_field', 'nm_municipio'),
@@ -111,8 +111,8 @@ class BaseMap():
 
         # Merge dataframe and pivoted dataframe
         headers = None
-        if options is not None:
-            headers = options.get("headers")
+        if self.options is not None:
+            headers = self.options.get("headers")
 
         df_tooltip['tooltip'] = df_tooltip.apply(
             self.tooltip_gen,
@@ -121,9 +121,9 @@ class BaseMap():
         )
         return df_tooltip[[chart_options.get('id_field', 'cd_mun_ibge'), 'tooltip']]
 
-    @staticmethod
-    def get_location_columns(chart_options):
-        ''' Get the column names to use as reference to location and value in the dataframe '''
+    def get_location_columns(self):
+        """ Get the column names to use as reference to location and value in the dataframe """
+        chart_options = self.options.get('chart_options')
         if chart_options is None:
             return ['lat', 'long']
         cols = [chart_options.get('lat', 'lat'), chart_options.get('long', 'long')]
@@ -131,31 +131,30 @@ class BaseMap():
             cols.append(chart_options.get('value_field'))
         return cols
 
-    @staticmethod
-    def prepare_dataframe(dataframe, chart_options, tooltip_data=None):
-        ''' Creates a standard index for the dataframes '''
+    def prepare_dataframe(self, tooltip_data=None):
+        """ Creates a standard index for the dataframes """
+        chart_options = self.options.get('chart_options')
         if chart_options is None:
-            return dataframe
+            return self.dataframe
 
         # Adding tooltips to detailed dataframe
         if tooltip_data is not None:
-            dataframe = pd.merge(
-                dataframe,
+            self.dataframe = pd.merge(
+                self.dataframe,
                 tooltip_data,
                 left_on=chart_options.get('id_field', 'cd_mun_ibge'),
                 right_on=chart_options.get('id_field', 'cd_mun_ibge'),
                 how="left"
             )
 
-        dataframe['str_id'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')].astype(str)
-        dataframe['idx'] = dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
-        return dataframe.set_index('idx')
+        self.dataframe['str_id'] = self.dataframe[chart_options.get('id_field', 'cd_mun_ibge')].astype(str)
+        self.dataframe['idx'] = self.dataframe[chart_options.get('id_field', 'cd_mun_ibge')]
+        self.dataframe.set_index('idx')
 
     @staticmethod
-    def tooltip_gen(row, **kwargs):
-        ''' Generates marker tooltip based on the location and collection of fields
-            sent on "headers" option '''
-        headers = kwargs.get('headers')
+    def tooltip_gen(row, headers):
+        """ Generates marker tooltip based on the location and collection of fields
+            sent on "headers" option """
         if headers is None or row is None:
             return "Tooltip!"
         tooltip = "".join([
@@ -169,24 +168,17 @@ class BaseMap():
 
     @staticmethod
     def get_au_title(row, headers):
-        ''' Gets the analysis unit title from headers definition '''
+        """ Gets the analysis unit title from headers definition """
         if headers is None or len(headers) <= 0 or row is None:
             return 'Analysis Unit'
         return row[headers[0].get('value')]
 
-    def pre_draw(self, dataframe, chart_options, options, tooltip_data):
-        ''' Common setup for dataframe and map '''
-        options['headers'] = self.get_headers(chart_options, options)
-        return (
-            self.prepare_dataframe(
-                dataframe,
-                chart_options,
-                tooltip_data
-            ),
-            folium.Map(
-                tiles=self.TILES_URL,
-                attr=self.TILES_ATTRIBUTION,
-                control_scale=True
-            ),
-            options
+    def pre_draw(self, tooltip_data):
+        """ Common setup for dataframe and map """
+        self.options['headers'] = self.get_headers()
+        self.prepare_dataframe(tooltip_data),
+        return folium.Map(
+            tiles=self.TILES_URL,
+            attr=self.TILES_ATTRIBUTION,
+            control_scale=True
         )

@@ -4,6 +4,11 @@ from service.viewconf_reader import ViewConfReader
 
 class BaseChart():
     ''' Base Chart class '''
+    def __init__(self, options, dataframe, mixed_type):
+        self.options = options
+        self.dataframe = dataframe
+        self.mixed_type = mixed_type
+
     @staticmethod
     def get_fill_color(index, options):
         ''' Gets the positional color in the scale built according to given options '''
@@ -61,7 +66,7 @@ class BaseCartesianChart(BaseChart):
         return {col:list(src[col]) for col in src.columns}
 
     @staticmethod
-    def chart_config(chart, _options):
+    def chart_config(chart):
         ''' Adds common chart configurations, according to given options '''
         # General config
         chart.axis.major_label_text_font = 'Palanquin'

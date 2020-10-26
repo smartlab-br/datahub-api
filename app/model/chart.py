@@ -121,7 +121,7 @@ class Chart(BaseModel):
             # Runs dataframe modifiers from viewconf
             dataframe = ViewConfReader().generate_columns(dataframe, options)
 
-        chart = ChartFactory().create(options, mixed_type).draw(dataframe, options)
+        chart = ChartFactory().create(options, dataframe, mixed_type).draw()
 
         chart_lib = 'BOKEH'
         chart_type = mixed_type

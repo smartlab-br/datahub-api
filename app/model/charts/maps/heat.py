@@ -1,22 +1,20 @@
-''' Model for fetching chart '''
+""" Model for fetching chart """
 import folium
 import numpy as np
 from folium.plugins import HeatMap, HeatMapWithTime
 from model.charts.maps.base import BaseMap
 from service.viewconf_reader import ViewConfReader
 
-class Heat(BaseMap):
-    ''' Heatmap building class '''
-    def draw(self, dataframe, options):
-        ''' Gera um mapa de calor a partir das opções enviadas '''
-        # http://localhost:5000/charts/choropleth?from_viewconf=S&au=2927408&card_id=mapa_pib_brasil&dimension=socialeconomico&as_image=S
-        analysis_unit = options.get('au')
-        chart_options = options.get('chart_options')
 
-        (dataframe, result, options) = self.pre_draw(
-            dataframe, chart_options, options,
-            self.get_tooltip_data(dataframe, chart_options, options)
-        )
+class Heat(BaseMap):
+    """ Heatmap building class """
+    def draw(self):
+        """ Gera um mapa de calor a partir das opções enviadas """
+        # http://localhost:5000/charts/choropleth?from_viewconf=S&au=2927408&card_id=mapa_pib_brasil&dimension=socialeconomico&as_image=S
+        analysis_unit = self.options.get('au')
+        chart_options = self.options.get('chart_options')
+
+        result = self.pre_draw(self.get_tooltip_data())
 
         centroide = None
         cols = [chart_options.get('lat', 'lat'), chart_options.get('long', 'long')]
@@ -24,8 +22,8 @@ class Heat(BaseMap):
             cols.append(chart_options.get('value_field'))
 
         # Get group names from headers
-        group_names = ViewConfReader.get_layers_names(options.get('headers'))
-        grouped = dataframe.groupby(chart_options.get('layer_id', 'cd_indicador'))
+        group_names = ViewConfReader.get_layers_names(self.options.get('headers'))
+        grouped = self.dataframe.groupby(chart_options.get('layer_id', 'cd_indicador'))
         show = True # Shows only the first
         for group_id, group in grouped:
             if 'timeseries' not in chart_options:
@@ -52,10 +50,10 @@ class Heat(BaseMap):
             show = False
 
         # Adding marker to current analysis unit
-        if np.issubdtype(dataframe.index.dtype, np.number):
+        if np.issubdtype(self.dataframe.index.dtype, np.number):
             analysis_unit = int(analysis_unit)
 
-        au_row = dataframe.loc[analysis_unit].pivot_table(
+        au_row = self.dataframe.loc[analysis_unit].pivot_table(
             index=[
                 chart_options.get('id_field', 'cd_mun_ibge'),
                 chart_options.get('name_field', 'nm_municipio'),
@@ -66,7 +64,7 @@ class Heat(BaseMap):
             values=chart_options.get('value_field', 'vl_indicador')
         ).reset_index().iloc[0]
 
-        if chart_options.get('lat', 'latitude') in list(dataframe.columns):
+        if chart_options.get('lat', 'latitude') in list(self.dataframe.columns):
             centroide = [
                 au_row[chart_options.get('lat', 'latitude')],
                 au_row[chart_options.get('long', 'longitude')]
@@ -74,17 +72,17 @@ class Heat(BaseMap):
 
         if centroide:
             marker_layer = folium.map.FeatureGroup(
-                name=self.get_au_title(au_row, options.get('headers'))
+                name=self.get_au_title(au_row, self.options.get('headers'))
             )
             folium.map.Marker(
                 centroide,
-                tooltip=self.tooltip_gen(au_row, headers=options.get('headers')),
-                icon=folium.Icon(color=ViewConfReader.get_marker_color(options))
+                tooltip=self.tooltip_gen(au_row, self.options.get('headers')),
+                icon=folium.Icon(color=ViewConfReader.get_marker_color(self.options))
             ).add_to(marker_layer)
             marker_layer.add_to(result)
 
-        return self.post_adjustments(result, dataframe, chart_options)
+        return self.post_adjustments(result)
 
     @staticmethod
-    def tooltip_gen(row, **kwargs):
+    def tooltip_gen(row, headers):
         pass

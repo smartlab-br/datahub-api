@@ -16,8 +16,9 @@ class Bar(BaseCartesianChart):
     #       text: "vl_indicador"
 
     # TODO Final - Responsivity
-    def __init__(self, style_theme='light_minimal'):
-        curdoc().theme = style_theme
+    def __init__(self, options, dataframe):
+        super().__init__(options, dataframe)
+        curdoc().theme = options.get('style_theme', 'light_minimal')
 
     def draw(self):
         ''' Abstract method - must be implemented '''

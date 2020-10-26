@@ -4,10 +4,11 @@ from service.viewconf_reader import ViewConfReader
 
 class BaseChart():
     ''' Base Chart class '''
-    def __init__(self, options, dataframe, mixed_type):
+    def __init__(self, options, dataframe, mixed_type=None):
         self.options = options
         self.dataframe = dataframe
-        self.mixed_type = mixed_type
+        if mixed_type is not None:
+            self.mixed_type = mixed_type
 
     @staticmethod
     def get_fill_color(index, options):

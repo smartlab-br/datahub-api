@@ -48,25 +48,27 @@ class BaseMap:
         if np.issubdtype(df.index.dtype, np.number):
             analysis_unit = int(analysis_unit)
 
-        au_row = df.loc[analysis_unit].reset_index().iloc[0]
+        if analysis_unit in df.index:
+            au_row = df.loc[analysis_unit].reset_index().iloc[0]
 
-        centroide = None
-        if self.options.get('chart_options', {}).get('lat', 'latitude') in list(self.dataframe.columns):
-            centroide = [
-                au_row[self.options.get('chart_options', {}).get('lat', 'latitude')].item(),
-                au_row[self.options.get('chart_options', {}).get('long', 'longitude')].item()
-            ]
+            centroid = None
+            if self.options.get('chart_options', {}).get('lat', 'latitude') in list(self.dataframe.columns):
+                centroid = [
+                    au_row[self.options.get('chart_options', {}).get('lat', 'latitude')].item(),
+                    au_row[self.options.get('chart_options', {}).get('long', 'longitude')].item()
+                ]
 
-        if centroide:
-            marker_layer = folium.map.FeatureGroup(
-                name=self.get_au_title(au_row, self.options.get('headers'))
-            )
-            folium.map.Marker(
-                centroide,
-                tooltip=au_row.get('tooltip', "Tooltip!"),
-                icon=folium.Icon(color=ViewConfReader.get_marker_color(self.options))
-            ).add_to(marker_layer)
-            marker_layer.add_to(folium_map)
+            if centroid:
+                marker_layer = folium.map.FeatureGroup(
+                    name=self.get_au_title(au_row, self.options.get('headers'))
+                )
+                folium.map.Marker(
+                    centroid,
+                    tooltip=au_row.get('tooltip', "Tooltip!"),
+                    icon=folium.Icon(color=ViewConfReader.get_marker_color(self.options))
+                ).add_to(marker_layer)
+                marker_layer.add_to(folium_map)
+
         return folium_map
 
     def post_adjustments(self, folium_map):

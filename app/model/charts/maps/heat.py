@@ -69,24 +69,25 @@ class Heat(BaseMap):
         else:
             df.set_index(chart_options.get('id_field', 'cd_mun_ibge'), inplace=True)
 
-        au_row = df.loc[analysis_unit].to_dict()
+        if analysis_unit in df.index:
+            au_row = df.loc[analysis_unit].to_dict()
 
-        if chart_options.get('lat', 'latitude') in list(df.columns):
-            centroide = [
-                au_row.get(chart_options.get('lat', 'latitude')),
-                au_row.get(chart_options.get('long', 'longitude'))
-            ]
+            if chart_options.get('lat', 'latitude') in list(df.columns):
+                centroide = [
+                    au_row.get(chart_options.get('lat', 'latitude')),
+                    au_row.get(chart_options.get('long', 'longitude'))
+                ]
 
-        if centroide:
-            marker_layer = folium.map.FeatureGroup(
-                name=self.get_au_title(au_row, self.options.get('headers'))
-            )
-            folium.map.Marker(
-                centroide,
-                tooltip=self.tooltip_gen(au_row, self.options.get('headers')),
-                icon=folium.Icon(color=ViewConfReader.get_marker_color(self.options))
-            ).add_to(marker_layer)
-            marker_layer.add_to(result)
+            if centroide:
+                marker_layer = folium.map.FeatureGroup(
+                    name=self.get_au_title(au_row, self.options.get('headers'))
+                )
+                folium.map.Marker(
+                    centroide,
+                    tooltip=self.tooltip_gen(au_row, self.options.get('headers')),
+                    icon=folium.Icon(color=ViewConfReader.get_marker_color(self.options))
+                ).add_to(marker_layer)
+                marker_layer.add_to(result)
 
         return self.post_adjustments(result)
 

@@ -54,4 +54,6 @@ class Cluster(BaseMap):
             show = False
             chart.add_to(result)
 
-        return self.add_au_marker(result, self.options.get('au'))
+        result = self.add_au_marker(result, self.options.get('au'))
+
+        return self.post_adjustments(result)

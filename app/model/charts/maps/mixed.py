@@ -5,39 +5,30 @@ from model.charts.maps.base import BaseMap
 class Mixed(BaseMap):
     """ Mixed map building class """
     def __init__(self, layers):
+        super().__init__(None, None)  # Blocks instantiation of dataframes and options
         self.layers = layers
 
-    def draw(self, dataframe, options):
+    def draw(self):
         """ Generates a base map and add layers according to config """
         # Creating map instance
         result = folium.Map(tiles=self.TILES_URL, attr=self.TILES_ATTRIBUTION, control_scale=True)
 
         # Generates layers
-        for each_layer, each_df, each_option in zip(self.layers, dataframe, options):
-            analysis_unit = each_option.get('au')
+        for layer in self.layers:
+            analysis_unit = layer.options.get('au')
 
-            if each_option.get('chart_type') == 'MAP_TOPOJSON':
-                # Gets the geometry
-                each_df = each_layer.prepare_dataframe(each_df, each_option.get('chart_options'))
+            if layer.options.get('chart_type') == 'MAP_TOPOJSON':
+                layer.prepare_dataframe()
                 # Join dataframe and state_geo
-                (state_geo, centroid) = each_layer.join_df_geo(
-                    each_df,
-                    each_layer.get_geometry(each_option, analysis_unit),
-                    each_option
-                )
+                (state_geo, centroid) = layer.join_df_geo(layer.get_geometry(analysis_unit))
                 # Generating choropleth layer
-                each_layer.layer_gen(each_df, each_option.get('chart_options'), state_geo, each_option).add_to(result)
-            elif each_option.get('chart_type') == 'MAP_BUBBLES':
-                # Adds tooltip data
-                each_df = each_layer.prepare_dataframe(
-                    each_df,
-                    each_option.get('chart_options'),
-                    self.get_tooltip_data(each_df, each_option.get('chart_options'), each_option)
-                )
+                layer.layer_gen(state_geo).add_to(result)
+            elif layer.options.get('chart_type') == 'MAP_BUBBLES':
+                layer.prepare_dataframe(layer.get_tooltip_data())
                 # Get grouped dataframe
-                grouped = each_df.groupby(each_option.get('layer_id', 'cd_indicador'))
+                grouped = layer.dataframe.groupby(layer.options.get('layer_id', 'cd_indicador'))
                 for group_id, group in grouped:
-                    each_layer.layer_gen(each_option.get('chart_options'), group, group_id, True, each_option).add_to(result)
+                    layer.layer_gen(group, group_id, True).add_to(result)
 
         folium.LayerControl().add_to(result)
 

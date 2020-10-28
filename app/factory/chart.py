@@ -1,4 +1,4 @@
-''' Class for instantiating chart objects '''
+""" Class for instantiating chart objects """
 from model.charts.maps.choropleth import Choropleth
 from model.charts.maps.heat import Heat
 from model.charts.maps.cluster import Cluster
@@ -9,24 +9,25 @@ from model.charts.bar import BarHorizontal, BarVertical, \
     BarHorizontalPyramid, BarVerticalPyramid
 from model.charts.line import Line, LineArea
 
-class ChartFactory():
-    ''' Factory to instantiate the correct chart implementation '''
+
+class ChartFactory:
+    """ Factory to instantiate the correct chart implementation """
     @classmethod
-    def create(cls, options, mixed_type=None):
-        ''' Factory method '''
+    def create(cls, options, dataframe, mixed_type=None):
+        """ Factory method """
         chart = None
         if mixed_type:
             if mixed_type == 'MIXED_MAP':
-                chart = Mixed([cls.create(each_option) for each_option in options])
+                chart = Mixed([cls.create(each_option, each_dataframe) for each_option, each_dataframe in zip(options, dataframe)])
         else:
             if options.get('chart_type') == 'MAP_TOPOJSON':
-                chart = Choropleth()
+                chart = Choropleth(options, dataframe)
             if options.get('chart_type') == 'MAP_HEAT':
-                chart = Heat()
+                chart = Heat(options, dataframe)
             if options.get('chart_type') == 'MAP_CLUSTER':
-                chart = Cluster()
+                chart = Cluster(options, dataframe)
             if options.get('chart_type') == 'MAP_BUBBLES':
-                chart = Bubbles()
+                chart = Bubbles(options, dataframe)
             if options.get('chart_type') == 'BAR':
                 # TODO - [REMOVE] Options for color testing
                 # options.get('chart_options')["colorArray"] = ["#FF0000", "blue", "green"]
@@ -49,35 +50,35 @@ class ChartFactory():
                 # options['chart_options']['show_x_axis'] = False
                 # options['chart_options']['show_y_axis'] = True
                 # del options['chart_options']['legend_field']
-                chart = cls.select_bar_by_options(options)
+                chart = cls.select_bar_by_options(options, dataframe)
             if options.get('chart_type') == 'LINE':
                 # TODO - [REMOVE] Options for stacked lines
                 # options.get('chart_options')['stacked'] = True
-                chart = cls.select_line_by_options(options)
+                chart = cls.select_line_by_options(options, dataframe)
         return chart
 
     @staticmethod
-    def select_bar_by_options(options):
-        ''' Select the adequate BAR implementation, according to options '''
+    def select_bar_by_options(options, dataframe):
+        """ Select the adequate BAR implementation, according to options """
         orientation = options.get('chart_options', {}).get('orientation', 'horizontal')
         is_stacked = options.get('chart_options', {}).get('stacked', False)
         is_pyramid = options.get('chart_options', {}).get('left', False)
         if is_pyramid:
             if orientation == 'vertical':
-                return BarVerticalPyramid(options.get('style_theme', 'light_minimal'))
-            return BarHorizontalPyramid(options.get('style_theme', 'light_minimal'))
+                return BarVerticalPyramid(options, dataframe)
+            return BarHorizontalPyramid(options, dataframe)
         if is_stacked:
             if orientation == 'vertical':
-                return BarVerticalStacked(options.get('style_theme', 'light_minimal'))
-            return BarHorizontalStacked(options.get('style_theme', 'light_minimal'))
+                return BarVerticalStacked(options, dataframe)
+            return BarHorizontalStacked(options, dataframe)
         if orientation == 'vertical':
-            return BarVertical(options.get('style_theme', 'light_minimal'))
-        return BarHorizontal(options.get('style_theme', 'light_minimal'))
+            return BarVertical(options, dataframe)
+        return BarHorizontal(options, dataframe)
 
     @staticmethod
-    def select_line_by_options(options):
-        ''' Select the adequate LINE implementation, according to options '''
+    def select_line_by_options(options, dataframe):
+        """ Select the adequate LINE implementation, according to options """
         is_stacked = options.get('chart_options', {}).get('stacked', False)
         if is_stacked:
-            return LineArea(options.get('style_theme', 'light_minimal'))
-        return Line(options.get('style_theme', 'light_minimal'))
+            return LineArea(options, dataframe)
+        return Line(options, dataframe)

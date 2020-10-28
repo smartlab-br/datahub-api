@@ -121,7 +121,7 @@ class Chart(BaseModel):
             # Runs dataframe modifiers from viewconf
             dataframe = ViewConfReader().generate_columns(dataframe, options)
 
-        chart = ChartFactory().create(options, mixed_type).draw(dataframe, options)
+        chart = ChartFactory().create(options, dataframe, mixed_type).draw()
 
         chart_lib = 'BOKEH'
         chart_type = mixed_type
@@ -176,6 +176,12 @@ class Chart(BaseModel):
                 'div': HTMLParser().unescape(div)
             }
         if lib == 'FOLIUM':
+            # from bs4 import BeautifulSoup
+            # import base64
+            # soup = BeautifulSoup(chart._repr_html_(), 'html.parser')
+            # content = soup.find_all('iframe')[0]['data-html'].encode('ascii')
+            # content = base64.b64decode(content).decode('ascii')
+            # return {'div': content, 'mime': 'text/html'}
             return {'div': chart._repr_html_(), 'mime': 'text/html'}
         return None
 

@@ -79,7 +79,9 @@ class ThematicRepository(ImpalaRepository):
         'coviddenunciacnpjmpt': 'covid_denuncia_cnpj_mpt',
         'coviddocumentompt': 'covid_documento_mpt',
         'covidtemampt': 'covid_tema_mpt',
-        'coviddestinacaompt': 'covid_destinacao_mpt'
+        'coviddestinacaompt': 'covid_destinacao_mpt',
+
+        'cagedtermometro': 'caged_termometro'
     }
     DEFAULT_PARTITIONING = {
         'MAIN': 'cd_indicador',

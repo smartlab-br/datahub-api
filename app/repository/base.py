@@ -247,7 +247,7 @@ class HadoopRepository(BaseRepository):
                 order_str += 'ORDER BY '
             else:
                 order_str += ', '
-            if "-" in field:
+            if field[0:1] == "-":
                 order_str += field[1:] + ' DESC'
             else:
                 order_str += field

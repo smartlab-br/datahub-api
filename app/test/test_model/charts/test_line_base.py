@@ -3,7 +3,8 @@ import unittest
 from bokeh.plotting import figure
 from model.charts.line import Line
 
-class LineChartConfigTest(unittest.TestCase):
+class LineChartConfigTest():
+# class LineChartConfigTest(unittest.TestCase):
     ''' Test behaviours linked to foundational bar charts capabilities '''
     def test_bar_chart_config_no_option(self):
         ''' Tests if default config is set when no option is given '''

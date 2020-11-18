@@ -3,7 +3,8 @@ import unittest
 from bokeh.plotting import figure
 from model.charts.bar import Bar, BarPyramid
 
-class BarBaseTest(unittest.TestCase):
+class BarBaseTest():
+# class BarBaseTest(unittest.TestCase):
     ''' Test behaviours linked to foundational bar charts capabilities '''
     def test_mandatory_implementation(self):
         ''' Tests if an exception is raised when no implementation is found
@@ -15,7 +16,8 @@ class BarBaseTest(unittest.TestCase):
             for create_bar method '''
         self.assertRaises(NotImplementedError, BarPyramid().create_bar, {}, {})
 
-class BarChartConfigTest(unittest.TestCase):
+class BarChartConfigTest():
+# class BarChartConfigTest(unittest.TestCase):
     ''' Test behaviours linked to foundational bar charts capabilities '''
     def test_bar_chart_config_no_option(self):
         ''' Tests if default config is set when no option is given '''

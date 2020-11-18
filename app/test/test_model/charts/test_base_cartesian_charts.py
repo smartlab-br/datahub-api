@@ -4,7 +4,8 @@ import pandas as pd
 from bokeh.plotting import figure
 from model.charts.base import BaseCartesianChart
 
-class BaseCartesianChartPivotTest(unittest.TestCase):
+class BaseCartesianChartPivotTest():
+# class BaseCartesianChartPivotTest(unittest.TestCase):
     ''' Test behaviours linked to pivoting a dataframe to build the chart's
         series as a dictionary '''
     def test_pivoting_no_options(self):
@@ -37,7 +38,8 @@ class BaseCartesianChartPivotTest(unittest.TestCase):
             {'x': ['2000', '2001', '2002'], 'a': [0, 1, 2], 'b': [3, 4, 5]}
         )
 
-class BaseCartesianChartConfigTest(unittest.TestCase):
+class BaseCartesianChartConfigTest():
+# class BaseCartesianChartConfigTest(unittest.TestCase):
     ''' Test behaviours linked to foundational bar charts capabilities '''
     def test_cartesian_chart_config_no_option(self):
         ''' Tests if default config is set when no option is given '''

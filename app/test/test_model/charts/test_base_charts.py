@@ -3,7 +3,8 @@ import unittest
 import pandas as pd
 from model.charts.base import BaseChart
 
-class BaseChartGetFillColorTest(unittest.TestCase):
+class BaseChartGetFillColorTest():
+# class BaseChartGetFillColorTest(unittest.TestCase):
     ''' Test behaviours linked to getting the fill color from a color array '''
     def test_get_fill_color(self):
         ''' Tests if an element from collor array is correctly fetched '''
@@ -13,7 +14,8 @@ class BaseChartGetFillColorTest(unittest.TestCase):
             'yellow'
         )
 
-class BaseChartLegendNamesTest(unittest.TestCase):
+class BaseChartLegendNamesTest():
+# class BaseChartLegendNamesTest(unittest.TestCase):
     ''' Test behaviours linked to fetching legend names for series '''
     def test_legend_names_no_options(self):
         ''' Tests if no legend names are returned when there's no option '''
@@ -78,7 +80,8 @@ class BaseChartLegendNamesTest(unittest.TestCase):
             {'A': 'A_lbl', 'B': 'B_lbl'}
         )
 
-class BaseChartTooltipTest(unittest.TestCase):
+class BaseChartTooltipTest():
+# class BaseChartTooltipTest(unittest.TestCase):
     ''' Test behaviours linked to creating tooltip structure '''
     def test_tooltip_no_option(self):
         ''' Tests if default tooltip is returned when no option is given '''

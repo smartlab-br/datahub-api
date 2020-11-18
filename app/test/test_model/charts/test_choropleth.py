@@ -2,7 +2,8 @@
 import unittest
 from model.charts.maps.choropleth import Choropleth
 
-class ChoroplethGetGeometryLocTest(unittest.TestCase):
+class ChoroplethGetGeometryLocTest():
+# class ChoroplethGetGeometryLocTest(unittest.TestCase):
     ''' Test behaviours linked to fetching or changing headers from YAML options '''
     def test_no_options(self):
         ''' Tests if default state-municipalities (vision-res) is returned when

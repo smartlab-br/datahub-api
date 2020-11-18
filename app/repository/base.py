@@ -85,7 +85,8 @@ class BaseRepository():
         'renavam': 'proprietario_cpfcnpj',
         'rfb': 'nu_cpf_responsavel',
         'rfbsocios': 'cnpj_cpf_socio',
-        'rfbparticipacaosocietaria': 'cnpj_cpf_socio'
+        'rfbparticipacaosocietaria': 'cnpj_cpf_socio',
+        'auto': 'nrauto'
     } # Dados que possuem nomes diferentes para a coluna de identificação da Pessoa Física
     PERSP_COLUMNS = { # Colunas que indicam diferentes perspectivas em um mesmo dataset
         'catweb': 'origem_busca'
@@ -246,7 +247,7 @@ class HadoopRepository(BaseRepository):
                 order_str += 'ORDER BY '
             else:
                 order_str += ', '
-            if "-" in field:
+            if field[0:1] == "-":
                 order_str += field[1:] + ' DESC'
             else:
                 order_str += field

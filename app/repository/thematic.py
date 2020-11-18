@@ -48,6 +48,7 @@ class ThematicRepository(ImpalaRepository):
         'sisben_c': "compliance.concessao_2018",
         'catweb_c': "compliance.catweb",
         'auto': "compliance.tb_auto",
+        'auto_trabalhadores': "compliance.tb_auto_trabalhador",
         'caged': "compliance.tb_caged_estab",
         'rfbsocios': "compliance.rfb_dados_socios_tratado",
         'rfbparticipacaosocietaria': "compliance.rfb_dados_socios_tratado",
@@ -78,7 +79,9 @@ class ThematicRepository(ImpalaRepository):
         'coviddenunciacnpjmpt': 'covid_denuncia_cnpj_mpt',
         'coviddocumentompt': 'covid_documento_mpt',
         'covidtemampt': 'covid_tema_mpt',
-        'coviddestinacaompt': 'covid_destinacao_mpt'
+        'coviddestinacaompt': 'covid_destinacao_mpt',
+
+        'cagedtermometro': 'caged_termometro'
     }
     DEFAULT_PARTITIONING = {
         'MAIN': 'cd_indicador',

@@ -4,7 +4,8 @@ import pandas as pd
 from folium.folium import Map as FoliumMap
 from model.charts.maps.base import BaseMap
 
-class BaseMapGetHeadersTest(unittest.TestCase):
+class BaseMapGetHeadersTest():
+# class BaseMapGetHeadersTest(unittest.TestCase):
     ''' Test behaviours linked to fetching or changing headers from YAML options '''
     BASE_DESCRIPTION = [
         {"id": "ignore", "items": [
@@ -76,7 +77,8 @@ class BaseMapGetHeadersTest(unittest.TestCase):
         expect.extend(self.BASE_EXPECT)
         self.assertEqual(BaseMap.get_headers({}, options), expect)
 
-class BaseMapGetLocationColumnsTest(unittest.TestCase):
+class BaseMapGetLocationColumnsTest():
+# class BaseMapGetLocationColumnsTest(unittest.TestCase):
     ''' Test behaviours linked to fetching locations and value columns '''
     def test_default_lat_long_no_options(self):
         ''' Tests for default lat and long fields, with no value column definition,
@@ -110,7 +112,8 @@ class BaseMapGetLocationColumnsTest(unittest.TestCase):
             ['latitude', 'longitude', 'val']
         )
 
-class BaseMapPrepareDataframeTest(unittest.TestCase):
+class BaseMapPrepareDataframeTest():
+# class BaseMapPrepareDataframeTest(unittest.TestCase):
     ''' Test behaviours linked to adding index and stringified index to a dataframe '''
     DATAFRAME = pd.DataFrame([
         {"cd_mun_ibge": 123456, 'cd_indicador': 1},
@@ -167,7 +170,8 @@ class BaseMapPrepareDataframeTest(unittest.TestCase):
             ]
         )
 
-class BaseMapGetTooltipDataTest(unittest.TestCase):
+class BaseMapGetTooltipDataTest():
+# class BaseMapGetTooltipDataTest(unittest.TestCase):
     ''' Test behaviours linked to fetching tooltip series based on given configuration '''
     DATAFRAME = pd.DataFrame([
         {
@@ -302,7 +306,8 @@ class BaseMapGetTooltipDataTest(unittest.TestCase):
             expect
         )
 
-class BaseMapGetAuTitleTest(unittest.TestCase):
+class BaseMapGetAuTitleTest():
+# class BaseMapGetAuTitleTest(unittest.TestCase):
     ''' Test behaviours linked to fetching tooltip series based on given configuration '''
     DEFAULT_TITLE = "Analysis Unit"
     def test_au_title_no_headers(self):
@@ -336,7 +341,8 @@ class BaseMapGetAuTitleTest(unittest.TestCase):
             "field_value"
         )
 
-class BaseMapPreDrawTest(unittest.TestCase):
+class BaseMapPreDrawTest():
+# class BaseMapPreDrawTest(unittest.TestCase):
     ''' Test behaviours linked to common folium map draw capabilities '''
     DATAFRAME = pd.DataFrame([
         {"cd_mun_ibge": 123456, 'cd_indicador': 1},

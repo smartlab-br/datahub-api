@@ -13,7 +13,7 @@ from model.charts.line import Line, LineArea
 class ChartFactory:
     """ Factory to instantiate the correct chart implementation """
     @classmethod
-    def create(cls, options, dataframe, mixed_type=None):
+    def create(cls, options={"chart_type": "LINE"}, dataframe=None, mixed_type=None):
         """ Factory method """
         chart = None
         if mixed_type:

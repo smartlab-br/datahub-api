@@ -144,8 +144,7 @@ class ChartFactorySelectLineTest(unittest.TestCase):
     """ Test behaviours linked to line chart instantiation """
     def test_instantiation_line_as_default(self):
         """ Tests if create returns a line if no stacked flag is given """
-        # chart = ChartFactory().create({"chart_type": "LINE"})
-        chart = ChartFactory().create(None)
+        chart = ChartFactory().create()
         self.assertTrue(isinstance(chart, Line))
 
     def test_instantiation_line(self):

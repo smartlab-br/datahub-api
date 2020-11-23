@@ -13,9 +13,11 @@ from model.charts.line import Line, LineArea
 class ChartFactory:
     """ Factory to instantiate the correct chart implementation """
     @classmethod
-    def create(cls, options, dataframe, mixed_type=None):
+    def create(cls, options, dataframe=None, mixed_type=None):
         """ Factory method """
         chart = None
+        if options is None:
+            options = {"chart_type": "LINE"}
         if mixed_type:
             if mixed_type == 'MIXED_MAP':
                 chart = Mixed([cls.create(each_option, each_dataframe) for each_option, each_dataframe in zip(options, dataframe)])

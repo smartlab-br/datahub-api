@@ -70,13 +70,13 @@ class Empresa(BaseModel):
                 result['dataset'] = dataset
         except requests.exceptions.HTTPError:
             loading_entry_is_valid = False
+        if not loading_entry_is_valid:
+            result['invalid'] = True
             self.produce(
                 options['cnpj_raiz'],
                 options.get('column_family'),
                 options.get('column')
             )
-        if not loading_entry_is_valid:
-            result['invalid'] = True
         if 'column' in options:
             result['status_competencia'] = column_status
         return result

@@ -1,5 +1,6 @@
 ''' Config loader for production environment '''
 import os
+import json
 from kazoo.client import KazooClient
 
 #pylint: disable=R0903
@@ -46,6 +47,36 @@ class StagingConfig():
     KAFKA_SCHEMA = data.decode("utf-8")
     data, stat = zk.get("/spai/datahub-api/staging/kafka_topic_prefix")
     KAFKA_TOPIC_PREFIX = data.decode("utf-8")
+
+    data, stat = zk.get("/spai/datahub-api/staging/conf_repo_thematic_table_names")
+    CONF_REPO_THEMATIC = {"TABLE_NAMES": json.loads(data.decode("utf-8"))}
+    data, stat = zk.get("/spai/datahub-api/staging/conf_repo_thematic_default_partitioning")
+    CONF_REPO_THEMATIC['DEFAULT_PARTITIONING'] = json.loads(data.decode("utf-8"))
+    data, stat = zk.get("/spai/datahub-api/staging/conf_repo_thematic_on_join")
+    CONF_REPO_THEMATIC['ON_JOIN'] = json.loads(data.decode("utf-8"))
+    data, stat = zk.get("/spai/datahub-api/staging/conf_repo_thematic_join_suffixes")
+    CONF_REPO_THEMATIC['JOIN_SUFFIXES'] = json.loads(data.decode("utf-8"))
+
+    data, stat = zk.get("/spai/datahub-api/staging/conf_repo_base_val_field")
+    CONF_REPO_BASE = {"VAL_FIELD": data.decode("utf-8")}
+    data, stat = zk.get("/spai/datahub-api/staging/conf_repo_base_default_grouping")
+    CONF_REPO_BASE['DEFAULT_GROUPING'] = data.decode("utf-8")
+    data, stat = zk.get("/spai/datahub-api/staging/conf_repo_base_default_partitioning")
+    CONF_REPO_BASE['DEFAULT_PARTITIONING'] = data.decode("utf-8")
+    data, stat = zk.get("/spai/datahub-api/staging/conf_repo_base_cnpj_raiz_columns")
+    CONF_REPO_BASE['CNPJ_RAIZ_COLUMNS'] = json.loads(data.decode("utf-8"))
+    data, stat = zk.get("/spai/datahub-api/staging/conf_repo_base_cnpj_columns")
+    CONF_REPO_BASE['CNPJ_COLUMNS'] = json.loads(data.decode("utf-8"))
+    data, stat = zk.get("/spai/datahub-api/staging/conf_repo_base_compet_columns")
+    CONF_REPO_BASE['COMPET_COLUMNS'] = json.loads(data.decode("utf-8"))
+    data, stat = zk.get("/spai/datahub-api/staging/conf_repo_base_pf_columns")
+    CONF_REPO_BASE['PF_COLUMNS'] = json.loads(data.decode("utf-8"))
+    data, stat = zk.get("/spai/datahub-api/staging/conf_repo_base_persp_columns")
+    CONF_REPO_BASE['PERSP_COLUMNS'] = json.loads(data.decode("utf-8"))
+    data, stat = zk.get("/spai/datahub-api/staging/conf_repo_base_on_join")
+    CONF_REPO_BASE['ON_JOIN'] = json.loads(data.decode("utf-8"))
+    data, stat = zk.get("/spai/datahub-api/staging/conf_repo_base_join_suffixes")
+    CONF_REPO_BASE['JOIN_SUFFIXES'] = json.loads(data.decode("utf-8"))
 
     zk.stop()
     zk = None

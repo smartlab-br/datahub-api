@@ -1,15 +1,18 @@
-''' Repository para recuperar informações de uma empresa '''
+""" Repository para recuperar informações de uma empresa """
 import json
 from repository.base import HBaseRepository
 
 #pylint: disable=R0903
 class EmpresaRepository(HBaseRepository):
-    ''' Definição do repo '''
+    """ Definição do repo """
     TABLE = 'sue'
     SIMPLE_COLUMNS = {}
 
+    def load_repo_configs(self):
+        """ Load repository definitions """
+
     def find_datasets(self, options):
-        ''' Localiza um município pelo código do IBGE '''
+        """ Localiza um município pelo código do IBGE """
         if options is None or options.get('cnpj_raiz') is None:
             return None
 
@@ -47,7 +50,7 @@ class EmpresaRepository(HBaseRepository):
         return result
 
     def split_dataframe_by_perspective(self, dataframe, options):
-        ''' Splits a dataframe by perpectives '''
+        """ Splits a dataframe by perpectives """
         result = {}
         if dataframe is None:
             return result    
@@ -63,7 +66,7 @@ class EmpresaRepository(HBaseRepository):
 
     @staticmethod
     def filter_by_person(dataframe, options, col_cnpj_name, col_pf_name):
-        ''' Filter dataframe by person identification, according to options data '''
+        """ Filter dataframe by person identification, according to options data """
         if dataframe is None or options is None:
             return None
         result = dataframe.copy()

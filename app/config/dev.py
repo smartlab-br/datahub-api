@@ -1,5 +1,6 @@
 ''' Config loader for dev environment '''
 import os
+import json
 
 #pylint: disable=R0903
 class DevelopmentConfig():
@@ -24,3 +25,22 @@ class DevelopmentConfig():
     KAFKA_PORT = os.getenv('KAFKA_PORT')
     KAFKA_SCHEMA = os.getenv('KAFKA_SCHEMA')
     KAFKA_TOPIC_PREFIX = os.getenv('KAFKA_TOPIC_PREFIX')
+
+    CONF_REPO_THEMATIC = {
+        "TABLE_NAMES": json.loads(os.getenv("CONF_REPO_THEMATIC_TABLE_NAMES")),
+        "DEFAULT_PARTITIONING": json.loads(os.getenv("CONF_REPO_THEMATIC_DEFAULT_PARTITIONING")),
+        "ON_JOIN": json.loads(os.getenv("CONF_REPO_THEMATIC_ON_JOIN")),
+        "JOIN_SUFFIXES": json.loads(os.getenv("CONF_REPO_THEMATIC_JOIN_SUFFIXES"))
+    }
+    CONF_REPO_BASE = {
+        "VAL_FIELD": os.getenv("CONF_REPO_BASE_VAL_FIELD"),
+        "DEFAULT_GROUPING": os.getenv("CONF_REPO_BASE_DEFAULT_GROUPING"),
+        "DEFAULT_PARTITIONING": os.getenv("CONF_REPO_BASE_DEFAULT_PARTITIONING"),
+        "CNPJ_RAIZ_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_CNPJ_RAIZ_COLUMNS")),
+        "CNPJ_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_CNPJ_COLUMNS")),
+        "COMPET_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_COMPET_COLUMNS")),
+        "PF_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_PF_COLUMNS")),
+        "PERSP_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_PERSP_COLUMNS")),
+        "ON_JOIN": json.loads(os.getenv("CONF_REPO_BASE_ON_JOIN")),
+        "JOIN_SUFFIXES": json.loads(os.getenv("CONF_REPO_BASE_JOIN_SUFFIXES"))
+    }

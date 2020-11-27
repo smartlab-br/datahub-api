@@ -1,23 +1,24 @@
-''' Stubs for model testing '''
+""" Stubs for model testing """
 import pandas as pd
 from datetime import datetime
 from model.empresa.empresa import Empresa
 from model.thematic import Thematic
 from repository.empresa.pessoadatasets import PessoaDatasetsRepository
 from repository.empresa.datasets import DatasetsRepository
+from repository.empresa.empresa import EmpresaRepository
 from test.stubs.repository import StubThematicRepository
 
 class StubThematicModel(Thematic):
-    ''' Class to return a constant dataset when find_dataset is invoked '''
+    """ Class to return a constant dataset when find_dataset is invoked """
     def load_and_prepare(self):
-        ''' Avoids the application context '''
+        """ Avoids the application context """
 
     def get_repo(self):
-        ''' Avoids the application context '''
+        """ Avoids the application context """
         return StubThematicRepository()
 
     def find_dataset(self, options):
-        ''' Method to return a fixed collection '''
+        """ Method to return a fixed collection """
         dataframe = [
             {'cnpj': '12345678000101', 'compet': 2047, 'agr_count': 100},
             {'cnpj': '12345678000202', 'compet': 2099, 'agr_count': 200}
@@ -42,7 +43,7 @@ class StubThematicModel(Thematic):
         return pd.DataFrame(dataframe)
 
     def get_persp_columns(self, dataframe):
-        ''' Returns a fixed perspective column for testing '''
+        """ Returns a fixed perspective column for testing """
         return 'persp_column'
 
     # def get_column_defs(self, table_name):
@@ -57,7 +58,7 @@ class StubThematicModel(Thematic):
     #     }
 
 class StubDatasetRepository(DatasetsRepository):
-    ''' Class to unlock Empresa model testing that uses REDIS data '''
+    """ Class to unlock Empresa model testing that uses REDIS data """
     DATASETS = {
         'skip': '2016',
         'test': '2017,2018',
@@ -65,16 +66,52 @@ class StubDatasetRepository(DatasetsRepository):
         'expired': '2017,2018',
         'another': '2019'
     }
+
+    def load_repo_configs(self):
+        """ Overrides flask app context data loading """
+
     def load_and_prepare(self):
-        ''' Avoids the application context '''
+        """ Avoids the application context """
+
+class StubEmpresaRepository(EmpresaRepository):
+    """ Class to unlock Empresa model testing that uses REDIS data """
+    DEFAULT_GROUPING = 'nu_competencia, cd_indicador'
+    DEFAULT_PARTITIONING = 'cd_indicador'
+    CNPJ_RAIZ_COLUMNS = {
+        "rais": "nu_cnpj_raiz",
+        "rfb" : "nu_cnpj_raiz",
+    }
+    CNPJ_COLUMNS = {
+        'rais': 'nu_cnpj_cei',
+        'rfb': 'nu_cnpj',
+    }
+    COMPET_COLUMNS = {
+        'rais': 'nu_ano_rais',
+    }
+    PF_COLUMNS = {
+        'rais': 'nu_cpf',
+        'rfb': 'nu_cpf_responsavel',
+    }
+    PERSP_COLUMNS = {
+        'catweb': 'origem_busca'
+    }
+
+    def load_repo_configs(self):
+        """ Overrides flask app context data loading """
+
+    def load_and_prepare(self):
+        """ Avoids the application context """
 
 class StubPessoaDatasetRepository(PessoaDatasetsRepository):
-    ''' Class to unlock Empresa model testing that uses REDIS data '''
+    """ Class to unlock Empresa model testing that uses REDIS data """
+    def load_repo_configs(self):
+        """ Overrides flask app context data loading """
+
     def load_and_prepare(self):
-        ''' Avoids the application context '''
+        """ Avoids the application context """
 
     def retrieve(self, _id_pfpj, dataframe, _pfpj='pj'):
-        ''' Fakes a REDIS call and return static data '''
+        """ Fakes a REDIS call and return static data """
         str_now = datetime.strftime(datetime.now(), "%Y-%m-%d")
         if dataframe == 'unavailable':
             return {
@@ -101,7 +138,7 @@ class StubPessoaDatasetRepository(PessoaDatasetsRepository):
         }
 
 class StubEmpresa(Empresa):
-    ''' Class to enable model testing without repository access '''
+    """ Class to enable model testing without repository access """
     EXPECTED_GROUPED_STATS = {
         'stats_estab': {
             '12345678000101': {'agr_count': 100, 'compet': 2047},
@@ -120,14 +157,27 @@ class StubEmpresa(Empresa):
             }
         }
     }
+
+    def __init__(self):
+        ''' Construtor '''
+        self.repo = None
+        self.dataset_repo = None
+        self.pessoa_dataset_repo = None
+        self.thematic_handler = None
+        self.__set_repo()
+
     def get_thematic_handler(self):
-        ''' Gets the stub thematic model instead of the real one '''
+        """ Gets the stub thematic model instead of the real one """
         return StubThematicModel()
 
     def get_dataset_repo(self):
-        ''' Gets the stub dataset repo instead of the real one '''
+        """ Gets the stub dataset repo instead of the real one """
         return StubDatasetRepository()
 
     def get_pessoa_dataset_repo(self):
-        ''' Gets the stub pessoa_dataset repo instead of the real one '''
+        """ Gets the stub pessoa_dataset repo instead of the real one """
         return StubPessoaDatasetRepository()
+
+    def __set_repo(self):
+        """ Setter invoked in Construtor """
+        self.repo = StubEmpresaRepository()

@@ -9,7 +9,7 @@ class EmpresaModelBaseTest(unittest.TestCase):
     def test_default_on_none(self):
         ''' Verifica se retorna np.mean se agregação nula '''
         self.assertEqual(
-            Empresa().get_stats_local_options(
+            StubEmpresa().get_stats_local_options(
                 {
                     'column': 2099,
                     'cnpj_raiz': '12345678',

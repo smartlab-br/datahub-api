@@ -79,10 +79,10 @@ class BaseRepository():
 
     def __init__(self):
         """ Construtor """
-        self.load_repo_configs()
+        self.__load_repo_configs()
         self.dao = self.load_and_prepare()
 
-    def load_repo_configs(self):
+    def __load_repo_configs(self):
         """ Load repository definitions """
         self.VAL_FIELD = current_app.config["CONF_REPO_BASE"].get("VAL_FIELD")
         self.DEFAULT_GROUPING = current_app.config["CONF_REPO_BASE"].get("DEFAULT_GROUPING")

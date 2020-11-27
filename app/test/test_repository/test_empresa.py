@@ -86,8 +86,8 @@ class StubEmpresaRepository(EmpresaRepository):
         'catweb': 'origem_busca'
     }
 
-    def load_repo_configs(self):
-        """ Overrides flask app context data loading """
+    def __init__(self):
+        """ Overrides constructor to avoid application context """
 
     def load_and_prepare(self):
         """ Overriding to avoid application context requirement """
@@ -115,7 +115,7 @@ class EmpresaRepositorySplitDataframePerspectiveTest(unittest.TestCase):
     def test_splitting_no_data(self):
         """ Tests if an empty dictionary is returned when no data is sent """
         self.assertEqual(
-            EmpresaRepository().split_dataframe_by_perspective(None, {}), {}
+            StubEmpresaRepository().split_dataframe_by_perspective(None, {}), {}
         )
 
     def test_splitting_emptys_data(self):

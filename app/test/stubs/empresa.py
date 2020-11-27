@@ -67,8 +67,8 @@ class StubDatasetRepository(DatasetsRepository):
         'another': '2019'
     }
 
-    def load_repo_configs(self):
-        """ Overrides flask app context data loading """
+    def __init__(self):
+        """ Overrides constructor to avoid application context """
 
     def load_and_prepare(self):
         """ Avoids the application context """
@@ -96,16 +96,16 @@ class StubEmpresaRepository(EmpresaRepository):
         'catweb': 'origem_busca'
     }
 
-    def load_repo_configs(self):
-        """ Overrides flask app context data loading """
+    def __init__(self):
+        """ Overrides constructor to avoid application context """
 
     def load_and_prepare(self):
         """ Avoids the application context """
 
 class StubPessoaDatasetRepository(PessoaDatasetsRepository):
     """ Class to unlock Empresa model testing that uses REDIS data """
-    def load_repo_configs(self):
-        """ Overrides flask app context data loading """
+    def __init__(self):
+        """ Overrides constructor to avoid application context """
 
     def load_and_prepare(self):
         """ Avoids the application context """

@@ -20,18 +20,20 @@ class StubRepository(BaseRepository):
         'QRY_FIND_JOINED_DATASET': 'SELECT {} FROM {} LEFT JOIN {} ON {} {} {} {}'
     }
 
+    def __init__(self):
+        """ Overrides constructor to avoid application context """
+        self.dao = self.load_and_prepare()
+
     def load_and_prepare(self):
         """ Overriding method outside test scope """
         self.dao = 'Instanciei o DAO'
 
-    def load_repo_configs(self):
-        """ Overrides flask app context data loading """
-
 
 class StubNoLoadRepository(BaseRepository):
     """ Fake repo to test instance methods """
-    def load_repo_configs(self):
-        """ Overrides flask app context data loading """
+    def __init__(self):
+        """ Overrides constructor to avoid application context """
+        self.dao = self.load_and_prepare()
 
 
 class StubHadoopRepository(HadoopRepository):
@@ -69,8 +71,8 @@ class StubHadoopRepository(HadoopRepository):
         'rfb': 'nu_cpf_responsavel',
     }
 
-    def load_repo_configs(self):
-        """ Overrides flask app context data loading """
+    def __init__(self):
+        """ Overrides constructor to avoid application context """
 
     def load_and_prepare(self):
         """ Overriding method outside test scope """
@@ -83,8 +85,9 @@ class StubHadoopRepository(HadoopRepository):
 
 class StubNoLoadHadoopRepository(HadoopRepository):
     """ Classe de STUB da abstração de repositórios hadoop (hive e impala) """
-    def load_repo_configs(self):
-        """ Overrides flask app context data loading """
+    def __init__(self):
+        """ Overrides constructor to avoid application context """
+        self.dao = self.load_and_prepare()
 
     def fetch_data(self, query):
         """ Overriding methd outside test scope """
@@ -161,9 +164,9 @@ class StubThematicRepository(ThematicRepository):
         'rfb': 'nu_cpf_responsavel',
     }
 
+    def __init__(self):
+        """ Overrides constructor to avoid application context """
+
     def load_and_prepare(self):
         """ Overriding method outside test scope """
         self.dao = 'Instanciei o DAO'
-
-    def load_repo_configs(self):
-        """ Overrides flask app context data loading """

@@ -6,7 +6,7 @@ class DatasetsRepository(RedisRepository):
     ''' Definição do repo '''
     REDIS_KEY = 'rx:ds'
     DATASETS = {
-        'rais': '2017',
+        'rais': ','.join([str(ano) for ano in range(2019, 2008, -1)]),
         'rfb': '2018',
         'sisben': '2018',
         'catweb': ','.join([str(ano) for ano in range(2018, 2010, -1)]),

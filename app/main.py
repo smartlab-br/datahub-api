@@ -86,7 +86,7 @@ from resources.v1.card_template import CardTemplateResource
 # Resource para obter um gráfico direto da API
 from resources.v1.charts import ChartsResource
 
-from resources.v1.healthchecks import HCAlive
+from resources.v1.healthchecks import HCAlive, HCReady
 
 CONFIG = {
     "dev": "config.dev.DevelopmentConfig",
@@ -114,6 +114,7 @@ CORS = CORS(application, resources={r"/*": {"origins": "*"}})
 api = Api(application, api_version='0.1', api_spec_url='/api/swagger') #pylint: disable=C0103
 
 api.add_resource(HCAlive, '/hcalive')
+api.add_resource(HCReady, '/hcready')
 
 api.add_resource(MunicipiosResource, '/municipios')
 api.add_resource(MunicipioResource, '/municipio/<int:cd_municipio_ibge>')

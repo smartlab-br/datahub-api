@@ -86,6 +86,12 @@ from resources.v1.card_template import CardTemplateResource
 # Resource para obter um gráfico direto da API
 from resources.v1.charts import ChartsResource
 
+# Resources de odometros
+from resources.v1.sst.acidentometros import AcidentometrosSSTResource
+
+# Resources for Machine Learning Models
+from resources.v1.mlmodel.supervisionado.classificacao import ClassificacaoResource
+
 from resources.v1.healthchecks import HCAlive, HCReady
 
 CONFIG = {
@@ -192,6 +198,12 @@ api.add_resource(EstabelecimentoResource, '/estabelecimento/<string:cnpj>')
 ## Resources para obter a estrutura de dados de um template de card ou gráfico
 api.add_resource(CardTemplateResource, '/cardtemplate/<string:cd_template>')
 api.add_resource(ChartsResource, '/chart')
+
+## Resources para obter acidentômetros
+api.add_resource(AcidentometrosSSTResource, '/odometros/sst')
+
+## resources for Machine LEarning Models
+api.add_resource(ClassificacaoResource, '/ml/classificacao/<string:model_id>')
 
 if __name__ == '__main__':
     application.run(request_handler=FLPORequestHandler)

@@ -23,6 +23,8 @@ class StagingConfig():
 
     data, stat = zk.get(f"/spai/{api_context}-api/staging/git_viewconf_url")
     GIT_VIEWCONF_BASE_URL = data.decode("utf-8")
+    data, stat = zk.get(f"/spai/{api_context}-api/staging/git_mlrepo_url")
+    GIT_MLREPO_BASE_URL = data.decode("utf-8")
 
     data, stat = zk.get(f"/spai/{api_context}-api/staging/hbase_host")
     HBASE_HOST = data.decode("utf-8")

@@ -89,6 +89,9 @@ from resources.v1.charts import ChartsResource
 # Resources de odometros
 from resources.v1.sst.acidentometros import AcidentometrosSSTResource
 
+# Resources for Machine Learning Models
+from resources.v1.mlmodel.supervisionado.classificacao import ClassificacaoResource
+
 from resources.v1.healthchecks import HCAlive, HCReady
 
 CONFIG = {
@@ -198,6 +201,9 @@ api.add_resource(ChartsResource, '/chart')
 
 ## Resources para obter acidentômetros
 api.add_resource(AcidentometrosSSTResource, '/odometros/sst')
+
+## resources for Machine LEarning Models
+api.add_resource(ClassificacaoResource, '/ml/classificacao/<string:model_id>')
 
 if __name__ == '__main__':
     application.run(request_handler=FLPORequestHandler)

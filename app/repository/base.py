@@ -572,7 +572,7 @@ class HBaseRepository(BaseRepository):
         # If the response was successful, no Exception will be raised
         response.raise_for_status()
 
-        return json.loads(response.content)['Row']
+        return json.loads(response.content.replace('NaN', 'null'))['Row']
 
     def find_row(self, table, key, column_family, column):
         """ Obtém dataset de acordo com os parâmetros informados """

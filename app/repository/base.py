@@ -6,7 +6,6 @@ import pandas
 import requests
 from decimal import Decimal
 from impala.util import as_pandas
-from pandas.io.json import json_normalize
 from flask import current_app
 from datasources import get_impala_connection, get_redis_pool
 from service.query_builder import QueryBuilder
@@ -572,7 +571,7 @@ class HBaseRepository(BaseRepository):
         # If the response was successful, no Exception will be raised
         response.raise_for_status()
 
-        return json.loads(response.content.replace('NaN', 'null'))['Row']
+        return json.loads(response.content)['Row']
 
     def find_row(self, table, key, column_family, column):
         """ Obtém dataset de acordo com os parâmetros informados """
@@ -588,7 +587,8 @@ class HBaseRepository(BaseRepository):
                 # Replacing double-quotes
                 str_value = value.decode('UTF-8').replace("\\xe2\\x80\\x9", '"')
                 # Turn value to pandas dataset
-                dataset = json_normalize(json.loads(str_value))
+                dataset = pandas.json_normalize(json.loads(str_value))
+                dataset = dataset.where(pandas.notnull(dataset), None)
                 dataset['col_compet'] = column_parts[1]
 
                 # Append do existing dataset or create a new one

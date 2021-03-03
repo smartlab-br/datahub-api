@@ -18,10 +18,10 @@ jobs:
           github-token: ${{ github.token }}
           webhook-uri: ${{ secrets.ACTION_TEAMS_WEBHOOK }}
           show-on-exit: true
-#          # TODO - Check if it makes sense
-#          custom-actions: |
-#            - text: Promote
-#              url: "https://{CI_host}/{path}/{job}?{params}"
+          # TODO - Check if it makes sense
+          custom-actions: |
+            - text: Promote
+              url: "https://google.com"
       - name: Linting (pylint)
         uses: ./
         with:

@@ -57,15 +57,14 @@ jobs:
           dry_run: true
       - name: Wait for Dockerhub to build the image
         run: |
-          echo "${{ steps.bump_tag.outputs.new_tag }}"
-#          until curl -s https://hub.docker.com/v2/repositories/smartlab/datahub-api/tags/${{ steps.bump_tag.outputs.new_tag }} | grep -vq "errinfo"; do
-#            sleep 60
-#          done
+          until curl -s https://hub.docker.com/v2/repositories/smartlab/datahub-api/tags/${{ steps.bump_tag.outputs.new_tag }} | grep -vq "errinfo"; do
+            sleep 60
+          done
       - name: Create a GitHub release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.tag_version.outputs.new_tag }}
-          release_name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+          tag_name: ${{ steps.bump_tag.outputs.new_tag }}
+          release_name: Release ${{ steps.bump_tag.outputs.new_tag }}
+          body: ${{ steps.bump_tag.outputs.changelog }}

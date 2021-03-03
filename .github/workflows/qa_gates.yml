@@ -18,6 +18,10 @@ jobs:
           github-token: ${{ github.token }}
           webhook-uri: ${{ secrets.ACTION_TEAMS_WEBHOOK }}
           show-on-exit: true
+#          # TODO - Check if it makes sense
+#          custom-actions: |
+#            - text: Promote
+#              url: "https://{CI_host}/{path}/{job}?{params}"
       - name: Linting (pylint)
         uses: ./
         with:
@@ -48,3 +52,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v5.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: none
+          tag_prefix: ""
+          dry_run: true
+#      - name: Push to Docker Hub
+#        uses: docker/build-push-action@v1
+#        with: # TODO - Check if we can connect using an SSH Key as secret
+#          username: ${{ secrets.DOCKER_USERNAME }}
+#          password: ${{ secrets.DOCKER_PASSWORD }}
+#          repository: smartlab/datahub-api
+#          tag_with_ref: true

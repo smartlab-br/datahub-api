@@ -38,7 +38,6 @@ jobs:
     #     nose2 --config app/test/nose2.cfg --with-cov --coverage-report xml --coverage-config app/test/coverage/.coveragerc > app/test/report.txt 2>&1
       - name: Unit testing
         uses: ./
-        # id: docker_build
         with:
           check: 'test'
           dest: "report"
@@ -53,17 +52,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Bump version and push tag
-        id: tag_version
         uses: mathieudutour/github-tag-action@v5.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: none
           tag_prefix: ""
           dry_run: true
-#      - name: Push to Docker Hub
-#        uses: docker/build-push-action@v1
-#        with: # TODO - Check if we can connect using an SSH Key as secret
-#          username: ${{ secrets.DOCKER_USERNAME }}
-#          password: ${{ secrets.DOCKER_PASSWORD }}
-#          repository: smartlab/datahub-api
-#          tag_with_ref: true
+#      - name: Wait for Dockerhub to build the image
+#        # TODO - How to get the tag number from BUMP (previous step)
+#        run: |
+#          until curl -s https://hub.docker.com/v2/repositories/smartlab/datahub-api/tags/{TAG} | grep -vq "errinfo"; do
+#            sleep 60
+#          done

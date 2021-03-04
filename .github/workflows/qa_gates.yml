@@ -7,7 +7,7 @@ on:
       - developement
       
 jobs:
-  test:
+  qa:
     # name: Run tests
     runs-on: ubuntu-latest
     steps:
@@ -18,10 +18,6 @@ jobs:
           github-token: ${{ github.token }}
           webhook-uri: ${{ secrets.ACTION_TEAMS_WEBHOOK }}
           show-on-exit: true
-          # TODO - Check if it makes sense
-          custom-actions: |
-            - text: Promote
-              url: "https://google.com"
       - name: Linting (pylint)
         uses: ./
         with:
@@ -47,6 +43,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  release:
+    needs: qa
+    runs-on: ubuntu-latest
+    steps:
       - name: Bump version and push tag
         id: bump_tag
         uses: mathieudutour/github-tag-action@v5.2
@@ -54,6 +54,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: none # Check types in https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-format
           tag_prefix: ""
+          append_to_pre_release_tag: "rc"
       - name: Wait for Dockerhub to build the image
         run: |
           until curl -s https://hub.docker.com/v2/repositories/smartlab/datahub-api/tags/${{ steps.bump_tag.outputs.new_tag }} | grep -vq "errinfo"; do

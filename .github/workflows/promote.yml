@@ -26,6 +26,7 @@ jobs:
           github_token: ${{ github.token }}
   delete_candidate_branch:
     runs-on: ubuntu-latest
+    needs: promote
     steps:
       - uses: actions/checkout@master
       - uses: dawidd6/action-delete-branch@v3

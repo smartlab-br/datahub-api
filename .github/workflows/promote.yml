@@ -13,14 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - uses: toko-bifrost/ms-teams-deploy-card@master #  DO NOT set name.
-          if: always()
-          with:
-            github-token: ${{ github.token }}
-            webhook-uri: ${{ secrets.ACTION_TEAMS_WEBHOOK }}
-            show-on-exit: true
+        if: always()
+        with:
+          github-token: ${{ github.token }}
+          webhook-uri: ${{ secrets.ACTION_TEAMS_WEBHOOK }}
+          show-on-exit: true
       - uses: devmasx/merge-branch@v1.3.1
         with:
           type: now
-          from_branch: v${{ github.event.inputs.version }}
+          from_branch: release.${{ github.event.inputs.version }}
           target_branch: master
           github_token: ${{ github.token }}

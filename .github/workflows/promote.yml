@@ -15,6 +15,6 @@ jobs:
       - uses: devmasx/merge-branch@v1.3.1
         with:
           type: now
-          from_branch: ${{ github.event.inputs.version }}
+          from_branch: v${{ github.event.inputs.version }}
           target_branch: master
           github_token: ${{ github.token }}

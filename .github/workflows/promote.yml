@@ -15,7 +15,7 @@ jobs:
       - uses: toko-bifrost/ms-teams-deploy-card@master #  DO NOT set name.
         if: always()
         with:
-          github-token: ${{ github.token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           webhook-uri: ${{ secrets.ACTION_TEAMS_WEBHOOK }}
           show-on-exit: true
       - uses: devmasx/merge-branch@v1.3.1
@@ -23,7 +23,7 @@ jobs:
           type: now
           from_branch: release.${{ github.event.inputs.version }}
           target_branch: master
-          github_token: ${{ github.token }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
   delete_candidate_branch:
     runs-on: ubuntu-latest
     needs: promote
@@ -31,5 +31,5 @@ jobs:
       - uses: actions/checkout@master
       - uses: dawidd6/action-delete-branch@v3
         with:
-          github_token: ${{github.token}}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           numbers: release.${{ github.event.inputs.version }}

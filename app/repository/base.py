@@ -422,7 +422,7 @@ class HadoopRepository(BaseRepository):
     def build_criteria(self, w_clause):
         simple_operators = {
             'EQ': "=", "NE": "!=", "LE": "<=", "LT": "<", "GE": ">=",
-            "GT": ">", "LK": "LIKE"
+            "GT": ">", "LK": "LIKE", "NL": "NOT LIKE"
         }
         boolean_operators = {
             "NL": "IS NULL", "NN": "IS NOT NULL"

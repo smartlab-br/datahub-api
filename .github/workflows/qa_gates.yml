@@ -46,7 +46,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   release:
     needs: qa
-    if: success() && github.ref == 'refs/heads/staging'
+    if: success() && (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     steps:
       - name: Bump version and push tag
@@ -76,3 +76,4 @@ jobs:
           tag_name: ${{ steps.bump_tag.outputs.new_tag }}
           release_name: Release ${{ steps.bump_tag.outputs.new_tag }}
           body: ${{ steps.bump_tag.outputs.changelog }}
+          prerelease: github.ref == 'refs/heads/staging'

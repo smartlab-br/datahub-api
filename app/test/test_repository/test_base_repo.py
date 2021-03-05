@@ -35,7 +35,7 @@ class HadoopRepositoryBuildComplexCriteriaTest(unittest.TestCase):
     """ Tests complex criteria string builder """
     SIMPLE_OPERATORS = {
         'EQ': "=", "NE": "!=", "LE": "<=", "LT": "<", "GE": ">=",
-        "GT": ">", "LK": "LIKE"
+        "GT": ">", "LK": "LIKE", "NL": "NOT LIKE"
     }
     def test_invalid_load(self):
         """ Verifica lançamento de exceção ao instanciar classe sem

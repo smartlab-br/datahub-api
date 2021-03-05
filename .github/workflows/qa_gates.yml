@@ -59,6 +59,7 @@ jobs:
           pre_release_branches: "staging"
           append_to_pre_release_tag: "rc"
       - uses: peterjgrainger/action-create-branch@v2.0.1
+        if: github.ref == 'refs/heads/staging'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

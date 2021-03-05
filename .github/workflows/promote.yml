@@ -1,9 +1,8 @@
 name: Promote
 
 on:
-  on:
-    repository_dispatch:
-      types: [ promote ]
+  repository_dispatch:
+    types: [ promote ]
 
 jobs:
   promote:

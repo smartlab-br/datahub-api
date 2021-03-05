@@ -1,4 +1,4 @@
-FROM smartlab/flask-dataviz:latest
+FROM smartlab/datahub-base:latest
 LABEL maintainer="smartlab-dev@mpt.mp.br"
 
 # If you need to tune start.sh, uncomment the following line

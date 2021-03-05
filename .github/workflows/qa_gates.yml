@@ -4,6 +4,7 @@ on:
   push:
     refs/heads:
       - master
+      - staging
       - developement
       
 jobs:
@@ -54,6 +55,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: none # Check types in https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-format
           tag_prefix: ""
+          pre_release_branches: "staging"
           append_to_pre_release_tag: "rc"
       - name: Wait for Dockerhub to build the image
         run: |

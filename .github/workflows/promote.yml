@@ -2,7 +2,10 @@ name: Promote
 
 on:
   workflow_dispatch:
-    types: [ promote ]
+    inputs:
+      version:
+        description: 'Tag to promote'
+        required: true
 
 jobs:
   promote:
@@ -12,6 +15,6 @@ jobs:
       - uses: devmasx/merge-branch@v1.3.1
         with:
           type: now
-          from_branch: ${{ version }}
+          from_branch: ${{ github.event.inputs.version }}
           target_branch: master
           github_token: ${{ github.token }}

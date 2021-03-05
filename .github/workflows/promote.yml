@@ -24,3 +24,12 @@ jobs:
           from_branch: release.${{ github.event.inputs.version }}
           target_branch: master
           github_token: ${{ github.token }}
+  delete_candidate_branch:
+    runs-on: ubuntu-latest
+    needs: promote
+    steps:
+      - uses: actions/checkout@master
+      - uses: dawidd6/action-delete-branch@v3
+        with:
+          github_token: ${{github.token}}
+          numbers: release.${{github.event.pull_request.number}}

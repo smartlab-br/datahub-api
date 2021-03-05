@@ -32,4 +32,4 @@ jobs:
       - uses: dawidd6/action-delete-branch@v3
         with:
           github_token: ${{github.token}}
-          numbers: release.${{github.event.pull_request.number}}
+          numbers: release.${{ github.event.inputs.version }}

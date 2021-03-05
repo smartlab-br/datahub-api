@@ -15,6 +15,14 @@ jobs:
       - uses: devmasx/merge-branch@v1.3.1
         with:
           type: now
-          from_branch: v${{ github.event.inputs.version }}
+          from_branch: release.${{ github.event.inputs.version }}
           target_branch: master
           github_token: ${{ github.token }}
+  delete_candidate_branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: dawidd6/action-delete-branch@v3
+        with:
+          github_token: ${{github.token}}
+          numbers: release.${{github.event.pull_request.number}}

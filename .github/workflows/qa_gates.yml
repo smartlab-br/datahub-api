@@ -4,10 +4,11 @@ on:
   push:
     refs/heads:
       - master
+      - staging
       - developement
       
 jobs:
-  test:
+  qa:
     # name: Run tests
     runs-on: ubuntu-latest
     steps:
@@ -28,13 +29,8 @@ jobs:
         with:
           name: lint
           path: ./report/lint.txt # ${INPUT_DEST}/lint.txt
-    # - name: Unit testing
-    #   run: |
-    #     pip install -Iv nose2==0.9.1
-    #     nose2 --config app/test/nose2.cfg --with-cov --coverage-report xml --coverage-config app/test/coverage/.coveragerc > app/test/report.txt 2>&1
       - name: Unit testing
         uses: ./
-        # id: docker_build
         with:
           check: 'test'
           dest: "report"
@@ -48,3 +44,38 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  release:
+    needs: qa
+    if: success() && (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bump version and push tag
+        id: bump_tag
+        uses: mathieudutour/github-tag-action@v5.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: none # Check types in https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-format
+          tag_prefix: ""
+          pre_release_branches: "staging"
+          append_to_pre_release_tag: "rc"
+      - uses: peterjgrainger/action-create-branch@v2.0.1
+        if: github.ref == 'refs/heads/staging'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          branch: release.${{ steps.bump_tag.outputs.new_tag }}
+      - name: Wait for Dockerhub to build the image
+        run: |
+          until curl -s https://hub.docker.com/v2/repositories/smartlab/datahub-api/tags/${{ steps.bump_tag.outputs.new_tag }} | grep -vq "errinfo"; do
+            sleep 60
+          done
+      - name: Create a GitHub release
+        uses: actions/create-release@v1
+        if: github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.bump_tag.outputs.new_tag }}
+          release_name: Release ${{ steps.bump_tag.outputs.new_tag }}
+          body: ${{ steps.bump_tag.outputs.changelog }}
+          prerelease: github.ref == 'refs/heads/staging'

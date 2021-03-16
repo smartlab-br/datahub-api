@@ -6,7 +6,6 @@ import pandas
 import requests
 from decimal import Decimal
 from impala.util import as_pandas
-from pandas.io.json import json_normalize
 from flask import current_app
 from datasources import get_impala_connection, get_redis_pool
 from service.query_builder import QueryBuilder
@@ -423,7 +422,7 @@ class HadoopRepository(BaseRepository):
     def build_criteria(self, w_clause):
         simple_operators = {
             'EQ': "=", "NE": "!=", "LE": "<=", "LT": "<", "GE": ">=",
-            "GT": ">", "LK": "LIKE", "NL": "NOT LIKE"
+            "GT": ">", "LK": "LIKE", "NK": "NOT LIKE"
         }
         boolean_operators = {
             "NL": "IS NULL", "NN": "IS NOT NULL"
@@ -588,7 +587,8 @@ class HBaseRepository(BaseRepository):
                 # Replacing double-quotes
                 str_value = value.decode('UTF-8').replace("\\xe2\\x80\\x9", '"')
                 # Turn value to pandas dataset
-                dataset = json_normalize(json.loads(str_value))
+                dataset = pandas.json_normalize(json.loads(str_value))
+                dataset = dataset.where(pandas.notnull(dataset), None)
                 dataset['col_compet'] = column_parts[1]
 
                 # Append do existing dataset or create a new one

@@ -93,7 +93,7 @@ from resources.v1.sst.acidentometros import AcidentometrosSSTResource
 from resources.v1.mlmodel.supervisionado.classificacao import ClassificacaoResource
 
 # Resources for getting report from external sources and adding data
-from resources.v1.external_reporter.mapbiomas.car import MapbiomasCarResource
+from resources.v1.external_reporter.mapbiomas.car import MapbiomasAlertsResource, MapbiomasAlertResource
 
 from resources.v1.healthchecks import HCAlive, HCReady
 
@@ -209,7 +209,8 @@ api.add_resource(AcidentometrosSSTResource, '/odometros/sst')
 api.add_resource(ClassificacaoResource, '/ml/classificacao/<string:model_id>')
 
 ## Resources for getting public reports and adding data
-api.add_resource(MapbiomasCarResource, '/filler/mapbiomas/car/<string:car>')
+api.add_resource(MapbiomasAlertResource, '/filler/mapbiomas/alert/<int:alert_id>')
+api.add_resource(MapbiomasAlertsResource, '/filler/mapbiomas/alerts')
 
 if __name__ == '__main__':
     application.run(request_handler=FLPORequestHandler)

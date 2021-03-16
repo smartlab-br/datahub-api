@@ -45,3 +45,9 @@ class DevelopmentConfig():
         "ON_JOIN": json.loads(os.getenv("CONF_REPO_BASE_ON_JOIN")),
         "JOIN_SUFFIXES": json.loads(os.getenv("CONF_REPO_BASE_JOIN_SUFFIXES"))
     }
+
+    MAPBIOMAS = {
+        "API_BASE_URL": os.getenv('MAPBIOMAS_API_BASE_URL'),
+        "USER": os.getenv('MAPBIOMAS_USER'),
+        "PASSWORD": os.getenv('MAPBIOMAS_PASSWORD')
+    }

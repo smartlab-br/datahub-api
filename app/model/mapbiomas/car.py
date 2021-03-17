@@ -60,64 +60,93 @@ class Car(BaseModel):
                 alertReport(alertId:{alert}, carId:{car}) {{
                     alertAreaInCar
                     carCode
+                    areaHa
                     images {{
                         alertInProperty
                         propertyInState
+                        labels
+                        before {{
+                            acquiredAt
+                            satellite
+                            url
+                        }}
+                        after {{
+                            acquiredAt
+                            satellite
+                            url
+                        }}
                     }}
                 }}
             }}"""
         )
         return resp.json().get('data')
 
-    def fetch_alerts_by_dates(self, timeframe, limit=50, offset=0):
-        """ Get alerts from MapBiomas, given a timeframe """
+    def fetch_alerts_by_dates(self, options, limit=50, offset=0):
+        """ Get alerts from MapBiomas, given a options """
         current_offset = offset
+        remote_limit_multiplier = 20
         result = []
 
-        if 'publish_from' not in timeframe:
-            timeframe['publish_from'] = datetime.now() + dateutil.relativedelta.relativedelta(months=-1)
+        if 'publish_from' not in options:
+            options['publish_from'] = datetime.now() + dateutil.relativedelta.relativedelta(months=-1)
         else:
-            timeframe['publish_from'] = datetime.fromtimestamp(timeframe.get('publish_from'))
+            options['publish_from'] = datetime.fromtimestamp(options.get('publish_from'))
 
-        if 'publish_to' not in timeframe:
-            timeframe['publish_to'] = datetime.now()
+        if 'publish_to' not in options:
+            options['publish_to'] = datetime.now()
         else:
-            timeframe['publish_to'] = datetime.fromtimestamp(timeframe.get('publish_to'))
+            options['publish_to'] = datetime.fromtimestamp(options.get('publish_to'))
 
         detect_from = ""
         detect_to = ""
-        if 'detect_from' in timeframe:
-            timeframe['detect_from'] = datetime.fromtimestamp(timeframe.get('detect_from'))
-            detect_from = f'startDetectedAt: "{timeframe.get("detect_from").strftime("%d-%m-%Y %H:%M")}"'
-            if 'detect_to' not in timeframe:
-                timeframe['detect_to'] = datetime.now()
+        if 'detect_from' in options:
+            options['detect_from'] = datetime.fromtimestamp(options.get('detect_from'))
+            detect_from = f'startDetectedAt: "{options.get("detect_from").strftime("%d-%m-%Y %H:%M")}"'
+            if 'detect_to' not in options:
+                options['detect_to'] = datetime.now()
             else:
-                timeframe['detect_to'] = datetime.fromtimestamp(timeframe.get('detect_to'))
+                options['detect_to'] = datetime.fromtimestamp(options.get('detect_to'))
 
-        if 'detect_to' in timeframe:
-            detect_to = detect_from = f'endDetectedAt: "{timeframe.get("detect_to").strftime("%d-%m-%Y %H:%M")}"'
+        if 'detect_to' in options:
+            detect_to = detect_from = f'endDetectedAt: "{options.get("detect_to").strftime("%d-%m-%Y %H:%M")}"'
 
         while len(result) < 50:
             # Show all alerts for a given time-frame
             resp = self.invoke_graphql_query(
                 f"""{{
                     allPublishedAlerts(
-                        startPublishedAt: "{timeframe.get('publish_from').strftime("%d-%m-%Y %H:%M")}" 
-                        endPublishedAt: "{timeframe.get('publish_to').strftime("%d-%m-%Y %H:%M")}"
+                        startPublishedAt: "{options.get('publish_from').strftime("%d-%m-%Y %H:%M")}" 
+                        endPublishedAt: "{options.get('publish_to').strftime("%d-%m-%Y %H:%M")}"
                         {detect_from}
                         {detect_to}
-                        limit: {limit}
+                        limit: {limit * remote_limit_multiplier}
                         offset: {current_offset}
-                    ) {{ cars {{ id }} id }}
+                    ) {{ cars {{
+                            id
+                            carCode
+                         }}
+                         id }}
                 }}""",
                 self.get_token()
             )
-            # TODO - Filtrar por cpf/cnpj
             nu_alerts = resp.json().get('data', {}).get('allPublishedAlerts')
-            result.extend(nu_alerts)
+            candidates = self.get_repo().find_by_filters(options)
+            if candidates is None:
+                result.extend(nu_alerts)
+            else:
+                viable = []
+                candidates = [candidate.get('carcode') for candidate in candidates]
+                for alert in nu_alerts:
+                    nu_alert = alert
+                    # Replace the cars with only the viable, according to filters
+                    nu_alert['cars'] = [car for car in alert.get('cars') if car.get('carCode') in candidates]
+                    if len(nu_alert.get('cars')) > 0:
+                        viable.append(nu_alert)
+                result.extend(viable)
+
             if len(nu_alerts) < limit:
                 break
-            current_offset = offset + 1
+            current_offset = current_offset + limit * remote_limit_multiplier
         # f"""{{
         #     allPublishedAlerts(
         #         startPublishedAt: "11-05-2020 17:00"
@@ -128,4 +157,6 @@ class Car(BaseModel):
         #         offset: {offset}
         #     ) {{ cars {{ id }} id }}
         # }}""",
+        if len(result) > 50:
+            return result[:50]
         return result

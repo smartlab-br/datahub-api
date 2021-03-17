@@ -22,6 +22,14 @@ class MapbiomasAlertsResource(BaseResource):
              "description": "Timestamp do início do filtro de detecção do alerta."},
             {"name": "detect_to", "required": False, "type": 'int', "in": "query",
              "description": "Timestamp do fim do filtro de detecção do alerta."},
+            {"name": "cpfcnpj", "required": False, "type": 'string', "in": "query",
+             "description": "CPF/CNPJ completo, com separadores, para filtro dos alertas/car."},
+            {"name": "nome", "required": False, "type": 'string', "in": "query",
+             "description": "Parte do nome (em bloco único) para filtro dos alertas/car."},
+            {"name": "siglauf", "required": False, "type": 'string', "in": "query",
+             "description": "Sigla de Unidade Federativa para filtro dos alertas/car."},
+            {"name": "nomemunicipio", "required": False, "type": 'string', "in": "query",
+             "description": "Nome parcial de município (em bloco único) para filtro dos alertas/car."}
         ],
         'responses': {'200': {'description': 'Alertas'}}
     })

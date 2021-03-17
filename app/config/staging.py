@@ -81,6 +81,10 @@ class StagingConfig():
     data, stat = zk.get(f"/spai/{api_context}-api/staging/conf_repo/base_join_suffixes")
     CONF_REPO_BASE['JOIN_SUFFIXES'] = json.loads(data.decode("utf-8"))
 
+    # Mapbiomas
+    CONF_REPO_BASE['MAPBIOMAS'] = json.loads(data.decode("utf-8"))
+    data, stat = zk.get(f"/spai/{api_context}-api/staging/mapbiomas")
+
     zk.stop()
     zk = None
     data = None

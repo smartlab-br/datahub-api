@@ -110,6 +110,10 @@ class Car(BaseModel):
         if 'detect_to' in options:
             detect_to = detect_from = f'endDetectedAt: "{options.get("detect_to").strftime("%d-%m-%Y %H:%M")}"'
 
+        candidates = self.get_repo().find_by_filters(options)
+        if candidates is not None:
+            candidates = [candidate.get('carcode') for candidate in candidates]
+
         while len(result) < 50:
             # Show all alerts for a given time-frame
             resp = self.invoke_graphql_query(
@@ -130,12 +134,10 @@ class Car(BaseModel):
                 self.get_token()
             )
             nu_alerts = resp.json().get('data', {}).get('allPublishedAlerts')
-            candidates = self.get_repo().find_by_filters(options)
             if candidates is None:
                 result.extend(nu_alerts)
             else:
                 viable = []
-                candidates = [candidate.get('carcode') for candidate in candidates]
                 for alert in nu_alerts:
                     nu_alert = alert
                     # Replace the cars with only the viable, according to filters

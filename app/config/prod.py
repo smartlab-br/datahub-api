@@ -83,7 +83,7 @@ class ProductionConfig():
 
     # Mapbiomas
     data, stat = zk.get(f"/spai/{api_context}-api/prod/mapbiomas")
-    CONF_REPO_BASE['MAPBIOMAS'] = json.loads(data.decode("utf-8"))
+    MAPBIOMAS = json.loads(data.decode("utf-8"))
 
     zk.stop()
     zk = None

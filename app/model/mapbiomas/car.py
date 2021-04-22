@@ -59,23 +59,98 @@ class Car(BaseModel):
             f"""{{
                 alertReport(alertId:{alert}, carId:{car}) {{
                     alertAreaInCar
-                    carCode
+                    alertCode
+                    alertGeomWkt
                     areaHa
-                    images {{
-                        alertInProperty
-                        propertyInState
+                    carCode
+                    changes {{
                         labels
-                        before {{
-                            acquiredAt
-                            satellite
-                            url
+                        layer
+                        overYears {{
+                            imageUrl
+                            year
                         }}
+                    }}
+                    imageGridMeasurements {{
+                        latitude {{
+                            endCoordinate
+                            startCoordinate
+                        }}
+                        longitude {{
+                            endCoordinate
+                            startCoordinate
+                        }}
+                    }}
+                    images {{
                         after {{
                             acquiredAt
                             satellite
                             url
                         }}
+                        alertInProperty
+                        before {{
+                            acquiredAt
+                            satellite
+                            url
+                        }}
+                        labels
+                        propertyInState
                     }}
+                    intersections {{
+                        conservationUnits {{
+                            area
+                            count
+                        }}
+                        deforestmentsAuthorized {{
+                            area
+                            count
+                        }}
+                        forestManagements {{
+                            area
+                            count
+                        }}
+                        indigenousLands {{
+                            area
+                            count
+                        }}
+                        settlements {{
+                            area
+                            count
+                        }}
+                        withRuralProperty {{
+                            embargoes {{
+                                area
+                                count
+                            }}
+                            legalReserves {{
+                                area
+                                count
+                            }}
+                            permanentProtected {{
+                                area
+                                count
+                            }}
+                            riverSources {{
+                                area
+                                count
+                            }}
+                        }}
+                    }}
+                    simplifiedPoints {{
+                        imageUrl
+                        table {{
+                            number
+                            x
+                            y
+                        }}
+                    }}
+                    source
+                    territories {{
+                        categoryName
+                        id
+                        name
+                    }}
+                    warnings
                 }}
             }}"""
         )

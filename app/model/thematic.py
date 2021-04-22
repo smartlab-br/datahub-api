@@ -33,7 +33,7 @@ class Thematic(BaseModel):
         },
         'trabalho': {
             'datasets': [
-                'catweb', 'rais', 'cagedtrabalhador', 'caged',
+                'rais', 'cagedtrabalhador', 'caged',
                 'cagedsaldo', 'cagedtrabalhadorano',
                 'incidenciaescravidao', 'migracoesescravos',
                 'operacoesresgate', 'teindicadoresnacionais',
@@ -76,7 +76,7 @@ class Thematic(BaseModel):
             }
         },
         'seguridade': {
-            'datasets': ['sisben'],
+            'datasets': ['catweb', 'sisben'],
             'source': {
                 'fonte': 'INSS - Instituto Nacional do Seguro Social',
                 'link': 'https://inss.gov.br/'

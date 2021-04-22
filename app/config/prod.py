@@ -81,6 +81,10 @@ class ProductionConfig():
     data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/base_join_suffixes")
     CONF_REPO_BASE['JOIN_SUFFIXES'] = json.loads(data.decode("utf-8"))
 
+    # Mapbiomas
+    data, stat = zk.get(f"/spai/{api_context}-api/prod/mapbiomas")
+    MAPBIOMAS = json.loads(data.decode("utf-8"))
+
     zk.stop()
     zk = None
     data = None

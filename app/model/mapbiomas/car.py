@@ -163,7 +163,7 @@ class Car(BaseModel):
         result = []
 
         if 'publish_from' not in options:
-            options['publish_from'] = datetime.now() + dateutil.relativedelta.relativedelta(months=-1)
+            options['publish_from'] = datetime.now() + dateutil.relativedelta.relativedelta(months=-6)
         else:
             options['publish_from'] = datetime.fromtimestamp(options.get('publish_from'))
 
@@ -183,7 +183,7 @@ class Car(BaseModel):
                 options['detect_to'] = datetime.fromtimestamp(options.get('detect_to'))
 
         if 'detect_to' in options:
-            detect_to = detect_from = f'endDetectedAt: "{options.get("detect_to").strftime("%d-%m-%Y %H:%M")}"'
+            detect_to = f'endDetectedAt: "{options.get("detect_to").strftime("%d-%m-%Y %H:%M")}"'
 
         candidates = self.get_repo().find_by_filters(options)
         if candidates is not None:

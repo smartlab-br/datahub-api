@@ -12,6 +12,7 @@ class Car(BaseModel):
     def __init__(self):
         """ Construtor """
         self.repo = CarRepository()
+        self.token = None
 
     def get_repo(self):
         """ Garantia de que o repo estará carregado """
@@ -42,16 +43,18 @@ class Car(BaseModel):
 
     def get_token(self):
         """ Get a token from MapBiomas """
-        resp = self.invoke_graphql_query(
-            f"""mutation {{
-              createToken(
-                email: "{current_app.config["MAPBIOMAS"].get('USER')}",
-                password: "{current_app.config["MAPBIOMAS"].get('PASSWORD')}"
-              )
-              {{ token }}
-            }}"""
-        )
-        return resp.json().get('data', {}).get('createToken', {}).get('token')
+        if self.token is None:
+            resp = self.invoke_graphql_query(
+                f"""mutation {{
+                  createToken(
+                    email: "{current_app.config["MAPBIOMAS"].get('USER')}",
+                    password: "{current_app.config["MAPBIOMAS"].get('PASSWORD')}"
+                  )
+                  {{ token }}
+                }}"""
+            )
+            self.token = resp.json().get('data', {}).get('createToken', {}).get('token')
+        return self.token
 
     def fetch_report_from_source(self, car, alert):
         """ Get report from MapBiomas """
@@ -163,7 +166,7 @@ class Car(BaseModel):
         result = []
 
         if 'publish_from' not in options:
-            options['publish_from'] = datetime.now() + dateutil.relativedelta.relativedelta(months=-6)
+            options['publish_from'] = datetime.now() + dateutil.relativedelta.relativedelta(months=-3)
         else:
             options['publish_from'] = datetime.fromtimestamp(options.get('publish_from'))
 
@@ -185,9 +188,7 @@ class Car(BaseModel):
         if 'detect_to' in options:
             detect_to = f'endDetectedAt: "{options.get("detect_to").strftime("%d-%m-%Y %H:%M")}"'
 
-        candidates = self.get_repo().find_by_filters(options)
-        if candidates is not None:
-            candidates = [candidate.get('carcode') for candidate in candidates]
+        candidates = {candidate.get('carcode'): candidate for candidate in self.get_repo().find_by_filters(options)}
 
         while len(result) < 50:
             # Show all alerts for a given time-frame
@@ -200,11 +201,27 @@ class Car(BaseModel):
                         {detect_to}
                         limit: {limit * remote_limit_multiplier}
                         offset: {current_offset}
-                    ) {{ cars {{
+                    ) {{ alertCode
+                         alertInsertedAt
+                         areaHa
+                         cars {{
                             id
                             carCode
                          }}
-                         id }}
+                         coordinates {{
+                            latitude
+                            longitude
+                         }}
+                         detectedAt
+                         geometry {{
+                            areaHa
+                            geom
+                            id
+                         }}
+                         id
+                         source
+                         statusId
+                         statusInsertedAt }}
                 }}""",
                 self.get_token()
             )
@@ -216,7 +233,15 @@ class Car(BaseModel):
                 for alert in nu_alerts:
                     nu_alert = alert
                     # Replace the cars with only the viable, according to filters
-                    nu_alert['cars'] = [car for car in alert.get('cars') if car.get('carCode') in candidates]
+                    nu_cars = []
+                    for car in alert.get('cars'):
+                        if car.get('carCode') in candidates.keys():
+                            # Adds owner data
+                            nu_car = car
+                            nu_car['owner'] = candidates.get(car.get('carCode'))
+                            nu_cars.append(nu_car)
+                    nu_alert['cars'] = nu_cars
+                    # Appends only if there's a CAR inside
                     if len(nu_alert.get('cars')) > 0:
                         viable.append(nu_alert)
                 result.extend(viable)

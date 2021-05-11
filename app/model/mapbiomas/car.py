@@ -24,7 +24,9 @@ class Car(BaseModel):
         """ Gather data from different sources and put them together """
         report = self.fetch_report_from_source(car, alert)
         if report is not None:
-            report['mpt_data'] = self.get_repo().find_by_id(report.get('alertReport', {}).get('carCode'))
+            report['mpt_data'] = {
+                "ownership": self.get_repo().find_by_id(report.get('alertReport', {}).get('carCode'))
+            }
         return report
 
     def invoke_graphql_query(self, gql_qry, token=None):
@@ -162,7 +164,7 @@ class Car(BaseModel):
     def fetch_alerts_by_dates(self, options, limit=50, offset=0):
         """ Get alerts from MapBiomas, given a options """
         current_offset = offset
-        remote_limit_multiplier = 20
+        remote_limit_multiplier = 100
         result = []
 
         if 'publish_from' not in options:
@@ -215,7 +217,6 @@ class Car(BaseModel):
                          detectedAt
                          geometry {{
                             areaHa
-                            geom
                             id
                          }}
                          id

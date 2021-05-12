@@ -190,7 +190,10 @@ class Car(BaseModel):
         if 'detect_to' in options:
             detect_to = f'endDetectedAt: "{options.get("detect_to").strftime("%d-%m-%Y %H:%M")}"'
 
-        candidates = {candidate.get('carcode'): candidate for candidate in self.get_repo().find_by_filters(options)}
+        filtered_cars = self.get_repo().find_by_filters(options)
+        candidates = None
+        if filtered_cars is not None:
+            candidates = {candidate.get('carcode'): candidate for candidate in filtered_cars}
 
         while len(result) < 50:
             # Show all alerts for a given time-frame
@@ -228,6 +231,20 @@ class Car(BaseModel):
             )
             nu_alerts = resp.json().get('data', {}).get('allPublishedAlerts')
             if candidates is None:
+                car_ids = []
+                for alert in nu_alerts:
+                    for car in alert.get('cars'):
+                        car_ids.append(car.get('carCode'))
+                identified_cars = {
+                    identified_car.get('carcode'): identified_car
+                    for
+                    identified_car
+                    in
+                    self.get_repo().find_by_id_list(car_ids)
+                }
+                for alert in nu_alerts:
+                    for car in alert.get('cars'):
+                        car['owner'] = identified_cars.get(car.get('carCode'))
                 result.extend(nu_alerts)
             else:
                 viable = []

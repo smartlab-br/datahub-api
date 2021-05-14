@@ -164,7 +164,7 @@ class Car(BaseModel):
     def fetch_alerts_by_dates(self, options, limit=50, offset=0):
         """ Get alerts from MapBiomas, given a options """
         current_offset = offset
-        remote_limit_multiplier = 100
+        remote_limit_multiplier = 20
         result = []
 
         if 'publish_from' not in options:

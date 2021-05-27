@@ -40,7 +40,7 @@ class MapbiomasAlertsResource(BaseResource):
     @authenticate(
         domain="bifrost",
         event_tracker_options={
-            "category": "laudo", "action": "search", "label": "mapbiomas", "additional_parameters": {"cpfcnpj": "query"}
+            "item": "laudo", "action": "search", "category": "mapbiomas", "additional_parameters": {"cpfcnpj": "query"}
         }
     )
     def get(self):
@@ -84,7 +84,7 @@ class MapbiomasAlertResource(BaseResource):
     @authenticate(
         domain="bifrost",
         event_tracker_options={
-            "category": "laudo", "action": "emit", "label": "mapbiomas",
+            "item": "laudo", "action": "emit", "category": "mapbiomas",
             "additional_parameters": {"alert_id": "path", "car_id": "query"}
         }
     )

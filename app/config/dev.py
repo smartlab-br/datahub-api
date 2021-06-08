@@ -51,3 +51,6 @@ class DevelopmentConfig():
         "USER": os.getenv('MAPBIOMAS_USER'),
         "PASSWORD": os.getenv('MAPBIOMAS_PASSWORD')
     }
+
+    AUTH_GATEWAYS = json.loads(os.getenv("AUTH_GATEWAYS"))
+    EVENT_TRACKERS = json.loads(os.getenv("EVENT_TRACKERS"))

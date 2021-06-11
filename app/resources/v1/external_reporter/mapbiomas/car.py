@@ -77,11 +77,14 @@ class MapbiomasAlertResource(BaseResource):
     def get(self, alert_id):
         """ Obtém conjunto de alertas para o período informado """
         try:
-            return self.get_domain().find_by_alert_and_car(alert_id, request.args.get('car_id'))
+            data = self.get_domain().find_by_alert_and_car(alert_id, request.args.get('car_id'))
+            return data
         except HTTPError:  # Falha ao obter dado do MapBiomas
             return {"origin": "Mapbiomas", "message": "Falha ao obter alerta do mapbiomas"}, 500
         except (TTransportException, DatabaseError):
             return {"origin": "Smartlab", "message": "Falha ao obter dados identificados no datahub"}, 500
+        except Exception as err:
+            return {"origin": "Mapbiomas", "message": str(err)}, 500
 
     def get_domain(self):
         """ Carrega o modelo de domínio, se não o encontrar """

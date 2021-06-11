@@ -1,6 +1,7 @@
 ''' Repository para recuperar informações de uma empresa '''
 from repository.base import RedisRepository
 
+
 #pylint: disable=R0903
 class DatasetsRepository(RedisRepository):
     ''' Definição do repo '''
@@ -36,11 +37,33 @@ class DatasetsRepository(RedisRepository):
         'aeronaves': '2018'
     }
 
+
+    # NA - para as bases marcadas com NA falar com Lucas para criarmos uma coluna de data da base de dados (data de extração no órgão de origem) Temos algo do tipo ?
+    DATASETS_COMPETENCIA = {
+        "auto": "dtlavratura",
+        "caged": "competencia_declarada",
+        "cagedano": "competencia_declarada", # Pegar somente o ano da competencia declarada
+        "cagedsaldo": "competencia_mov",
+        "cagedtrabalhador": "competencia_mov",
+        "cagedtrabalhadorano": "ano_declarado",
+        "rais": "nu_ano_rais",
+        "catweb": "dt_acidente",
+        "rfb": "NA",
+        "sisben": "nu_ano_compet",
+        "rfbsocios": "NA",
+        "rfbparticipacaosocietaria": "NA",
+        "renavam": "NA",
+        "aeronaves": "NA"
+    }
+
+
     def retrieve(self):
         ''' Localiza o dicionário de datasources no REDIS '''
         return self.retrieve_hashset(self.REDIS_KEY)
 
-    def store(self):
+    def store(self, datasets):
         ''' Inclui/atualiza dicionário de competências e datasources no REDIS '''
-        self.get_dao().hmset(self.REDIS_KEY, self.DATASETS)
-        return self.DATASETS
+        # self.get_dao().hmset(self.REDIS_KEY, self.DATASETS)
+        # self.get_dao().hmset(self.REDIS_KEY, datasets)
+
+        return datasets

@@ -2,7 +2,11 @@
 from flask_restful_swagger_2 import swagger
 from resources.base import BaseResource
 from model.mapbiomas.car import Car
-from flask import Response, request
+from flask import request
+from requests import HTTPError
+from thriftpy2.transport.base import TTransportException
+from pandas.io.sql import DatabaseError
+from service.decorators.auth import authenticate
 
 class MapbiomasAlertsResource(BaseResource):
     """ Classe de busca alertas do mapbiomas """
@@ -33,9 +37,21 @@ class MapbiomasAlertsResource(BaseResource):
         ],
         'responses': {'200': {'description': 'Alertas'}}
     })
+    @authenticate(
+        domain="bifrost",
+        event_tracker_options={
+            "item": "laudo", "action": "search", "category": "mapbiomas", "additional_parameters": {"cpfcnpj": "query"}
+        }
+    )
     def get(self):
         """ Obtém conjunto de alertas para o período informado """
-        return self.get_domain().fetch_alerts_by_dates(request.args.copy().to_dict(flat=False))
+        try:
+            return self.get_domain().fetch_alerts_by_dates(request.args.copy().to_dict(flat=False))
+            return result
+        except HTTPError:  # Falha ao obter dado do MapBiomas
+            return {"origin": "Mapbiomas", "message": "Falha ao obter conjunto de alertas do mapbiomas"}, 500
+        except (TTransportException, DatabaseError):
+            return {"origin": "Smartlab", "message": "Falha ao obter dados identificados no datahub"}, 500
 
     def get_domain(self):
         """ Carrega o modelo de domínio, se não o encontrar """
@@ -65,9 +81,24 @@ class MapbiomasAlertResource(BaseResource):
         ],
         'responses': {'200': {'description': 'Laudo'}}
     })
+    @authenticate(
+        domain="bifrost",
+        event_tracker_options={
+            "item": "laudo", "action": "emit", "category": "mapbiomas",
+            "additional_parameters": {"alert_id": "path", "car_id": "query"}
+        }
+    )
     def get(self, alert_id):
         """ Obtém conjunto de alertas para o período informado """
-        return self.get_domain().find_by_alert_and_car(alert_id, request.args.get('car_id'))
+        try:
+            data = self.get_domain().find_by_alert_and_car(alert_id, request.args.get('car_id'))
+            return data
+        except HTTPError:  # Falha ao obter dado do MapBiomas
+            return {"origin": "Mapbiomas", "message": "Falha ao obter alerta do mapbiomas"}, 500
+        except (TTransportException, DatabaseError):
+            return {"origin": "Smartlab", "message": "Falha ao obter dados identificados no datahub"}, 500
+        except Exception as err:
+            return {"origin": "Mapbiomas", "message": str(err)}, 500
 
     def get_domain(self):
         """ Carrega o modelo de domínio, se não o encontrar """

@@ -5,7 +5,8 @@ from repository.base import RedisRepository
 #pylint: disable=R0903
 class DatasetsRepository(RedisRepository):
     ''' Definição do repo '''
-    REDIS_KEY = 'rx:ds'
+    # TODO Voltar para o nome correto
+    REDIS_KEY = 'rx_new:ds'
     DATASETS = {
         'rais': ','.join([str(ano) for ano in range(2019, 2008, -1)]),
         'rfb': '2018',
@@ -40,20 +41,22 @@ class DatasetsRepository(RedisRepository):
 
     # NA - para as bases marcadas com NA falar com Lucas para criarmos uma coluna de data da base de dados (data de extração no órgão de origem) Temos algo do tipo ?
     DATASETS_COMPETENCIA = {
-        "auto": "dtlavratura",
-        "caged": "competencia_declarada",
-        "cagedano": "competencia_declarada", # Pegar somente o ano da competencia declarada
-        "cagedsaldo": "competencia_mov",
-        "cagedtrabalhador": "competencia_mov",
-        "cagedtrabalhadorano": "ano_declarado",
-        "rais": "nu_ano_rais",
-        "catweb": "dt_acidente",
-        "rfb": "NA",
-        "sisben": "nu_ano_compet",
-        "rfbsocios": "NA",
-        "rfbparticipacaosocietaria": "NA",
-        "renavam": "NA",
-        "aeronaves": "NA"
+        "auto": "DISTINCT ano",
+        "caged": "DISTINCT ano",
+        "cagedano": "DISTINCT ano",
+        "cagedsaldo": "DISTINCT competencia_mov",
+        "cagedtrabalhador": "DISTINCT competencia_mov",
+        "cagedtrabalhadorano": "DISTINCT ano_declarado",
+        "rais": "DISTINCT nu_ano_rais",
+        "catweb_c": "DISTINCT ano",
+        "catweb": "DISTINCT ano_cat",
+        "rfb": "MAX dt_carga",
+        "sisben_c": "DISTINCT nu_ano_compet",
+        "sisben": "DISTINCT ano_beneficio",
+        "rfbsocios": "MAX dt_carga",
+        "rfbparticipacaosocietaria": "MAX dt_carga",
+        "renavam": "MAX dt_carga",
+        "aeronaves": "MAX dt_carga"
     }
 
 
@@ -64,6 +67,6 @@ class DatasetsRepository(RedisRepository):
     def store(self, datasets):
         ''' Inclui/atualiza dicionário de competências e datasources no REDIS '''
         # self.get_dao().hmset(self.REDIS_KEY, self.DATASETS)
-        # self.get_dao().hmset(self.REDIS_KEY, datasets)
+        self.get_dao().hmset(self.REDIS_KEY, datasets)
 
         return datasets

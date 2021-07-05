@@ -45,5 +45,4 @@ class Datasets(BaseModel):
             df = model.find_dataset(options)
             value_to_add = ",".join([str(item.get(coluna_resultado)).replace(".0", "") for item in df.get("dataset")])
             result[key] = value_to_add
-        print(result)
         self.get_repo().store(result)

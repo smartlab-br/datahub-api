@@ -5,14 +5,8 @@ from repository.base import RedisRepository
 #pylint: disable=R0903
 class DatasetsRepository(RedisRepository):
     ''' Definição do repo '''
-    # TODO Voltar para o nome correto
     REDIS_KEY = 'rx:ds'
-    DATASETS = None
 
-    def __init__(self):
-        super().__init__()
-        if not DatasetsRepository.DATASETS:
-            DatasetsRepository.DATASETS = self.retrieve()
     # TODO Na migração para configmap no k8s essa conf deve ser adicionada no configmap
     DATASETS_COMPETENCIA = {
         "auto": "DISTINCT ano",
@@ -39,8 +33,5 @@ class DatasetsRepository(RedisRepository):
 
     def store(self, datasets):
         ''' Inclui/atualiza dicionário de competências e datasources no REDIS '''
-        # self.get_dao().hmset(self.REDIS_KEY, self.DATASETS)
-        DatasetsRepository.DATASETS = datasets
         self.get_dao().hmset(self.REDIS_KEY, datasets)
-
         return datasets

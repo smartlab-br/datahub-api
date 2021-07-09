@@ -10,7 +10,7 @@ class DatasetsRepository(RedisRepository):
     # TODO Na migração para configmap no k8s essa conf deve ser adicionada no configmap
     DATASETS_COMPETENCIA = {
         "auto": "DISTINCT ano",
-        "caged": "DISTINCT ano",
+        "caged": "DISTINCT competencia_declarada",
         "cagedano": "DISTINCT ano",
         "cagedsaldo": "DISTINCT competencia_mov",
         "cagedtrabalhador": "DISTINCT competencia_mov",

@@ -7,7 +7,7 @@ class Renavam(BaseSource):
         ''' Create options according to tables and query conditions '''
         subset_rules = [
             # f"eq-{local_cols.get('cnpj_raiz')}-'{options.get('cnpj_raiz')}'-1-8",
-            f"eqon-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-1-8",
+            f"eq-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-1-8",
             "and",
             f"eqsz-{local_cols.get('cnpj_raiz')}-14"
         ]

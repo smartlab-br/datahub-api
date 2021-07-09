@@ -3,6 +3,7 @@ import unittest
 from datetime import datetime
 from model.empresa.empresa import Empresa
 from test.stubs.empresa import StubEmpresa
+from test.stubs.empresa import StubDatasetRepository
 
 class EmpresaModelBaseTest(unittest.TestCase):
     ''' Classe que testa o mapeamento de agregações para funções do pandas '''
@@ -420,7 +421,8 @@ class StubGetIsValidLoadingEntryTest(unittest.TestCase):
             ValueError,
             StubEmpresa().is_valid_loading_entry,
             '12345678',
-            {'column_family': 'non-existent'}
+            {'column_family': 'non-existent'},
+            StubDatasetRepository.DATASETS
         )
 
     def test_is_valid_loading_entry_wrong_column(self):
@@ -430,7 +432,8 @@ class StubGetIsValidLoadingEntryTest(unittest.TestCase):
             ValueError,
             StubEmpresa().is_valid_loading_entry,
             '12345678',
-            {'column_family': 'test', 'column': '2099'}
+            {'column_family': 'test', 'column': '2099'},
+            StubDatasetRepository.DATASETS
         )
 
     def test_is_valid_loading_entry(self):
@@ -439,7 +442,8 @@ class StubGetIsValidLoadingEntryTest(unittest.TestCase):
         self.assertEqual(
             StubEmpresa().is_valid_loading_entry(
                 '12345678',
-                {'column_family': 'test'}
+                {'column_family': 'test'},
+                StubDatasetRepository.DATASETS
             ),
             True
         )
@@ -450,7 +454,8 @@ class StubGetIsValidLoadingEntryTest(unittest.TestCase):
         self.assertEqual(
             StubEmpresa().is_valid_loading_entry(
                 '12345678',
-                {'column_family': 'another'}
+                {'column_family': 'another'},
+                StubDatasetRepository.DATASETS
             ),
             False
         )
@@ -460,7 +465,8 @@ class StubGetIsValidLoadingEntryTest(unittest.TestCase):
         self.assertEqual(
             StubEmpresa().is_valid_loading_entry(
                 '12345678',
-                {'column_family': 'failed_status', 'column': '2017'}
+                {'column_family': 'failed_status', 'column': '2017'},
+                StubDatasetRepository.DATASETS
             ),
             False
         )
@@ -470,7 +476,8 @@ class StubGetIsValidLoadingEntryTest(unittest.TestCase):
         self.assertEqual(
             StubEmpresa().is_valid_loading_entry(
                 '12345678',
-                {'column_family': 'expired', 'column': '2018'}
+                {'column_family': 'expired', 'column': '2018'},
+                StubDatasetRepository.DATASETS
             ),
             False
         )
@@ -504,7 +511,7 @@ class StubGetLoadingEntryTest(unittest.TestCase):
     def test_get_loading_entry_no_options(self):
         ''' Tests if no column status is returned when no options is given '''
         self.assertEqual(
-            StubEmpresa().get_loading_entry('12345678', None),
+            StubEmpresa().get_loading_entry('12345678', None, StubDatasetRepository.DATASETS),
             (
                 self.get_expected_status_dict(),
                 None
@@ -514,7 +521,7 @@ class StubGetLoadingEntryTest(unittest.TestCase):
     def test_get_loading_entry_empty_options(self):
         ''' Tests if no column status is returned when an empty options is given '''
         self.assertEqual(
-            StubEmpresa().get_loading_entry('12345678', {}),
+            StubEmpresa().get_loading_entry('12345678', {}, StubDatasetRepository.DATASETS),
             (
                 self.get_expected_status_dict(),
                 None
@@ -526,7 +533,8 @@ class StubGetLoadingEntryTest(unittest.TestCase):
         self.assertEqual(
             StubEmpresa().get_loading_entry(
                 '12345678',
-                {'column_family': 'test', 'column': '2017'}
+                {'column_family': 'test', 'column': '2017'},
+                StubDatasetRepository.DATASETS
             ),
             (
                 self.get_expected_status_dict(),
@@ -539,7 +547,8 @@ class StubGetLoadingEntryTest(unittest.TestCase):
         self.assertEqual(
             StubEmpresa().get_loading_entry(
                 '12345678',
-                {'column_family': 'failed_status'}
+                {'column_family': 'failed_status'},
+                StubDatasetRepository.DATASETS
             ),
             (
                 self.get_expected_status_dict(),

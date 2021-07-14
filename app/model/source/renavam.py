@@ -6,10 +6,7 @@ class Renavam(BaseSource):
     def get_options_empresa(self, options, local_cols, df, persp):
         ''' Create options according to tables and query conditions '''
         subset_rules = [
-            # f"eq-{local_cols.get('cnpj_raiz')}-'{options.get('cnpj_raiz')}'-1-8",
-            f"eq-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-1-8",
-            "and",
-            f"eqsz-{local_cols.get('cnpj_raiz')}-14"
+            f"eq-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}"
         ]
         subset_rules.extend(self.get_options_rules_empresa(options, local_cols, df, persp))
         return {

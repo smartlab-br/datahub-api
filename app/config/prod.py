@@ -1,8 +1,6 @@
 ''' Config loader for production environment '''
 import os
 import yaml
-import json
-from kazoo.client import KazooClient
 
 #pylint: disable=R0903
 class ProductionConfig():

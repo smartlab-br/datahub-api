@@ -57,8 +57,9 @@ class Empresa(BaseModel):
 
     def find_datasets(self, options):
         ''' Localiza um todos os datasets de uma empresa pelo CNPJ Raiz '''
-        loading_entry_is_valid = self.is_valid_loading_entry(options['cnpj_raiz'], options)
-        (loading_entry, column_status) = self.get_loading_entry(options['cnpj_raiz'], options)
+        dict_datasets = self.get_dataset_repo().retrieve()
+        loading_entry_is_valid = self.is_valid_loading_entry(options['cnpj_raiz'], options, dict_datasets)
+        (loading_entry, column_status) = self.get_loading_entry(options['cnpj_raiz'], options, dict_datasets)
         result = {'status': loading_entry}
         try:
             dataset = self.get_repo().find_datasets(options)
@@ -75,18 +76,19 @@ class Empresa(BaseModel):
             self.produce(
                 options['cnpj_raiz'],
                 options.get('column_family'),
-                options.get('column')
+                options.get('column'),
+                dict_datasets
             )
         if 'column' in options:
             result['status_competencia'] = column_status
         return result
 
-    def produce(self, cnpj_raiz, column_family, column):
+    def produce(self, cnpj_raiz, column_family, column, dict_datasets):
         ''' Gera uma entrada na fila para ingestão de dados da empresa '''
         kafka_server = f'{current_app.config["KAFKA_HOST"]}:{current_app.config["KAFKA_PORT"]}'
         producer = KafkaProducer(bootstrap_servers=[kafka_server])
         redis_dao = PessoaDatasetsRepository()
-        ds_dict = DatasetsRepository().DATASETS
+        ds_dict = dict_datasets
 
         if column_family is None:
             for topic in self.TOPICS:
@@ -114,12 +116,12 @@ class Empresa(BaseModel):
                 producer.send(t_name, msg)
         producer.close()
 
-    def get_loading_entry(self, cnpj_raiz, options=None):
+    def get_loading_entry(self, cnpj_raiz, options=None, dict_datasets=None):
         ''' Verifica se há uma entrada ainda válida para ingestão de dados da empresa '''
         loading_entry = {}
         column_status = None
         column_status_specific = None
-        for dataframe, slot_list in self.get_dataset_repo().DATASETS.items():
+        for dataframe, slot_list in dict_datasets.items():
             columns_available = self.get_pessoa_dataset_repo().retrieve(cnpj_raiz, dataframe)
             if (options is not None and 'column_family' in options and
                     options.get('column_family', dataframe) == dataframe and
@@ -139,9 +141,9 @@ class Empresa(BaseModel):
 
         return (loading_entry, column_status)
 
-    def is_valid_loading_entry(self, cnpj_raiz, options=None):
+    def is_valid_loading_entry(self, cnpj_raiz, options=None, dict_datasets=None):
         ''' Checks if a loading entry is valid '''
-        rules = self.get_dataset_repo().DATASETS
+        rules = dict_datasets
         if (options is None or not options.get('column_family') or
                 not rules.get((options.get('column_family')))):
             raise ValueError('Dataset inválido')

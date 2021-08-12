@@ -1,7 +1,6 @@
 ''' Config loader for production environment '''
 import os
-import json
-from kazoo.client import KazooClient
+import yaml
 
 #pylint: disable=R0903
 class ProductionConfig():
@@ -9,83 +8,54 @@ class ProductionConfig():
     CORS_AUTOMATIC_OPTIONS = True
 
     api_context = os.getenv('API_CONTEXT')
-    zk = KazooClient(hosts=os.getenv('ZOOKEEPER_HOST') + ':' + os.getenv('ZOOKEEPER_PORT'))
-    zk.start()
 
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/impala_host")
-    IMPALA_HOST = data.decode("utf-8")
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/impala_port")
-    IMPALA_PORT = data.decode("utf-8")
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/impala_user")
-    IMPALA_USER = data.decode("utf-8")
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/impala_pwd")
-    IMPALA_PWD = data.decode("utf-8")
+    IMPALA_HOST = os.getenv('IMPALA_HOST')
+    IMPALA_PORT = os.getenv('IMPALA_PORT')
+    IMPALA_USER = os.getenv('IMPALA_USER')
+    IMPALA_PWD = os.getenv('IMPALA_PWD')
 
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/git_viewconf_url")
-    GIT_VIEWCONF_BASE_URL = data.decode("utf-8")
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/git_mlrepo_url")
-    GIT_MLREPO_BASE_URL = data.decode("utf-8")
+    GIT_VIEWCONF_BASE_URL = os.getenv('GIT_VIEWCONF_BASE_URL')
+    GIT_MLREPO_BASE_URL = os.getenv('GIT_MLREPO_BASE_URL')
 
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/hbase_host")
-    HBASE_HOST = data.decode("utf-8")
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/hbase_port")
-    HBASE_PORT = data.decode("utf-8")
+    HBASE_HOST = os.getenv('HBASE_HOST')
+    HBASE_PORT = os.getenv('HBASE_PORT')
 
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/redis_host")
-    REDIS_HOST = data.decode("utf-8")
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/redis_port")
-    REDIS_PORT = data.decode("utf-8")
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/redis_db")
-    REDIS_DB = data.decode("utf-8")
-    # data, stat = zk.get(f"/spai/{api_context}-api/prod/redis_user")
-    # REDIS_USER = data.decode("utf-8")
-    # data, stat = zk.get(f"/spai/{api_context}-api/prod/redis_pwd")
-    # REDIS_PWD = data.decode("utf-8")
+    REDIS_HOST = os.getenv('REDIS_HOST')
+    REDIS_PORT = os.getenv('REDIS_PORT')
+    REDIS_DB = os.getenv('REDIS_DB')
+    # REDIS_USER = os.getenv('REDIS_USER')
+    # REDIS_PWD = os.getenv('REDIS_PWD')
 
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/kafka_host")
-    KAFKA_HOST = data.decode("utf-8")
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/kafka_port")
-    KAFKA_PORT = data.decode("utf-8")
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/kafka_schema")
-    KAFKA_SCHEMA = data.decode("utf-8")
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/kafka_topic_prefix")
-    KAFKA_TOPIC_PREFIX = data.decode("utf-8")
+    KAFKA_HOST = os.getenv('KAFKA_HOST')
+    KAFKA_PORT = os.getenv('KAFKA_PORT')
+    KAFKA_SCHEMA = os.getenv('KAFKA_SCHEMA')
+    KAFKA_TOPIC_PREFIX = os.getenv('KAFKA_TOPIC_PREFIX')
 
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/thematic_table_names")
-    CONF_REPO_THEMATIC = {"TABLE_NAMES": json.loads(data.decode("utf-8"))}
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/thematic_default_partitioning")
-    CONF_REPO_THEMATIC['DEFAULT_PARTITIONING'] = json.loads(data.decode("utf-8"))
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/thematic_on_join")
-    CONF_REPO_THEMATIC['ON_JOIN'] = json.loads(data.decode("utf-8"))
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/thematic_join_suffixes")
-    CONF_REPO_THEMATIC['JOIN_SUFFIXES'] = json.loads(data.decode("utf-8"))
+    MAPBIOMAS = {
+        "API_BASE_URL": os.getenv('MAPBIOMAS_API_BASE_URL'),
+        "USER": os.getenv('MAPBIOMAS_USER'),
+        "PASSWORD": os.getenv('MAPBIOMAS_PASSWORD')
+    }
 
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/base_val_field")
-    CONF_REPO_BASE = {"VAL_FIELD": data.decode("utf-8")}
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/base_default_grouping")
-    CONF_REPO_BASE['DEFAULT_GROUPING'] = data.decode("utf-8")
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/base_default_partitioning")
-    CONF_REPO_BASE['DEFAULT_PARTITIONING'] = data.decode("utf-8")
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/base_cnpj_raiz_columns")
-    CONF_REPO_BASE['CNPJ_RAIZ_COLUMNS'] = json.loads(data.decode("utf-8"))
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/base_cnpj_columns")
-    CONF_REPO_BASE['CNPJ_COLUMNS'] = json.loads(data.decode("utf-8"))
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/base_compet_columns")
-    CONF_REPO_BASE['COMPET_COLUMNS'] = json.loads(data.decode("utf-8"))
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/base_pf_columns")
-    CONF_REPO_BASE['PF_COLUMNS'] = json.loads(data.decode("utf-8"))
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/base_persp_columns")
-    CONF_REPO_BASE['PERSP_COLUMNS'] = json.loads(data.decode("utf-8"))
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/base_on_join")
-    CONF_REPO_BASE['ON_JOIN'] = json.loads(data.decode("utf-8"))
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/conf_repo/base_join_suffixes")
-    CONF_REPO_BASE['JOIN_SUFFIXES'] = json.loads(data.decode("utf-8"))
+    CONF_REPO = yaml.safe_load(os.getenv("CONF_REPO"))
+    CONF_REPO_THEMATIC = {
+        "TABLE_NAMES": CONF_REPO.get("thematic", {}).get("tableNames", {}),
+        "DEFAULT_PARTITIONING": CONF_REPO.get("thematic", {}).get("defaultPartitioning", {}),
+        "ON_JOIN": CONF_REPO.get("thematic", {}).get("onJoin", {}),
+        "JOIN_SUFFIXES": CONF_REPO.get("thematic", {}).get("joinSuffixes", {}),
+    }
+    CONF_REPO_BASE = {
+        "VAL_FIELD": CONF_REPO.get("base", {}).get("valField", {}),
+        "DEFAULT_GROUPING": CONF_REPO.get("base", {}).get("defaultGrouping", {}),
+        "DEFAULT_PARTITIONING": CONF_REPO.get("base", {}).get("defaultPartitioning", {}),
+        "CNPJ_RAIZ_COLUMNS": CONF_REPO.get("base", {}).get("cnpjRaizColumns", {}),
+        "CNPJ_COLUMNS": CONF_REPO.get("base", {}).get("cnpjColumns", {}),
+        "COMPET_COLUMNS": CONF_REPO.get("base", {}).get("competColumns", {}),
+        "PF_COLUMNS": CONF_REPO.get("base", {}).get("pfColumns", {}),
+        "PERSP_COLUMNS": CONF_REPO.get("base", {}).get("perspColumns", {}),
+        "ON_JOIN": CONF_REPO.get("base", {}).get("onJoin", {}),
+        "JOIN_SUFFIXES": CONF_REPO.get("base", {}).get("joinSuffixes", {}),
+    }
 
-    # Mapbiomas
-    data, stat = zk.get(f"/spai/{api_context}-api/prod/mapbiomas")
-    MAPBIOMAS = json.loads(data.decode("utf-8"))
-
-    zk.stop()
-    zk = None
-    data = None
-    stat = None
+    AUTH_GATEWAYS = yaml.safe_load(os.getenv("AUTH_GATEWAYS"))
+    EVENT_TRACKERS = yaml.safe_load(os.getenv("EVENT_TRACKERS"))

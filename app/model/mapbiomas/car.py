@@ -159,7 +159,14 @@ class Car(BaseModel):
                 }}
             }}"""
         )
-        return resp.json().get('data')
+
+        if resp.json().get('data', None) is not None:
+            return resp.json().get('data')
+
+        message = "Erro não identificado"
+        if 'errors' in resp.json():
+            message = " | ".join([x.get('message') for x in resp.json().get('errors')])
+        raise Exception(message) from None
 
     def fetch_alerts_by_dates(self, options, limit=50, offset=0):
         """ Get alerts from MapBiomas, given a options """

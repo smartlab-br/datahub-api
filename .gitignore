@@ -4,6 +4,7 @@
 .idea
 .vscode
 .scannerwork
+.run
 app/.scannerwork
 Dockerfile
 **/__pycache__

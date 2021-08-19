@@ -10,6 +10,7 @@ from model.source.rais import Rais
 from model.source.renavam import Renavam
 from model.source.sisben import Sisben
 from model.source.rfb import BaseRfb, RfbSocios, RfbParticipacaoSocietaria
+from model.source.embarcacoes import Embarcacoes
 
 class SourceModelCreateTest(unittest.TestCase):
     ''' Test behaviours linked to "empresa" dataset-specific model instantiation '''
@@ -52,6 +53,11 @@ class SourceModelCreateTest(unittest.TestCase):
         ''' Tests if create returns a Renavam dataset model '''
         chart = SourceFactory().create('renavam')
         self.assertTrue(isinstance(chart, Renavam))
+
+    def test_instantiation_embarcacoes(self):
+        ''' Tests if create returns a Embarcacoes dataset model '''
+        chart = SourceFactory().create('embarcacoes')
+        self.assertTrue(isinstance(chart, Embarcacoes))
 
     def test_instantiation_sisben(self):
         ''' Tests if create returns a SISBEN dataset model '''

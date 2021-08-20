@@ -66,7 +66,7 @@ jobs:
           branch: release.${{ steps.bump_tag.outputs.new_tag }}
       - name: Wait for Dockerhub to build the image
         run: |
-          until curl -s https://hub.docker.com/v2/repositories/smartlab/datahub-api/tags/${{ steps.bump_tag.outputs.new_tag }} | grep -vq "errinfo"; do
+          until curl -s https://hub.docker.com/v2/repositories/mptrabalho/datahub-api/tags/${{ steps.bump_tag.outputs.new_tag }} | grep -vq "errinfo"; do
             sleep 60
           done
       - name: Create a GitHub release

@@ -1,7 +1,6 @@
 ''' Config loader for production environment '''
 import os
-import json
-from kazoo.client import KazooClient
+import yaml
 
 #pylint: disable=R0903
 class StagingConfig():

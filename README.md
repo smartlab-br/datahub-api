@@ -4,7 +4,7 @@
 
 Flask for SmartLab developers 
 
-==> Environment for development in Flask in MPT
+# Environment for development in Flask in MPT
 
      > Run app with pure Flask
        docker run -p 8080:5000 -d -v /path/app:/app smartlab/flask

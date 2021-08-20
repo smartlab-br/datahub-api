@@ -37,7 +37,7 @@ class StagingConfig():
         "PASSWORD": os.getenv('MAPBIOMAS_PASSWORD')
     }
 
-    CONF_REPO = yaml.safe_load(os.get_env("CONF_REPO"))
+    CONF_REPO = yaml.safe_load(os.getenv("CONF_REPO"))
     CONF_REPO_THEMATIC = {
         "TABLE_NAMES": CONF_REPO.get("thematic", {}).get("tableNames",{}),
         "DEFAULT_PARTITIONING": CONF_REPO.get("thematic", {}).get("defaultPartitioning",{}),

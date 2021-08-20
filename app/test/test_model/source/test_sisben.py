@@ -10,13 +10,13 @@ class SisbenGetOptionsEmpresaTest(unittest.TestCase):
         self.assertEqual(
             Sisben().get_options_empresa(
                 {'column': 2099, 'cnpj_raiz': '12345678'},
-                {'cnpj': 'col_cnpj', 'cnpj_raiz': 'col_cnpj_raiz'},
+                {'cnpj': 'col_cnpj', 'cnpj_raiz': 'col_cnpj_raiz', 'compet': 'col_compet'},
                 'sisben',
                 None
             ),
             {
                 'categorias': ['col_cnpj_raiz'],
                 'agregacao': ['count'],
-                'where': ["eq-col_cnpj_raiz-'12345678'", "and", "ne-col_cnpj-'00000000000000'"],
+                'where': ["eq-col_cnpj_raiz-'12345678'", "and", "ne-col_cnpj-'00000000000000'", "and", "eq-col_compet-2099"],
                 'theme': 'sisben_c'}
         )

@@ -18,7 +18,7 @@ class Empresa(BaseModel):
     TOPICS = [
         'rais', 'rfb', 'sisben', 'catweb', 'auto', 'caged', 'rfbsocios',
         'rfbparticipacaosocietaria', 'aeronaves', 'renavam', 'cagedsaldo',
-        'cagedtrabalhador', 'cagedtrabalhadorano'
+        'cagedtrabalhador', 'cagedtrabalhadorano', 'embarcacoes'
     ]
 
     def __init__(self):
@@ -309,7 +309,7 @@ class Empresa(BaseModel):
         # Get statistics partitioning by timeframe
         ds_no_compet = [
             'sisben', 'sisben_c', 'auto', 'rfb', 'rfbsocios',
-            'rfbparticipacaosocietaria', 'aeronaves', 'renavam'
+            'rfbparticipacaosocietaria', 'aeronaves', 'renavam', 'embarcacoes'
         ]
         ds_displaced_compet = ['catweb', 'catweb_c']
 

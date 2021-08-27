@@ -46,8 +46,7 @@ class MapbiomasAlertsResource(BaseResource):
     def get(self):
         """ Obtém conjunto de alertas para o período informado """
         try:
-            return self.get_domain().fetch_alerts_by_dates(request.args.copy().to_dict(flat=False))
-            return result
+            return self.get_domain().filter_alerts(request.args.copy().to_dict(flat=False))
         except HTTPError:  # Falha ao obter dado do MapBiomas
             return {"origin": "Mapbiomas", "message": "Falha ao obter conjunto de alertas do mapbiomas"}, 500
         except (TTransportException, DatabaseError):

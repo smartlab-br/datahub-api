@@ -48,21 +48,21 @@ class Car(BaseModel):
         if self.token is None:
             resp = self.invoke_graphql_query(
                 f"""mutation {{
-                  createToken(
+                  signIn(
                     email: "{current_app.config["MAPBIOMAS"].get('USER')}",
                     password: "{current_app.config["MAPBIOMAS"].get('PASSWORD')}"
                   )
                   {{ token }}
                 }}"""
             )
-            self.token = resp.json().get('data', {}).get('createToken', {}).get('token')
+            self.token = resp.json().get('data', {}).get('signIn', {}).get('token')
         return self.token
 
     def fetch_report_from_source(self, car, alert):
         """ Get report from MapBiomas """
         resp = self.invoke_graphql_query(
             f"""{{
-                alertReport(alertId:{alert}, carId:{car}) {{
+                alertReport(alertCode:{alert}) {{
                     alertAreaInCar
                     alertCode
                     alertGeomWkt
@@ -168,10 +168,31 @@ class Car(BaseModel):
             message = " | ".join([x.get('message') for x in resp.json().get('errors')])
         raise Exception(message) from None
 
+    def fetch_alerts_by_owner_id(self, cpfcnpj):
+        """ Fetch alerts for a given CAR """
+        result = []
+        for car in self.get_repo().find_by_filters({"cpfcnpj": cpfcnpj}):
+            resp = self.invoke_graphql_query(
+                f"""{{
+                    alertsFromCar(alertCode:{car.get("carCode")}) {{
+                    }}
+                }}"""
+            )
+
+            alerts = [{**car, **{"alertId": alert}} for alert in resp.json().get('data', {}).get('alertsFromCar')]
+            result.extend(alerts)
+        return result
+
+    def filter_alerts(self, options):
+        """ Filter alerts by owner ID or publication date """
+        if "cpfcnpj" in options:
+            return self.fetch_alerts_by_owner_id(options.get("cpfcnpj"))
+        return self.fetch_alerts_by_dates(options)
+
     def fetch_alerts_by_dates(self, options, limit=50, offset=0):
         """ Get alerts from MapBiomas, given a options """
         current_offset = offset
-        remote_limit_multiplier = 20
+        remote_limit_multiplier = 2
         result = []
 
         if 'publish_from' not in options:
@@ -197,16 +218,11 @@ class Car(BaseModel):
         if 'detect_to' in options:
             detect_to = f'endDetectedAt: "{options.get("detect_to").strftime("%d-%m-%Y %H:%M")}"'
 
-        filtered_cars = self.get_repo().find_by_filters(options)
-        candidates = None
-        if filtered_cars is not None:
-            candidates = {candidate.get('carcode'): candidate for candidate in filtered_cars}
-
         while len(result) < 50:
             # Show all alerts for a given time-frame
             resp = self.invoke_graphql_query(
                 f"""{{
-                    allPublishedAlerts(
+                    publishedAlerts(
                         startPublishedAt: "{options.get('publish_from').strftime("%d-%m-%Y %H:%M")}" 
                         endPublishedAt: "{options.get('publish_to').strftime("%d-%m-%Y %H:%M")}"
                         {detect_from}
@@ -236,7 +252,15 @@ class Car(BaseModel):
                 }}""",
                 self.get_token()
             )
-            nu_alerts = resp.json().get('data', {}).get('allPublishedAlerts')
+            nu_alerts = resp.json().get('data', {}).get('publishedAlerts')
+
+            filtered_cars = self.get_repo().find_by_id_list(
+                list(set([car.get("carCode") for alert in nu_alerts for car in alert.get("cars")]))
+            )
+            candidates = None
+            if filtered_cars is not None:
+                candidates = {candidate.get('carCode'): candidate for candidate in filtered_cars}
+
             if candidates is None:
                 car_ids = []
                 for alert in nu_alerts:

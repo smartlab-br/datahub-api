@@ -55,6 +55,8 @@ class Car(BaseModel):
                   {{ token }}
                 }}"""
             )
+            if resp.json() is None:
+                return self.get_token()
             self.token = resp.json().get('data', {}).get('signIn', {}).get('token')
         return self.token
 
@@ -174,8 +176,9 @@ class Car(BaseModel):
         for car in self.get_repo().find_by_filters({"cpfcnpj": cpfcnpj}):
             resp = self.invoke_graphql_query(
                 f"""{{
-                    alertsFromCar(alertCode:{car.get("carCode")}) {{
-                    }}
+                    alertsFromCar(
+                        carCode:"{car.get("carcode")}"
+                    )
                 }}"""
             )
 
@@ -183,11 +186,33 @@ class Car(BaseModel):
             result.extend(alerts)
         return result
 
+    def fecth_alerts_by_car(self, car):
+        """ Get alerts for a specific CAR """
+        result = []
+        for each_car in car:
+            car_complete = self.get_repo().find_by_id(each_car)
+            resp = self.invoke_graphql_query(
+                f"""{{
+                    alertsFromCar(
+                        carCode:"{each_car}"
+                    )
+                }}"""
+            )
+
+            result.extend([{**car_complete, **{"alertId": alert}} for alert in resp.json().get('data', {}).get('alertsFromCar')])
+        return result
+
     def filter_alerts(self, options):
         """ Filter alerts by owner ID or publication date """
         if "cpfcnpj" in options:
-            return self.fetch_alerts_by_owner_id(options.get("cpfcnpj"))
+            return self.fetch_cars_by_owner_id(options.get("cpfcnpj"))
+        if "car" in options:
+            return self.fecth_alerts_by_car(options.get("car"))
         return self.fetch_alerts_by_dates(options)
+
+    def fetch_cars_by_owner_id(self, id):
+        """ Gets a list of CAR according to owner ID """
+        return self.get_repo().find_by_filters({"cpfcnpj": id})
 
     def fetch_alerts_by_dates(self, options, limit=50, offset=0):
         """ Get alerts from MapBiomas, given a options """
@@ -259,41 +284,20 @@ class Car(BaseModel):
             )
             candidates = None
             if filtered_cars is not None:
-                candidates = {candidate.get('carCode'): candidate for candidate in filtered_cars}
+                candidates = {candidate.get('carcode'): candidate for candidate in filtered_cars}
 
-            if candidates is None:
-                car_ids = []
-                for alert in nu_alerts:
-                    for car in alert.get('cars'):
-                        car_ids.append(car.get('carCode'))
-                identified_cars = {
-                    identified_car.get('carcode'): identified_car
-                    for
-                    identified_car
-                    in
-                    self.get_repo().find_by_id_list(car_ids)
-                }
-                for alert in nu_alerts:
-                    for car in alert.get('cars'):
-                        car['owner'] = identified_cars.get(car.get('carCode'))
-                result.extend(nu_alerts)
-            else:
-                viable = []
-                for alert in nu_alerts:
-                    nu_alert = alert
-                    # Replace the cars with only the viable, according to filters
-                    nu_cars = []
-                    for car in alert.get('cars'):
-                        if car.get('carCode') in candidates.keys():
-                            # Adds owner data
-                            nu_car = car
-                            nu_car['owner'] = candidates.get(car.get('carCode'))
-                            nu_cars.append(nu_car)
-                    nu_alert['cars'] = nu_cars
-                    # Appends only if there's a CAR inside
-                    if len(nu_alert.get('cars')) > 0:
-                        viable.append(nu_alert)
-                result.extend(viable)
+            for alert in nu_alerts:
+                # Replace the cars with only the viable, according to filters
+                for car in alert.get('cars'):
+                    if car.get('carCode') in candidates.keys():
+                        # Adds owner data
+                        nu_alert = {
+                            **alert.copy(),
+                            **{"car_id": car.get("id"), "carCode": car.get("carCode")},
+                            **candidates.get(car.get('carCode'))
+                        }
+                        del nu_alert["cars"]
+                        result.append(nu_alert)
 
             if len(nu_alerts) < limit:
                 break

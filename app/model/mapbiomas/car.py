@@ -1,6 +1,6 @@
 """ Model for getting report from mapbiomas and adding more data """
 from model.base import BaseModel
-from repository.mapbiomas.car import CarRepository
+from repository.mapbiomas.car import CarRepository, MapBiomasConnectorRepository
 import requests
 from datetime import datetime
 import dateutil.relativedelta
@@ -20,13 +20,18 @@ class Car(BaseModel):
             self.repo = CarRepository()
         return self.repo
 
-    def find_by_alert_and_car(self, alert, car):
+    def find_by_alert_and_car(self, alert, car, car_code):
         """ Gather data from different sources and put them together """
-        report = self.fetch_report_from_source(car, alert)
+        report = self.fetch_report_from_source(alert)
         if report is not None:
-            report['mpt_data'] = {
-                "ownership": self.get_repo().find_by_id(report.get('alertReport', {}).get('carCode'))
-            }
+            if car_code:
+                report['mpt_data'] = {
+                    "ownership": self.get_repo().find_by_id(car_code)
+                }
+            else:
+                report['mpt_data'] = {
+                    "ownership": self.get_repo().find_by_id(report.get('alertReport', {}).get('carCode'))
+                }
         return report
 
     def invoke_graphql_query(self, gql_qry, token=None):
@@ -41,26 +46,32 @@ class Car(BaseModel):
             verify=False
         )
         resp.raise_for_status()
+        if resp.json().get("errors"):
+            retry = any([err.get("extensions", {}).get("forbidden", False) for err in resp.json().get("errors")])
+            if retry:
+                return self.invoke_graphql_query(gql_qry, self.get_token())
         return resp
 
     def get_token(self):
         """ Get a token from MapBiomas """
         if self.token is None:
-            resp = self.invoke_graphql_query(
-                f"""mutation {{
-                  signIn(
-                    email: "{current_app.config["MAPBIOMAS"].get('USER')}",
-                    password: "{current_app.config["MAPBIOMAS"].get('PASSWORD')}"
-                  )
-                  {{ token }}
-                }}"""
-            )
-            if resp.json() is None:
-                return self.get_token()
-            self.token = resp.json().get('data', {}).get('signIn', {}).get('token')
+            self.token = MapBiomasConnectorRepository().get_token()
+            if self.token is None:
+                resp = self.invoke_graphql_query(
+                    f"""mutation {{
+                      signIn(
+                        email: "{current_app.config["MAPBIOMAS"].get('USER')}",
+                        password: "{current_app.config["MAPBIOMAS"].get('PASSWORD')}"
+                      )
+                      {{ token }}
+                    }}"""
+                )
+                if resp.json() is None:
+                    return self.get_token()
+                self.token = resp.json().get('data', {}).get('signIn', {}).get('token')
         return self.token
 
-    def fetch_report_from_source(self, car, alert):
+    def fetch_report_from_source(self, alert):
         """ Get report from MapBiomas """
         resp = self.invoke_graphql_query(
             f"""{{
@@ -159,7 +170,8 @@ class Car(BaseModel):
                     }}
                     warnings
                 }}
-            }}"""
+            }}""",
+            self.get_token()
         )
 
         if resp.json().get('data', None) is not None:
@@ -186,20 +198,22 @@ class Car(BaseModel):
             result.extend(alerts)
         return result
 
-    def fecth_alerts_by_car(self, car):
+    def fetch_alerts_by_car(self, car):
         """ Get alerts for a specific CAR """
         result = []
         for each_car in car:
-            car_complete = self.get_repo().find_by_id(each_car)
-            resp = self.invoke_graphql_query(
-                f"""{{
-                    alertsFromCar(
-                        carCode:"{each_car}"
-                    )
-                }}"""
-            )
+            car_complete_list = self.get_repo().find_by_id(each_car)
+            for car_complete in car_complete_list:
+                resp = self.invoke_graphql_query(
+                    f"""{{
+                        alertsFromCar(
+                            carCode:"{each_car}"
+                        )
+                    }}""",
+                    self.get_token()
+                )
 
-            result.extend([{**car_complete, **{"alertId": alert}} for alert in resp.json().get('data', {}).get('alertsFromCar')])
+                result.extend([{**car_complete, **alert, **{"alertId": alert.get("alert_code")}} for alert in resp.json().get('data', {}).get('alertsFromCar')])
         return result
 
     def filter_alerts(self, options):
@@ -207,7 +221,7 @@ class Car(BaseModel):
         if "cpfcnpj" in options:
             return self.fetch_cars_by_owner_id(options.get("cpfcnpj"))
         if "car" in options:
-            return self.fecth_alerts_by_car(options.get("car"))
+            return self.fetch_alerts_by_car(options.get("car"))
         return self.fetch_alerts_by_dates(options)
 
     def fetch_cars_by_owner_id(self, id):

@@ -24,7 +24,8 @@ class DatasetsRepository(RedisRepository):
         "rfbsocios": "MAX dt_carga",
         "rfbparticipacaosocietaria": "MAX dt_carga",
         "renavam": "MAX dt_carga",
-        "aeronaves": "MAX dt_carga"
+        "aeronaves": "MAX dt_carga",
+        "embarcacoes": "MAX dt_carga"
     }
 
     def retrieve(self):

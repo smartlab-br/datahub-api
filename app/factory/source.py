@@ -8,6 +8,7 @@ from model.source.rais import Rais
 from model.source.renavam import Renavam
 from model.source.sisben import Sisben
 from model.source.rfb import BaseRfb, RfbSocios, RfbParticipacaoSocietaria
+from model.source.embarcacoes import Embarcacoes
 
 class SourceFactory():
     ''' Factory for instantiating specific models depending on the source
@@ -39,5 +40,7 @@ class SourceFactory():
             if dataframe == 'cagedsaldo':
                 return CagedSaldo()
             return BaseCaged()
+        if dataframe == 'embarcacoes':
+            return Embarcacoes()
         # Default
         return BaseSource()

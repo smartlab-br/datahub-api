@@ -54,6 +54,13 @@ class Thematic(BaseModel):
                 'link': 'https://infraestrutura.gov.br/denatran'
             }
         },
+        'marinha': {
+            'datasets': ['embarcacoes'],
+            'source': {
+                'fonte': 'Ministério da Defesa - Marinha do Brasil',
+                'link': 'https://www.marinha.mil.br/'
+            }
+        },
         'mpt': {
             'datasets': ['auto'],
             'source': {

@@ -98,6 +98,8 @@ class BaseModel():
             return np.mean
         if aggr.upper() == 'SUM' or aggr.upper() == 'COUNT':
             return np.sum
+        if aggr.upper() == 'FIRST':
+            return 'first'
         return np.mean
 
     def get_template(self, cd_template, options):

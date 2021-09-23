@@ -1,6 +1,6 @@
 ''' Repository para recuperar informações da CEE '''
 import pandas as pd
-from repository.base import ImpalaRepository
+from repository.base import ImpalaRepository, RedisRepository
 
 #pylint: disable=R0903
 class CarRepository(ImpalaRepository):
@@ -53,3 +53,19 @@ class CarRepository(ImpalaRepository):
         query = self.get_named_query('QRY_FIND_BY_FILTERS').format(f" WHERE {' AND '.join(list_filters)}")
 
         return pd.read_sql(query, self.get_dao()).to_dict(orient="records")
+
+
+class MapBiomasConnectorRepository(RedisRepository):
+    """ Repository to manage MapBiomas token"""
+    KEY = "sue:er:mb:token"
+
+    def __init__(self):
+        self.load_and_prepare()
+
+    def get_token(self):
+        """ Get token from REDIS """
+        return self.get_dao().get(self.KEY)
+
+    def store_status(self, value):
+        """Save token to REDIS """
+        self.get_dao().set(self.KEY, value)

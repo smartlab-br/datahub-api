@@ -46,8 +46,7 @@ class MapbiomasAlertsResource(BaseResource):
     def get(self):
         """ Obtém conjunto de alertas para o período informado """
         try:
-            return self.get_domain().fetch_alerts_by_dates(request.args.copy().to_dict(flat=False))
-            return result
+            return self.get_domain().filter_alerts(request.args.copy().to_dict(flat=False))
         except HTTPError:  # Falha ao obter dado do MapBiomas
             return {"origin": "Mapbiomas", "message": "Falha ao obter conjunto de alertas do mapbiomas"}, 500
         except (TTransportException, DatabaseError):
@@ -76,8 +75,10 @@ class MapbiomasAlertResource(BaseResource):
         'parameters': [
             {"name": "alert_id", "required": True, "type": 'int', "in": "path",
              "description": "ID do alerta."},
-            {"name": "car_id", "required": True, "type": 'int', "in": "query",
-             "description": "ID do CAR para geração do laudo."}
+            {"name": "car_id", "required": False, "type": 'int', "in": "query",
+             "description": "ID do CAR para geração do laudo."},
+            {"name": "car_code", "required": False, "type": 'string', "in": "query",
+             "description": "Recibo do CAR para geração do laudo."}
         ],
         'responses': {'200': {'description': 'Laudo'}}
     })
@@ -85,13 +86,13 @@ class MapbiomasAlertResource(BaseResource):
         domain="bifrost",
         event_tracker_options={
             "item": "laudo", "action": "emit", "category": "mapbiomas",
-            "additional_parameters": {"alert_id": "path", "car_id": "query"}
+            "additional_parameters": {"alert_id": "path", "car_id": "query", "car_code": "query"}
         }
     )
     def get(self, alert_id):
         """ Obtém conjunto de alertas para o período informado """
         try:
-            data = self.get_domain().find_by_alert_and_car(alert_id, request.args.get('car_id'))
+            data = self.get_domain().find_by_alert_and_car(alert_id, request.args.get('car_id'), request.args.get('car_code'))
             return data
         except HTTPError:  # Falha ao obter dado do MapBiomas
             return {"origin": "Mapbiomas", "message": "Falha ao obter alerta do mapbiomas"}, 500

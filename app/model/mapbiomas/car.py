@@ -221,8 +221,10 @@ class Car(BaseModel):
         if "cpfcnpj" in options:
             return self.fetch_cars_by_owner_id(options.get("cpfcnpj"))
         if "car" in options:
-            return self.fetch_alerts_by_car(options.get("car"))
-        return self.fetch_alerts_by_dates(options)
+            # return self.fetch_alerts_by_car(options.get("car"))
+            return self.get_repo().find_by_id(options.get("car"))
+        # return self.fetch_alerts_by_dates(options)
+        return self.get_repo().find_all(options)
 
     def fetch_cars_by_owner_id(self, id):
         """ Gets a list of CAR according to owner ID """

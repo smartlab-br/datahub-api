@@ -11,22 +11,39 @@ class CarRepository(ImpalaRepository):
     NAMED_QUERIES = {
         'QRY_FIND_DATASET': 'SELECT {} FROM {} {} {} {} {} {}',
         'QRY_FIND_BY_CODE': '''SELECT 
-            nu_recibo AS carCode, nm_proprietarios, cpf_cnpj_proprietarios 
-            FROM private.tb_cadastro_atividade_rural WHERE nu_recibo = "{}"''',
+            car_code AS carCode, nm_proprietarios, cpf_cnpj_proprietarios,
+            nm_imovel, alertcode, CAST(alertinsertedat AS STRING) as alertinsertedat, areaha,
+            coordinates, CAST(detectedat AS STRING) as detectedat, geometry, id, source,
+            statusid, car_id, CAST(statusinsertedat AS STRING) as statusinsertedat
+            FROM private.mapbiomas_alerta WHERE car_code = "{}" LIMIT 50''',
         'QRY_FIND_BY_CODES': '''SELECT 
-            nu_recibo AS carCode, nm_proprietarios, cpf_cnpj_proprietarios 
-            FROM private.tb_cadastro_atividade_rural WHERE nu_recibo IN ({})''',
+            car_code AS carCode, nm_proprietarios, cpf_cnpj_proprietarios,
+            nm_imovel, alertcode, CAST(alertinsertedat AS STRING) as alertinsertedat, areaha,
+            coordinates, CAST(detectedat AS STRING) as detectedat, geometry, id, source,
+            statusid, car_id, CAST(statusinsertedat AS STRING) statusinsertedat
+            FROM private.mapbiomas_alerta WHERE car_code IN ({}) LIMIT 50''',
         'QRY_FIND_BY_FILTERS': '''SELECT 
-            nu_recibo AS carCode, nm_proprietarios, cpf_cnpj_proprietarios 
-            FROM private.tb_cadastro_atividade_rural {}''',
+            car_code AS carCode, nm_proprietarios, cpf_cnpj_proprietarios,
+            nm_imovel, alertcode, CAST(alertinsertedat AS STRING) as alertinsertedat, areaha,
+            coordinates, CAST(detectedat AS STRING) as detectedat, geometry, id, source,
+            statusid, car_id, CAST(statusinsertedat AS STRING) as statusinsertedat
+            FROM private.mapbiomas_alerta {} LIMIT 50''',
         'QRY_FIND_ALL': '''SELECT DISTINCT
-            nu_recibo AS carCode, nm_proprietarios, cpf_cnpj_proprietarios 
-            FROM private.tb_cadastro_atividade_rural'''
+            car_code AS carCode, nm_proprietarios, cpf_cnpj_proprietarios,
+            nm_imovel, alertcode, CAST(alertinsertedat AS STRING) as alertinsertedat, areaha,
+            coordinates, CAST(detectedat AS STRING) as detectedat, geometry, id, source,
+            statusid, car_id, CAST(statusinsertedat AS STRING) as statusinsertedat
+            FROM private.mapbiomas_alerta LIMIT 50'''
     }
 
     def find_by_id(self, car):
         """ Localiza um município pelo código do IBGE """
         query = self.get_named_query('QRY_FIND_BY_CODE').format(car)
+        return pd.read_sql(query, self.get_dao()).to_dict(orient="records")
+
+    def find_all(self, car):
+        """ Localiza um município pelo código do IBGE """
+        query = self.get_named_query('QRY_FIND_ALL').format(car)
         return pd.read_sql(query, self.get_dao()).to_dict(orient="records")
 
     def find_by_id_list(self, car_list):

@@ -18,22 +18,18 @@ class MapbiomasAlertsResource(BaseResource):
         'tags': ['alerta'],
         'description': 'Laudo do mapbiomas com identificação do CAR',
         'parameters': [
-            {"name": "publish_from", "required": False, "type": 'int', "in": "query",
-             "description": "Timestamp do início do filtro de publicação do alerta."},
-            {"name": "publish_to", "required": False, "type": 'int', "in": "query",
-             "description": "Timestamp do fim do filtro de publicação do alerta."},
-            {"name": "detect_from", "required": False, "type": 'int', "in": "query",
-             "description": "Timestamp do início do filtro de detecção do alerta."},
-            {"name": "detect_to", "required": False, "type": 'int', "in": "query",
-             "description": "Timestamp do fim do filtro de detecção do alerta."},
             {"name": "cpfcnpj", "required": False, "type": 'string', "in": "query",
              "description": "CPF/CNPJ completo, com separadores, para filtro dos alertas/car."},
             {"name": "nome", "required": False, "type": 'string', "in": "query",
-             "description": "Parte do nome (em bloco único) para filtro dos alertas/car."},
+             "description": "Parte do nome (em bloco único) do proprietário para filtro dos alertas/car."},
+            {"name": "nome_propriedade", "required": False, "type": 'string', "in": "query",
+             "description": "Parte do nome (em bloco único) da propriedade para filtro dos alertas/car."},
             {"name": "siglauf", "required": False, "type": 'string', "in": "query",
-             "description": "Sigla de Unidade Federativa para filtro dos alertas/car."},
-            {"name": "nomemunicipio", "required": False, "type": 'string', "in": "query",
-             "description": "Nome parcial de município (em bloco único) para filtro dos alertas/car."}
+             "description": "Lista de siglas de Unidade Federativa do alerta, separadas por vírgula."},
+            {"name": "arearange", "required": False, "type": 'string', "in": "query",
+             "description": "Area (ha) do alerta, mínimo e máximo, separados por vírgula."},
+            {"name": "daterange", "required": False, "type": 'string', "in": "query",
+             "description": "Data de identificação do alerta, início e fim separados por vírgula e formato YYYY-MM-DD."}
         ],
         'responses': {'200': {'description': 'Alertas'}}
     })

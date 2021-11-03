@@ -218,17 +218,20 @@ class Car(BaseModel):
 
     def filter_alerts(self, options):
         """ Filter alerts by owner ID or publication date """
+        page = int(options.get("page", ["1"])[0])
         if "cpfcnpj" in options:
-            return self.fetch_cars_by_owner_id(options.get("cpfcnpj"))
+            if not any([x in options for x in ["arearange", "daterange", "siglauf"]]):
+                return self.fetch_cars_by_owner_id(options.get("cpfcnpj"), page)
+            return self.get_repo().find_by_filters(options, page)
         if "car" in options:
             # return self.fetch_alerts_by_car(options.get("car"))
-            return self.get_repo().find_by_id(options.get("car"))
+            return self.get_repo().find_by_id(options.get("car"), page)
         # return self.fetch_alerts_by_dates(options)
-        return self.get_repo().find_all(options)
+        return self.get_repo().find_all(page)
 
-    def fetch_cars_by_owner_id(self, id):
+    def fetch_cars_by_owner_id(self, id, page):
         """ Gets a list of CAR according to owner ID """
-        return self.get_repo().find_by_filters({"cpfcnpj": id})
+        return self.get_repo().find_by_filters({"cpfcnpj": id}, page)
 
     def fetch_alerts_by_dates(self, options, limit=50, offset=0):
         """ Get alerts from MapBiomas, given a options """

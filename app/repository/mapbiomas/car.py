@@ -9,6 +9,7 @@ class CarRepository(ImpalaRepository):
     TABLE_NAMES = {
         'MAIN': 'car'
     }
+    PAGE_SIZE = 200
     NAMED_QUERIES = {
         'QRY_FIND_DATASET': 'SELECT {} FROM {} {} {} {} {} {}',
         'QRY_FIND_BY_CODE': '''SELECT 
@@ -18,7 +19,7 @@ class CarRepository(ImpalaRepository):
             statusid, car_id, CAST(statusinsertedat AS STRING) as statusinsertedat
             FROM private.mapbiomas_alerta WHERE car_code = "{}"
             ORDER BY detectedat DESC, areaha DESC
-            LIMIT 50 OFFSET {}''',
+            LIMIT {} OFFSET {}''',
         'QRY_FIND_BY_CODES': '''SELECT 
             car_code AS carCode, nm_proprietarios, cpf_cnpj_proprietarios,
             nm_imovel, alertcode, CAST(alertinsertedat AS STRING) as alertinsertedat, areaha,
@@ -26,7 +27,7 @@ class CarRepository(ImpalaRepository):
             statusid, car_id, CAST(statusinsertedat AS STRING) statusinsertedat
             FROM private.mapbiomas_alerta WHERE car_code IN ({})
             ORDER BY detectedat DESC, areaha DESC
-            LIMIT 50 OFFSET {}''',
+            LIMIT {} OFFSET {}''',
         'QRY_FIND_BY_FILTERS': '''SELECT 
             car_code AS carCode, nm_proprietarios, cpf_cnpj_proprietarios,
             nm_imovel, alertcode, CAST(alertinsertedat AS STRING) as alertinsertedat, areaha,
@@ -34,7 +35,7 @@ class CarRepository(ImpalaRepository):
             statusid, car_id, CAST(statusinsertedat AS STRING) as statusinsertedat
             FROM private.mapbiomas_alerta {}
             ORDER BY detectedat DESC, areaha DESC
-            LIMIT 50 OFFSET {}''',
+            LIMIT {} OFFSET {}''',
         'QRY_FIND_ALL': '''SELECT DISTINCT
             car_code AS carCode, nm_proprietarios, cpf_cnpj_proprietarios,
             nm_imovel, alertcode, CAST(alertinsertedat AS STRING) as alertinsertedat, areaha,
@@ -42,7 +43,7 @@ class CarRepository(ImpalaRepository):
             statusid, car_id, CAST(statusinsertedat AS STRING) as statusinsertedat
             FROM private.mapbiomas_alerta
             ORDER BY detectedat DESC, areaha DESC
-            LIMIT 50 OFFSET {}''',
+            LIMIT {} OFFSET {}''',
 
         'QRY_COUNT_FIND_BY_CODE': '''SELECT COUNT(*) AS total_count
             FROM private.mapbiomas_alerta WHERE car_code = "{}"''',
@@ -56,8 +57,8 @@ class CarRepository(ImpalaRepository):
 
     def find_by_id(self, car, page):
         """ Localiza um município pelo código do IBGE """
-        offset = (page - 1) * 50 + 1
-        query_dataset = self.get_named_query('QRY_FIND_BY_CODE').format(car, offset)
+        offset = (page - 1) * self.PAGE_SIZE
+        query_dataset = self.get_named_query('QRY_FIND_BY_CODE').format(car, self.PAGE_SIZE, offset)
         dataset = pd.read_sql(query_dataset, self.get_dao()).to_dict(orient="records")
 
         if page == 1:
@@ -68,8 +69,8 @@ class CarRepository(ImpalaRepository):
 
     def find_all(self, page):
         """ Localiza um município pelo código do IBGE """
-        offset = (page - 1) * 50
-        query_dataset = self.get_named_query('QRY_FIND_ALL').format(offset)
+        offset = (page - 1) * self.PAGE_SIZE
+        query_dataset = self.get_named_query('QRY_FIND_ALL').format(self.PAGE_SIZE, offset)
         dataset = pd.read_sql(query_dataset, self.get_dao()).to_dict(orient="records")
 
         if page == 1:
@@ -80,9 +81,9 @@ class CarRepository(ImpalaRepository):
 
     def find_by_id_list(self, car_list, page):
         """ Localiza um município pelo código do IBGE """
-        offset = (page - 1) * 50 + 1
+        offset = (page - 1) * self.PAGE_SIZE
         qry_param = ('\", \"').join(car_list)
-        query_dataset = self.get_named_query('QRY_FIND_BY_CODES').format(f'\"{qry_param}"', offset)
+        query_dataset = self.get_named_query('QRY_FIND_BY_CODES').format(f'\"{qry_param}"', self.PAGE_SIZE, offset)
         dataset = pd.read_sql(query_dataset, self.get_dao()).to_dict(orient="records")
 
         if page == 1:
@@ -93,7 +94,7 @@ class CarRepository(ImpalaRepository):
 
     def find_by_filters(self, options, page):
         """ Finds a collection of CAR according to filters """
-        offset = (page - 1) * 50 + 1
+        offset = (page - 1) * self.PAGE_SIZE
         list_filters = []
         if 'cpfcnpj' in options and options.get('cpfcnpj') != ['undefined']:  # Filter by cpf/cnpj
             list_filters.append(f"cpf_cnpj_proprietarios LIKE '%{''.join(options.get('cpfcnpj'))}%'")
@@ -117,6 +118,7 @@ class CarRepository(ImpalaRepository):
 
         query_dataset = self.get_named_query('QRY_FIND_BY_FILTERS').format(
             f" WHERE {' AND '.join(list_filters)}",
+            self.PAGE_SIZE,
             offset
         )
         dataset = pd.read_sql(query_dataset, self.get_dao()).to_dict(orient="records")

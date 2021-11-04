@@ -1,7 +1,7 @@
 ''' Repository para recuperar informações da CEE '''
 import pandas as pd
 from repository.base import ImpalaRepository, RedisRepository
-from datetime import datetime
+from datetime import datetime, timedelta
 
 #pylint: disable=R0903
 class CarRepository(ImpalaRepository):
@@ -112,17 +112,18 @@ class CarRepository(ImpalaRepository):
         if 'nome_proprietario' in options:  # Filter by name (partial)
             list_filters.append(f"nm_proprietarios LIKE '%{''.join(options.get('nome'))}%'")
         if 'siglauf' in options:  # Filter by name (partial)
-            list_filters.append(f"estado = '{''.join(options.get('siglauf'))}'")
+            list_filters.append(f"SUBSTR(car_code, 1, 2) = '{''.join(options.get('siglauf')[0])}'")
         # if 'nomemunicipio' in options:  # Filter by name (partial)
         #     list_filters.append(f"municipio LIKE '%{''.join(options.get('nomemunicipio'))}%'")
         if 'nome_propriedade' in options:
             list_filters.append(f"nm_propriedade LIKE '%{''.join(options.get('nome'))}%'")
         if 'arearange' in options:
-            arearange = [float(x) for x in options.get("arearange").split(",")]
-            list_filters.append(f"areaha BETWEEN {arearange[0]} AND {arearange[1]}")
+            arearange = [float(x) for x in options.get("arearange")[0].split(",")]
+            list_filters.append(f"CAST(areaha AS DECIMAL) BETWEEN {arearange[0]} AND {arearange[1]}")
         if 'daterange' in options:
-            daterange = [datetime.strptime(x, "YYYY-MM-DD") for x in options.get("daterange").split(",")]
-            list_filters.append(f"areaha BETWEEN {daterange[0]} AND {daterange[1]}")
+            daterange = [datetime.strptime(x[:10], "%Y-%m-%d") for x in options.get("daterange")[0].split(",")]
+            daterange[1] = daterange[1] + timedelta(days=1) + timedelta(seconds=-1)
+            list_filters.append(f"detectedat BETWEEN '{daterange[0]}' AND '{daterange[1]}'")
 
         if len(list_filters) == 0:
             return None
@@ -135,8 +136,8 @@ class CarRepository(ImpalaRepository):
         dataset = pd.read_sql(query_dataset, self.get_dao()).to_dict(orient="records")
 
         if page == 1:
-            query_count = self.get_named_query('QRY_COUNT_FIND_BY_FILTERS')
-            count = pd.read_sql(query_count, self.get_dao()).to_dict(orient="records")
+            query_count = self.get_named_query('QRY_COUNT_FIND_BY_FILTERS').format(f" WHERE {' AND '.join(list_filters)}")
+            count = pd.read_sql(query_count, self.get_dao()).to_dict(orient="records")[0]
 
         return {"dataset": dataset, "metadata": count}
 

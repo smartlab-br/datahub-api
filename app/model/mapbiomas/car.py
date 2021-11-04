@@ -227,6 +227,8 @@ class Car(BaseModel):
             # return self.fetch_alerts_by_car(options.get("car"))
             return self.get_repo().find_by_id(options.get("car"), page)
         # return self.fetch_alerts_by_dates(options)
+        if options.get("siglauf") or options.get("daterange", [',']) != [','] or options.get("arearange", ['0,0']) != ['0,0']:
+            return self.get_repo().find_by_filters(options, page)
         return self.get_repo().find_all(page)
 
     def find_filters_options(self):

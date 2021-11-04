@@ -229,6 +229,9 @@ class Car(BaseModel):
         # return self.fetch_alerts_by_dates(options)
         return self.get_repo().find_all(page)
 
+    def find_filters_options(self):
+        return self.get_repo().find_filters_options()
+
     def fetch_cars_by_owner_id(self, id, page):
         """ Gets a list of CAR according to owner ID """
         return self.get_repo().find_by_filters({"cpfcnpj": id}, page)

@@ -106,3 +106,40 @@ class MapbiomasAlertResource(BaseResource):
     def set_domain(self):
         """ Setter invoked from constructor """
         self.domain = Car()
+
+class MapbiomasAlertsFilterOptionsResource(BaseResource):
+    """ Classe de busca alertas do mapbiomas """
+    def __init__(self):
+        """ Construtor"""
+        self.domain = Car()
+
+    @swagger.doc({
+        'tags': ['alerta'],
+        'description': 'Opções para filtros',
+        'parameters': [],
+        'responses': {'200': {'description': 'Opções de filtros'}}
+    })
+    @authenticate(
+        domain="bifrost",
+        event_tracker_options={
+            "item": "filter_options", "action": "find", "category": "mapbiomas"
+        }
+    )
+    def get(self):
+        """ Obtém conjunto de alertas para o período informado """
+        try:
+            return self.get_domain().find_filters_options()
+        except HTTPError:  # Falha ao obter dado do MapBiomas
+            return {"origin": "Mapbiomas", "message": "Falha ao obter conjunto de alertas do mapbiomas"}, 500
+        except (TTransportException, DatabaseError):
+            return {"origin": "Smartlab", "message": "Falha ao obter dados identificados no datahub"}, 500
+
+    def get_domain(self):
+        """ Carrega o modelo de domínio, se não o encontrar """
+        if self.domain is None:
+            self.domain = Car()
+        return self.domain
+
+    def set_domain(self):
+        """ Setter invoked from constructor """
+        self.domain = Car()

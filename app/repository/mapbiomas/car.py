@@ -52,6 +52,13 @@ class CarRepository(ImpalaRepository):
         'QRY_COUNT_FIND_BY_FILTERS': '''SELECT COUNT(*) AS total_count
             FROM private.mapbiomas_alerta {}''',
         'QRY_COUNT_FIND_ALL': '''SELECT COUNT(*) AS total_count
+            FROM private.mapbiomas_alerta''',
+
+        'QRY_OPTIONS_UF': '''SELECT DISTINCT(SUBSTR(car_code, 1, 2)) AS uf
+            FROM private.mapbiomas_alerta''',
+        'QRY_OPTIONS_RANGES': '''SELECT MIN(CAST(areaha AS DECIMAL)) AS min_areaha,
+            MAX(CAST(areaha AS DECIMAL)) AS max_areaha, CAST(MIN(detectedat) AS STRING) AS min_detectedat,
+            CAST(MAX(detectedat) AS STRING) AS max_detectedat
             FROM private.mapbiomas_alerta'''
     }
 
@@ -75,8 +82,12 @@ class CarRepository(ImpalaRepository):
 
         if page == 1:
             query_count = self.get_named_query('QRY_COUNT_FIND_ALL')
-            count = pd.read_sql(query_count, self.get_dao()).to_dict(orient="records")
-            return {"dataset": dataset, "metadata": count}
+            count = pd.read_sql(query_count, self.get_dao()).to_dict(orient="records")[0]
+            filter_options = self.find_filters_options()
+            return {
+                "dataset": dataset,
+                "metadata": {**count, **filter_options}
+            }
         return {"dataset": dataset}
 
     def find_by_id_list(self, car_list, page):
@@ -128,6 +139,11 @@ class CarRepository(ImpalaRepository):
             count = pd.read_sql(query_count, self.get_dao()).to_dict(orient="records")
 
         return {"dataset": dataset, "metadata": count}
+
+    def find_filters_options(self):
+        result = pd.read_sql(self.get_named_query("QRY_OPTIONS_RANGES"), self.get_dao()).to_dict(orient="records")[0]
+        result["uf"] = sorted(pd.read_sql(self.get_named_query("QRY_OPTIONS_UF"), self.get_dao())["uf"].tolist())
+        return result
 
 
 class MapBiomasConnectorRepository(RedisRepository):

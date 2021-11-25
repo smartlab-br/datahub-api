@@ -26,11 +26,11 @@ class Car(BaseModel):
         if report is not None:
             if car_code:
                 report['mpt_data'] = {
-                    "ownership": self.get_repo().find_by_id(car_code)
+                    "ownership": self.get_repo().find_by_id(car_code, 1).get('dataset', [{}])[0]
                 }
             else:
                 report['mpt_data'] = {
-                    "ownership": self.get_repo().find_by_id(report.get('alertReport', {}).get('carCode'))
+                    "ownership": self.get_repo().find_by_id(report.get('alertReport', {}).get('carCode'), 1).get('dataset',[{}])[0]
                 }
         return report
 

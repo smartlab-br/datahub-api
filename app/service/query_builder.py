@@ -13,7 +13,7 @@ class QueryBuilder():
     @staticmethod
     def get_agr_string(agregacao=None, valor=None):
         ''' Obtém o alias de uma função, se fora do pardão '''
-        as_is = ['SUM', 'COUNT', 'MAX', 'MIN', 'AVG']
+        as_is = ['SUM', 'COUNT', 'MAX', 'MIN', 'AVG', 'GROUP_CONCAT']
         ignore = ['DISTINCT']
         if agregacao.upper() in ignore:
             return None
@@ -142,7 +142,7 @@ class QueryBuilder():
     def catch_injection(options):
         ''' Verifica se há alguma palavra reservada indicando SQL Injection '''
         blocked_words = ['SELECT', 'JOIN', 'UNION', 'WHERE', 'ALTER', 'CREATE',
-                         'TRUNCATE', 'DELETE', 'CONCAT', 'UPDATE', 'FROM', ';',
+                         'TRUNCATE', 'DELETE', 'UPDATE', 'FROM', ';',
                          '|']
         for key, option in options.items():
             check_exclusions = [

@@ -18,7 +18,7 @@ class Empresa(BaseModel):
     TOPICS = [
         'rais', 'rfb', 'sisben', 'catweb', 'auto', 'caged', 'rfbsocios',
         'rfbparticipacaosocietaria', 'aeronaves', 'renavam', 'cagedsaldo',
-        'cagedtrabalhador', 'cagedtrabalhadorano'
+        'cagedtrabalhador', 'cagedtrabalhadorano', 'embarcacoes'
     ]
 
     def __init__(self):
@@ -62,12 +62,12 @@ class Empresa(BaseModel):
         (loading_entry, column_status) = self.get_loading_entry(options['cnpj_raiz'], options, dict_datasets)
         result = {'status': loading_entry}
         try:
-            dataset = self.get_repo().find_datasets(options)
             metadata = self.get_statistics(options)
             result['metadata'] = metadata
             if 'only_meta' in options and options['only_meta']:
                 result['dataset'] = []
             else:
+                dataset = self.get_repo().find_datasets(options)
                 result['dataset'] = dataset
         except requests.exceptions.HTTPError:
             loading_entry_is_valid = False
@@ -158,13 +158,7 @@ class Empresa(BaseModel):
                 # A entrada é compatível com o rol de datasources?
                 # A entrada tem menos de 1 mês?
                 if (columns_available is None or
-                        any([
-                            slot not in columns_available.keys()
-                            for
-                            slot
-                            in
-                            slot_list.split(',')
-                        ])):
+                        options.get('column') not in columns_available):
                     return False
                 if any(
                     [
@@ -309,7 +303,7 @@ class Empresa(BaseModel):
         # Get statistics partitioning by timeframe
         ds_no_compet = [
             'sisben', 'sisben_c', 'auto', 'rfb', 'rfbsocios',
-            'rfbparticipacaosocietaria', 'aeronaves', 'renavam'
+            'rfbparticipacaosocietaria', 'aeronaves', 'renavam', 'embarcacoes'
         ]
         ds_displaced_compet = ['catweb', 'catweb_c']
 

@@ -18,22 +18,18 @@ class MapbiomasAlertsResource(BaseResource):
         'tags': ['alerta'],
         'description': 'Laudo do mapbiomas com identificação do CAR',
         'parameters': [
-            {"name": "publish_from", "required": False, "type": 'int', "in": "query",
-             "description": "Timestamp do início do filtro de publicação do alerta."},
-            {"name": "publish_to", "required": False, "type": 'int', "in": "query",
-             "description": "Timestamp do fim do filtro de publicação do alerta."},
-            {"name": "detect_from", "required": False, "type": 'int', "in": "query",
-             "description": "Timestamp do início do filtro de detecção do alerta."},
-            {"name": "detect_to", "required": False, "type": 'int', "in": "query",
-             "description": "Timestamp do fim do filtro de detecção do alerta."},
             {"name": "cpfcnpj", "required": False, "type": 'string', "in": "query",
              "description": "CPF/CNPJ completo, com separadores, para filtro dos alertas/car."},
             {"name": "nome", "required": False, "type": 'string', "in": "query",
-             "description": "Parte do nome (em bloco único) para filtro dos alertas/car."},
+             "description": "Parte do nome (em bloco único) do proprietário para filtro dos alertas/car."},
+            {"name": "nome_propriedade", "required": False, "type": 'string', "in": "query",
+             "description": "Parte do nome (em bloco único) da propriedade para filtro dos alertas/car."},
             {"name": "siglauf", "required": False, "type": 'string', "in": "query",
-             "description": "Sigla de Unidade Federativa para filtro dos alertas/car."},
-            {"name": "nomemunicipio", "required": False, "type": 'string', "in": "query",
-             "description": "Nome parcial de município (em bloco único) para filtro dos alertas/car."}
+             "description": "Lista de siglas de Unidade Federativa do alerta, separadas por vírgula."},
+            {"name": "arearange", "required": False, "type": 'string', "in": "query",
+             "description": "Area (ha) do alerta, mínimo e máximo, separados por vírgula."},
+            {"name": "daterange", "required": False, "type": 'string', "in": "query",
+             "description": "Data de identificação do alerta, início e fim separados por vírgula e formato YYYY-MM-DD."}
         ],
         'responses': {'200': {'description': 'Alertas'}}
     })
@@ -46,8 +42,7 @@ class MapbiomasAlertsResource(BaseResource):
     def get(self):
         """ Obtém conjunto de alertas para o período informado """
         try:
-            return self.get_domain().fetch_alerts_by_dates(request.args.copy().to_dict(flat=False))
-            return result
+            return self.get_domain().filter_alerts(request.args.copy().to_dict(flat=False))
         except HTTPError:  # Falha ao obter dado do MapBiomas
             return {"origin": "Mapbiomas", "message": "Falha ao obter conjunto de alertas do mapbiomas"}, 500
         except (TTransportException, DatabaseError):
@@ -76,8 +71,10 @@ class MapbiomasAlertResource(BaseResource):
         'parameters': [
             {"name": "alert_id", "required": True, "type": 'int', "in": "path",
              "description": "ID do alerta."},
-            {"name": "car_id", "required": True, "type": 'int', "in": "query",
-             "description": "ID do CAR para geração do laudo."}
+            {"name": "car_id", "required": False, "type": 'int', "in": "query",
+             "description": "ID do CAR para geração do laudo."},
+            {"name": "car_code", "required": False, "type": 'string', "in": "query",
+             "description": "Recibo do CAR para geração do laudo."}
         ],
         'responses': {'200': {'description': 'Laudo'}}
     })
@@ -85,13 +82,13 @@ class MapbiomasAlertResource(BaseResource):
         domain="bifrost",
         event_tracker_options={
             "item": "laudo", "action": "emit", "category": "mapbiomas",
-            "additional_parameters": {"alert_id": "path", "car_id": "query"}
+            "additional_parameters": {"alert_id": "path", "car_id": "query", "car_code": "query"}
         }
     )
     def get(self, alert_id):
         """ Obtém conjunto de alertas para o período informado """
         try:
-            data = self.get_domain().find_by_alert_and_car(alert_id, request.args.get('car_id'))
+            data = self.get_domain().find_by_alert_and_car(alert_id, request.args.get('car_id'), request.args.get('car_code'))
             return data
         except HTTPError:  # Falha ao obter dado do MapBiomas
             return {"origin": "Mapbiomas", "message": "Falha ao obter alerta do mapbiomas"}, 500
@@ -99,6 +96,43 @@ class MapbiomasAlertResource(BaseResource):
             return {"origin": "Smartlab", "message": "Falha ao obter dados identificados no datahub"}, 500
         except Exception as err:
             return {"origin": "Mapbiomas", "message": str(err)}, 500
+
+    def get_domain(self):
+        """ Carrega o modelo de domínio, se não o encontrar """
+        if self.domain is None:
+            self.domain = Car()
+        return self.domain
+
+    def set_domain(self):
+        """ Setter invoked from constructor """
+        self.domain = Car()
+
+class MapbiomasAlertsFilterOptionsResource(BaseResource):
+    """ Classe de busca alertas do mapbiomas """
+    def __init__(self):
+        """ Construtor"""
+        self.domain = Car()
+
+    @swagger.doc({
+        'tags': ['alerta'],
+        'description': 'Opções para filtros',
+        'parameters': [],
+        'responses': {'200': {'description': 'Opções de filtros'}}
+    })
+    @authenticate(
+        domain="bifrost",
+        event_tracker_options={
+            "item": "filter_options", "action": "find", "category": "mapbiomas"
+        }
+    )
+    def get(self):
+        """ Obtém conjunto de alertas para o período informado """
+        try:
+            return self.get_domain().find_filters_options()
+        except HTTPError:  # Falha ao obter dado do MapBiomas
+            return {"origin": "Mapbiomas", "message": "Falha ao obter conjunto de alertas do mapbiomas"}, 500
+        except (TTransportException, DatabaseError):
+            return {"origin": "Smartlab", "message": "Falha ao obter dados identificados no datahub"}, 500
 
     def get_domain(self):
         """ Carrega o modelo de domínio, se não o encontrar """

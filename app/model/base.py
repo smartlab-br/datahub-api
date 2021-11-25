@@ -29,6 +29,7 @@ class BaseModel():
                 nu_val = self.get_repo().get_agr_string(
                     options.get('agregacao')[0], options.get('valor')[0]
                 ).split()[-1]
+            nu_val = nu_val.lower()
             result = pd.DataFrame(result)
             result = pd.pivot_table(
                 result, values=[nu_val],
@@ -98,6 +99,8 @@ class BaseModel():
             return np.mean
         if aggr.upper() == 'SUM' or aggr.upper() == 'COUNT':
             return np.sum
+        if aggr.upper() == 'GROUP_CONCAT':
+            return (lambda x: ' '.join(x))
         return np.mean
 
     def get_template(self, cd_template, options):

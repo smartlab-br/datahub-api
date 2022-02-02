@@ -45,4 +45,19 @@ class Datasets(BaseModel):
             df = model.find_dataset(options)
             value_to_add = ",".join([str(item.get(coluna_resultado)).replace(".0", "") for item in df.get("dataset")])
             result[key] = value_to_add
+
+            # Add ingestion date
+            try:
+                carga_df = model.find_dataset({
+                    "categorias": ['1'],
+                    "valor": ['dt_carga'],
+                    "agregacao": ["MAX"],
+                    "theme": key,
+                    "no_wrap": True
+                }).to_dict('records')
+                if carga_df:
+                    result[f"dt_carga_{key}"] = str(carga_df[0].get('agr_max_dt_carga'))
+            except Exception as e:
+                result[f"dt_carga_{key}"] = str(e)
+
         self.get_repo().store(result)

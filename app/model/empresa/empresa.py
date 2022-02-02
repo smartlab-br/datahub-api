@@ -122,9 +122,15 @@ class Empresa(BaseModel):
         column_status = None
         column_status_specific = None
         for dataframe, slot_list in dict_datasets.items():
-            columns_available = self.get_pessoa_dataset_repo().retrieve(cnpj_raiz, dataframe)
+            rev_theme = dataframe
+            if rev_theme in ["catweb_c", "sisben_c"]:
+                rev_theme = rev_theme[:-2]
+            columns_available = self.get_pessoa_dataset_repo().retrieve(cnpj_raiz, rev_theme)
+            theme = options.get('column_family', dataframe)
+            if theme in ["catweb", "sisben"]:
+                theme = f"{theme}_c"
             if (options is not None and 'column_family' in options and
-                    options.get('column_family', dataframe) == dataframe and
+                    theme == dataframe and
                     'column' in options):
                 column_status = self.assess_column_status(
                     slot_list.split(','),

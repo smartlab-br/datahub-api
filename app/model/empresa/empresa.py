@@ -144,12 +144,12 @@ class Empresa(BaseModel):
     def is_valid_loading_entry(self, cnpj_raiz, options=None, dict_datasets=None):
         ''' Checks if a loading entry is valid '''
         rules = dict_datasets
-        if (options is None or not options.get('column_family') or
-                not rules.get((options.get('column_family')))):
+        cf = options.get('column_family')
+        if cf in ['catweb', 'sisben']:
+            cf = f"{cf}_c"
+        if options is None or not cf or not rules.get(cf):
             raise ValueError('Dataset inválido')
-        if (options.get('column') and
-                options.get('column') not in rules.get(
-                    (options.get('column_family'))).split(',')):
+        if options.get('column') and options.get('column') not in rules.get((cf)).split(','):
             raise ValueError('Competência inválida para o dataset informado')
         for dataframe, slot_list in rules.items():
             columns_available = self.get_pessoa_dataset_repo().retrieve(cnpj_raiz, dataframe)

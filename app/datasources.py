@@ -11,7 +11,8 @@ def get_impala_connection():
             host=current_app.config["IMPALA_HOST"],
             database='spai',
             port=int(current_app.config["IMPALA_PORT"]),
-            user=current_app.config["IMPALA_USER"],
+            kerberos_service_name="impala",
+            auth_mechanism="GSSAPI",            
             use_ssl=True
         )
     return g.impala_connection

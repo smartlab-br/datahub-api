@@ -86,7 +86,11 @@ class Empresa(BaseModel):
     def produce(self, cnpj_raiz, column_family, column, dict_datasets):
         ''' Gera uma entrada na fila para ingestão de dados da empresa '''
         kafka_server = f'{current_app.config["KAFKA_HOST"]}:{current_app.config["KAFKA_PORT"]}'
-        producer = KafkaProducer(bootstrap_servers=[kafka_server])
+        producer = KafkaProducer(bootstrap_servers=[kafka_server],
+                   security_protocol='SASL_SSL',
+                   sasl_mechanism='GSSAPI',
+                   sasl_kerberos_service_name='kafka'
+        )
         redis_dao = PessoaDatasetsRepository()
         ds_dict = dict_datasets
 

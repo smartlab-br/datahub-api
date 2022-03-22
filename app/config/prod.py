@@ -11,8 +11,6 @@ class ProductionConfig():
 
     IMPALA_HOST = os.getenv('IMPALA_HOST')
     IMPALA_PORT = os.getenv('IMPALA_PORT')
-    IMPALA_USER = os.getenv('IMPALA_USER')
-    IMPALA_PWD = os.getenv('IMPALA_PWD')
 
     GIT_VIEWCONF_BASE_URL = os.getenv('GIT_VIEWCONF_BASE_URL')
     GIT_MLREPO_BASE_URL = os.getenv('GIT_MLREPO_BASE_URL')

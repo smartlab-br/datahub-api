@@ -139,7 +139,6 @@ class HadoopRepository(BaseRepository):
     def fetch_data(self, query):
         """ Runs the query in pandas """
         cursor = self.get_dao().cursor()
-        print(query)
         cursor.execute(query)
         dataframe = as_pandas(cursor)
         if not dataframe.empty:

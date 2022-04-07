@@ -20,13 +20,13 @@ class SourceFactory():
             return Aeronaves()
         if dataframe == 'auto':
             return Auto()
-        if dataframe == 'catweb':
+        if dataframe in ['catweb', 'catweb_c']:
             return Catweb()
         if dataframe == 'rais':
             return Rais()
         if dataframe == 'renavam':
             return Renavam()
-        if dataframe == 'sisben':
+        if dataframe in ['sisben', 'sisben_c']:
             return Sisben()
         # RFB
         if dataframe == 'rfb':

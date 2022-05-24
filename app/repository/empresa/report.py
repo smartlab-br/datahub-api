@@ -1,5 +1,5 @@
 ''' Repository para recuperar informações de uma empresa '''
-from kafka import KafkaProducer
+import pika
 from flask import current_app
 from repository.base import RedisRepository
 
@@ -11,12 +11,21 @@ class ReportRepository(RedisRepository):
         return self.get_dao().get(key)
 
     def store(self, cnpj_raiz):
-        ''' Inclui cnpj raiz no tópico do kafka '''
-        kafka_server = f'{current_app.config["KAFKA_HOST"]}:{current_app.config["KAFKA_PORT"]}'
-        producer = KafkaProducer(bootstrap_servers=[kafka_server])
-        # Then publishes to Kafka
-        producer.send("polaris-compliance-input-report", bytes(cnpj_raiz, 'utf-8'))
-        producer.close()
+        ''' Inclui cnpj raiz na fila do RabbitMQ '''
+        rabbitCredentials = pika.PlainCredentials(current_app.config["RABBIT_USER"], current_app.config["RABBIT_PASSWORD"])
+        rabbitParameters = pika.ConnectionParameters(
+            current_app.config["RABBIT_HOST"],
+            current_app.config["RABBIT_PORT"],
+            '/',
+            rabbitCredentials
+        )
+        rabbitConn = pika.BlockingConnection(rabbitParameters)
+        rabbitChannel = rabbitConn.channel()
+        rabbitChannel.queue_declare(queue="polaris-compliance-input-report", durable=True)
+        rabbitChannel.basic_publish(exchange='',
+                            routing_key="polaris-compliance-input-report",
+                            body=bytes(cnpj_raiz, 'utf-8'))
+        rabbitConn.close()
 
     def store_status(self, key, value):
         ''' Store status in REDIS '''

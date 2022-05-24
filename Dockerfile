@@ -1,4 +1,4 @@
-FROM mptrabalho/datahub-base:1.0.0-rc.3
+FROM mptrabalho/datahub-base:1.0.0-rc.5
 LABEL maintainer="smartlab-dev@mpt.mp.br"
 
 # If you need to tune start.sh, uncomment the following line

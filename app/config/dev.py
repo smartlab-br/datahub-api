@@ -20,10 +20,11 @@ class DevelopmentConfig():
     # REDIS_USER = os.getenv('REDIS_USER')
     # REDIS_PWD = os.getenv('REDIS_PWD')
 
-    KAFKA_HOST = os.getenv('KAFKA_HOST')
-    KAFKA_PORT = os.getenv('KAFKA_PORT')
-    KAFKA_SCHEMA = os.getenv('KAFKA_SCHEMA')
-    KAFKA_TOPIC_PREFIX = os.getenv('KAFKA_TOPIC_PREFIX')
+    RABBIT_HOST=os.getenv('RABBIT_HOST')
+    RABBIT_PORT=os.getenv('RABBIT_PORT')
+    RABBIT_USER=os.getenv('RABBIT_USER')
+    RABBIT_PASSWORD=os.getenv('RABBIT_PASSWORD')
+    RABBIT_QUEUE_PREFIX = os.getenv('RABBIT_QUEUE_PREFIX')
 
     CONF_REPO_THEMATIC = {
         "TABLE_NAMES": json.loads(os.getenv("CONF_REPO_THEMATIC_TABLE_NAMES")),

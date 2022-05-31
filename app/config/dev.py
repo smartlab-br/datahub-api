@@ -13,6 +13,7 @@ class DevelopmentConfig():
 
     HBASE_HOST = os.getenv('HBASE_HOST')
     HBASE_PORT = os.getenv('HBASE_PORT')
+    HBASE_DATABASE = os.getenv('HBASE_DATABASE')
 
     REDIS_HOST = os.getenv('REDIS_HOST')
     REDIS_PORT = os.getenv('REDIS_PORT')

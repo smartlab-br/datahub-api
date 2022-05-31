@@ -3,7 +3,7 @@ import pika
 from flask_restful import Resource
 import requests
 from flask import current_app
-from datasources import get_impala_connection, get_redis_pool, get_hbase_connection
+from datasources import get_impala_connection, get_redis_pool, test_hbase_connection
 
 
 class HCAlive(Resource):
@@ -41,7 +41,7 @@ class HCReady(Resource):
             pass
 
         try:
-            if get_hbase_connection():
+            if test_hbase_connection():
                 result["hbase"] = True
         except:
             pass

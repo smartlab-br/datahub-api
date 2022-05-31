@@ -31,19 +31,35 @@ def get_hbase_kerberos_auth():
     headers = {'Authorization': 'Negotiate ' + negotiate_details,'Content-Type':'application/binary'}
     return headers
 
-def get_hbase_connection():
-    ''' Gerencia a conexão com o hbase '''
-    if not hasattr(g, 'hbase_connection'):
-        ssl._create_default_https_context = ssl._create_unverified_context
-
-        #cert_file is copied from CDP, use “find” to get the location, scp to your app server.
-        httpClient = THttpClient.THttpClient(f'https://{current_app.config["HBASE_HOST"]}:{current_app.config["HBASE_PORT"]}/')
-        # if no ssl verification is required
+def test_hbase_connection():
+    ssl._create_default_https_context = ssl._create_unverified_context
+    httpClient = THttpClient.THttpClient(f'https://{current_app.config["HBASE_HOST"]}:{current_app.config["HBASE_PORT"]}/')
+    try:
         httpClient.setCustomHeaders(headers=get_hbase_kerberos_auth())
         protocol = TBinaryProtocol.TBinaryProtocol(httpClient)
         httpClient.open()
-        g.hbase_connection = Hbase.Client(protocol)
-    return g.hbase_connection
+        Hbase.Client(protocol)
+        httpClient.close()
+        return True
+    except:
+        return False
+
+def get_hbase_data(table, key, column_family = "", column = ""):
+    ssl._create_default_https_context = ssl._create_unverified_context
+    httpClient = THttpClient.THttpClient(f'https://{current_app.config["HBASE_HOST"]}:{current_app.config["HBASE_PORT"]}/')
+    httpClient.setCustomHeaders(headers=get_hbase_kerberos_auth())
+    protocol = TBinaryProtocol.TBinaryProtocol(httpClient)
+    httpClient.open()
+    client = Hbase.Client(protocol)
+    if column_family == "":
+        result = client.getRow(table, key)
+    else:
+        if column == "":
+            result = client.getRowWithColumns(table, key, column_family)
+        else:
+            result = client.getRowWithColumns(table, key, f'{column_family}:{column}')
+    httpClient.close()
+    return result
 
 def get_redis_pool():
     ''' Gerencia a conexão com o redis '''

@@ -3,8 +3,8 @@ from datetime import datetime
 import json
 import re
 import requests
-import pika
 from flask import current_app
+from datasources import send_rabbit_message
 from model.thematic import Thematic
 from model.base import BaseModel
 from model.empresa.datasets import DatasetsRepository
@@ -84,17 +84,6 @@ class Empresa(BaseModel):
         return result
 
     def produce(self, cnpj_raiz, column_family, column, dict_datasets):
-        ''' Gera uma entrada na fila para ingestão de dados da empresa '''
-        rabbitCredentials = pika.PlainCredentials(current_app.config["RABBIT_USER"], current_app.config["RABBIT_PASSWORD"])
-        rabbitParameters = pika.ConnectionParameters(
-            current_app.config["RABBIT_HOST"],
-            current_app.config["RABBIT_PORT"],
-            '/',
-            rabbitCredentials
-        )
-        rabbitConn = pika.BlockingConnection(rabbitParameters)
-        rabbitChannel = rabbitConn.channel()
-
         redis_dao = PessoaDatasetsRepository()
         ds_dict = dict_datasets
 
@@ -121,11 +110,8 @@ class Empresa(BaseModel):
                 t_name = f'{current_app.config["RABBIT_QUEUE_PREFIX"]}-{column_family}'
                 msg = bytes(f'{cnpj_raiz}:{column}', 'utf-8')
         # Send message to RabbitMQ
-        rabbitChannel.queue_declare(queue=t_name, durable=True)
-        rabbitChannel.basic_publish(exchange='',
-                            routing_key=t_name,
-                            body=msg)
-        rabbitConn.close()
+        ''' Gera uma entrada na fila para ingestão de dados da empresa '''
+        send_rabbit_message(t_name, msg)
 
     def get_loading_entry(self, cnpj_raiz, options=None, dict_datasets=None):
         ''' Verifica se há uma entrada ainda válida para ingestão de dados da empresa '''

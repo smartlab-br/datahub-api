@@ -1,6 +1,7 @@
 ''' Gerenciamento de conexões com fontes de dados '''
 from impala.dbapi import connect
 import redis
+import pika
 from flask import g
 from flask import current_app
 from thrift.transport import THttpClient
@@ -31,19 +32,6 @@ def get_hbase_kerberos_auth():
     headers = {'Authorization': 'Negotiate ' + negotiate_details,'Content-Type':'application/binary'}
     return headers
 
-def test_hbase_connection():
-    ssl._create_default_https_context = ssl._create_unverified_context
-    httpClient = THttpClient.THttpClient(f'https://{current_app.config["HBASE_HOST"]}:{current_app.config["HBASE_PORT"]}/')
-    try:
-        httpClient.setCustomHeaders(headers=get_hbase_kerberos_auth())
-        protocol = TBinaryProtocol.TBinaryProtocol(httpClient)
-        httpClient.open()
-        Hbase.Client(protocol)
-        httpClient.close()
-        return True
-    except:
-        return False
-
 def get_hbase_data(table, key, column_family = "", column = ""):
     ssl._create_default_https_context = ssl._create_unverified_context
     httpClient = THttpClient.THttpClient(f'https://{current_app.config["HBASE_HOST"]}:{current_app.config["HBASE_PORT"]}/')
@@ -70,3 +58,47 @@ def get_redis_pool():
             db=current_app.config['REDIS_DB'] # 0
         )
     return g.redis_pool
+
+def send_rabbit_message(queue, msg):
+    rabbitCredentials = pika.PlainCredentials(current_app.config["RABBIT_USER"], current_app.config["RABBIT_PASSWORD"])
+    rabbitParameters = pika.ConnectionParameters(
+        current_app.config["RABBIT_HOST"],
+        current_app.config["RABBIT_PORT"],
+        '/',
+        rabbitCredentials
+    )
+    rabbitConn = pika.BlockingConnection(rabbitParameters)
+    rabbitChannel = rabbitConn.channel()
+    rabbitChannel.queue_declare(queue=queue, durable=True)
+    rabbitChannel.basic_publish(exchange='',
+                        routing_key=queue,
+                        body=msg)
+    rabbitConn.close()
+
+def test_hbase_connection():
+    ssl._create_default_https_context = ssl._create_unverified_context
+    httpClient = THttpClient.THttpClient(f'https://{current_app.config["HBASE_HOST"]}:{current_app.config["HBASE_PORT"]}/')
+    try:
+        httpClient.setCustomHeaders(headers=get_hbase_kerberos_auth())
+        protocol = TBinaryProtocol.TBinaryProtocol(httpClient)
+        httpClient.open()
+        Hbase.Client(protocol)
+        httpClient.close()
+        return True
+    except:
+        return False
+
+def test_rabbit_connection():
+    try:
+        rabbitCredentials = pika.PlainCredentials(current_app.config["RABBIT_USER"], current_app.config["RABBIT_PASSWORD"])
+        rabbitParameters = pika.ConnectionParameters(
+            current_app.config["RABBIT_HOST"],
+            current_app.config["RABBIT_PORT"],
+            '/',
+            rabbitCredentials
+        )
+        rabbitConn = pika.BlockingConnection(rabbitParameters)
+        rabbitConn.close()
+        return True
+    except:
+        return False

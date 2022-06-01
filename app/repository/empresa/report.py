@@ -1,6 +1,7 @@
 ''' Repository para recuperar informações de uma empresa '''
 import pika
 from flask import current_app
+from datasources import send_rabbit_message
 from repository.base import RedisRepository
 
 #pylint: disable=R0903
@@ -12,20 +13,8 @@ class ReportRepository(RedisRepository):
 
     def store(self, cnpj_raiz):
         ''' Inclui cnpj raiz na fila do RabbitMQ '''
-        rabbitCredentials = pika.PlainCredentials(current_app.config["RABBIT_USER"], current_app.config["RABBIT_PASSWORD"])
-        rabbitParameters = pika.ConnectionParameters(
-            current_app.config["RABBIT_HOST"],
-            current_app.config["RABBIT_PORT"],
-            '/',
-            rabbitCredentials
-        )
-        rabbitConn = pika.BlockingConnection(rabbitParameters)
-        rabbitChannel = rabbitConn.channel()
-        rabbitChannel.queue_declare(queue="polaris-compliance-input-report", durable=True)
-        rabbitChannel.basic_publish(exchange='',
-                            routing_key="polaris-compliance-input-report",
-                            body=bytes(cnpj_raiz, 'utf-8'))
-        rabbitConn.close()
+        complianceQueue = "polaris-compliance-input-report"
+        send_rabbit_message(complianceQueue, cnpj_raiz)
 
     def store_status(self, key, value):
         ''' Store status in REDIS '''

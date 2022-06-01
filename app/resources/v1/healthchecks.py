@@ -3,7 +3,7 @@ import pika
 from flask_restful import Resource
 import requests
 from flask import current_app
-from datasources import get_impala_connection, get_redis_pool, test_hbase_connection
+from datasources import get_impala_connection, get_redis_pool, test_hbase_connection, test_rabbit_connection
 
 
 class HCAlive(Resource):
@@ -41,22 +41,12 @@ class HCReady(Resource):
             pass
 
         try:
-            if test_hbase_connection():
-                result["hbase"] = True
+            result["hbase"] = test_hbase_connection()
         except:
             pass
 
         try:
-            rabbitCredentials = pika.PlainCredentials(current_app.config["RABBIT_USER"], current_app.config["RABBIT_PASSWORD"])
-            rabbitParameters = pika.ConnectionParameters(
-                current_app.config["RABBIT_HOST"],
-                current_app.config["RABBIT_PORT"],
-                '/',
-                rabbitCredentials
-            )
-            rabbitConn = pika.BlockingConnection(rabbitParameters)
-            rabbitConn.close()
-            result["rabbit"] = True
+            result["rabbit"] = test_rabbit_connection()
         except:
             pass
         return result

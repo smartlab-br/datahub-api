@@ -5,6 +5,8 @@ import json
 #pylint: disable=R0903
 class DevelopmentConfig():
     ''' Config loader for dev environment '''
+    AMBIENTE = 'stg'
+
     IMPALA_HOST = os.getenv('IMPALA_HOST')
     IMPALA_PORT = os.getenv('IMPALA_PORT')
 
@@ -25,7 +27,6 @@ class DevelopmentConfig():
     RABBIT_PORT=os.getenv('RABBIT_PORT')
     RABBIT_USER=os.getenv('RABBIT_USER')
     RABBIT_PASSWORD=os.getenv('RABBIT_PASSWORD')
-    RABBIT_QUEUE_PREFIX = os.getenv('RABBIT_QUEUE_PREFIX')
 
     CONF_REPO_THEMATIC = {
         "TABLE_NAMES": json.loads(os.getenv("CONF_REPO_THEMATIC_TABLE_NAMES")),

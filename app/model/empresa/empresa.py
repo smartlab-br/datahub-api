@@ -93,25 +93,22 @@ class Empresa(BaseModel):
                 redis_dao.store_status(cnpj_raiz, topic, ds_dict[topic].split(','))
                 # Then build RabbitMQ message
                 for comp in ds_dict[topic].split(','):
-                    t_name = f'{current_app.config["RABBIT_QUEUE_PREFIX"]}-{topic}'
                     msg = bytes(f'{cnpj_raiz}:{comp}', 'utf-8')
+                    send_rabbit_message('suetonio',topic, msg)
         else:
             if column is None:
                 # First, updates status on REDIS
                 redis_dao.store_status(cnpj_raiz, column_family, ds_dict[column_family].split(','))
                 # Then build RabbitMQ message
                 for comp in ds_dict[column_family].split(','):
-                    t_name = f'{current_app.config["RABBIT_QUEUE_PREFIX"]}-{column_family}'
                     msg = bytes(f'{cnpj_raiz}:{comp}', 'utf-8')
+                    send_rabbit_message('suetonio',column_family, msg)
             else:
                 # First, updates status on REDIS
                 redis_dao.store_status(cnpj_raiz, column_family, [column])
                 # Then build RabbitMQ message
-                t_name = f'{current_app.config["RABBIT_QUEUE_PREFIX"]}-{column_family}'
                 msg = bytes(f'{cnpj_raiz}:{column}', 'utf-8')
-        # Send message to RabbitMQ
-        ''' Gera uma entrada na fila para ingestão de dados da empresa '''
-        send_rabbit_message(t_name, msg)
+                send_rabbit_message('suetonio',column_family, msg)
 
     def get_loading_entry(self, cnpj_raiz, options=None, dict_datasets=None):
         ''' Verifica se há uma entrada ainda válida para ingestão de dados da empresa '''

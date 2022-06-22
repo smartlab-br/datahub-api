@@ -560,10 +560,7 @@ class HBaseRepository(BaseRepository):
         result = {}
         for row in get_hbase_data(table, key, column_family, column):
             for col in row.columns:
-                # colfam = base64.urlsafe_b64decode(col)
-                # column_parts = colfam.decode('UTF-8').split(':')
                 column_parts = col.split(':')
-
                 # Decompressing gzip hbase value
                 value = gzip.decompress(base64.urlsafe_b64decode(row.columns[col].value))
                 # Replacing double-quotes

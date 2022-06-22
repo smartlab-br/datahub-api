@@ -43,9 +43,9 @@ def get_hbase_data(table, key, column_family = "", column = ""):
         result = client.getRow(table, key)
     else:
         if column == "":
-            result = client.getRowWithColumns(table, key, column_family)
+            result = client.getRowWithColumns(table, key, [column_family])
         else:
-            result = client.getRowWithColumns(table, key, f'{column_family}:{column}')
+            result = client.getRowWithColumns(table, key, [f'{column_family}:{column}'])
     httpClient.close()
     return result
 
@@ -59,12 +59,13 @@ def get_redis_pool():
         )
     return g.redis_pool
 
-def send_rabbit_message(queue, msg):
+def send_rabbit_message(service, queue, msg):
     rabbitCredentials = pika.PlainCredentials(current_app.config["RABBIT_USER"], current_app.config["RABBIT_PASSWORD"])
+    rabbitVHost = f'/{service}/{current_app.config["AMBIENTE"]}'
     rabbitParameters = pika.ConnectionParameters(
         current_app.config["RABBIT_HOST"],
         current_app.config["RABBIT_PORT"],
-        '/',
+        rabbitVHost,
         rabbitCredentials
     )
     rabbitConn = pika.BlockingConnection(rabbitParameters)

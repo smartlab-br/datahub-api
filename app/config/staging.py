@@ -5,6 +5,8 @@ import yaml
 #pylint: disable=R0903
 class StagingConfig():
     ''' Config loader for production environment '''
+    AMBIENTE = 'stg'
+
     CORS_AUTOMATIC_OPTIONS = True
 
     api_context = os.getenv('API_CONTEXT')
@@ -29,7 +31,6 @@ class StagingConfig():
     RABBIT_PORT=os.getenv('RABBIT_PORT')
     RABBIT_USER=os.getenv('RABBIT_USER')
     RABBIT_PASSWORD=os.getenv('RABBIT_PASSWORD')
-    RABBIT_QUEUE_PREFIX = os.getenv('RABBIT_QUEUE_PREFIX')
 
     MAPBIOMAS = {
         "API_BASE_URL": os.getenv('MAPBIOMAS_API_BASE_URL'),

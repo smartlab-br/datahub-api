@@ -13,8 +13,8 @@ class ReportRepository(RedisRepository):
 
     def store(self, cnpj_raiz):
         ''' Inclui cnpj raiz na fila do RabbitMQ '''
-        complianceQueue = "polaris-compliance-input-report"
-        send_rabbit_message(complianceQueue, cnpj_raiz)
+        complianceQueue = "report"
+        send_rabbit_message('compliance', complianceQueue, cnpj_raiz)
 
     def store_status(self, key, value):
         ''' Store status in REDIS '''

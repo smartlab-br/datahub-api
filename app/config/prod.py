@@ -5,8 +5,6 @@ import yaml
 #pylint: disable=R0903
 class ProductionConfig():
     ''' Config loader for production environment '''
-    AMBIENTE = 'prd'
-
     CORS_AUTOMATIC_OPTIONS = True
 
     api_context = os.getenv('API_CONTEXT')

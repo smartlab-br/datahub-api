@@ -1,12 +1,10 @@
-''' Config loader for production environment '''
+''' Config loader for staging environment '''
 import os
 import yaml
 
 #pylint: disable=R0903
 class StagingConfig():
-    ''' Config loader for production environment '''
-    AMBIENTE = 'stg'
-
+    ''' Config loader for staging environment '''
     CORS_AUTOMATIC_OPTIONS = True
 
     api_context = os.getenv('API_CONTEXT')

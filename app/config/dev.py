@@ -5,8 +5,6 @@ import json
 #pylint: disable=R0903
 class DevelopmentConfig():
     ''' Config loader for dev environment '''
-    AMBIENTE = 'stg'
-
     IMPALA_HOST = os.getenv('IMPALA_HOST')
     IMPALA_PORT = os.getenv('IMPALA_PORT')
 

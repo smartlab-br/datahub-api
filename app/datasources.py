@@ -61,7 +61,7 @@ def get_redis_pool():
 
 def send_rabbit_message(service, queue, msg):
     rabbitCredentials = pika.PlainCredentials(current_app.config["RABBIT_USER"], current_app.config["RABBIT_PASSWORD"])
-    rabbitVHost = f'/{service}/{current_app.config["AMBIENTE"]}'
+    rabbitVHost = f'/{service}/{current_app.config["RABBIT_ENV"]}'
     rabbitParameters = pika.ConnectionParameters(
         current_app.config["RABBIT_HOST"],
         current_app.config["RABBIT_PORT"],

@@ -12,7 +12,7 @@ class PessoaDatasetsRepository(RedisRepository):
         return self.retrieve_hashset(self.REDIS_BASE.format(pfpj, id_pfpj, dataframe))
 
     def store_status(self, id_pfpj, dataframe, competencias, pfpj="pj"):
-        ''' Armazena um registro de status enviado para o kafka '''
+        ''' Armazena um registro de status enviado para o rabbit '''
         dict_status = {cmp: 'INGESTING' for cmp in competencias}
         dict_status['when'] = f"{datetime.now():%Y-%m-%d}"
         self.get_dao().hmset(self.REDIS_BASE.format(pfpj, id_pfpj, dataframe), dict_status)

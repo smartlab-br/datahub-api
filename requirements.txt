@@ -1,2 +1,5 @@
+# https://itsmycode.com/importerror-cannot-import-name-json-from-itsdangerous/
+# Incluir na imagem do mptrabalho/flask, antes do flask?
+# itsdangerous==2.0.1
 
-
+# gssapi==1.7.3

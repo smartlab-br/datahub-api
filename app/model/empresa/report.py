@@ -42,7 +42,7 @@ class Report(Empresa):
             # In any other case, sends to reprocessing
             self.generate(cnpj_raiz)
             if redis_report_status in ['FAILED', 'RENEWING', 'UNLOCKING']:
-                # If failed, produces report item in Kafka an sends back the failed status
+                # If failed, produces report item in Rabbit an sends back the failed status
                 return {'status': redis_report_status}
             # In any other case, responds as not found
             return {'status': "NOTFOUND"}

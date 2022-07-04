@@ -99,15 +99,13 @@ from resources.v1.healthchecks import HCAlive, HCReady
 
 CONFIG = {
     "dev": "config.dev.DevelopmentConfig",
-    "prd": "config.prod.ProductionConfig",
-    "stg": "config.staging.StagingConfig",
+    "prd": "config.prd.ProductionConfig",
+    "stg": "config.stg.StagingConfig",
 }
 
 application = Flask(__name__, static_folder='static', static_url_path='') #pylint: disable=C0103
 CONFIG_NAME = os.getenv('FLASK_CONFIGURATION', 'dev')
 application.config.from_object(CONFIG[CONFIG_NAME])
-rabbit_env = os.getenv('FLASK_CONFIGURATION', 'stg')
-application.config.update({"RABBIT_ENV": rabbit_env})
 
 @application.teardown_appcontext
 def close_db_connection(_error):

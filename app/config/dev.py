@@ -18,14 +18,13 @@ class DevelopmentConfig():
     REDIS_HOST = os.getenv('REDIS_HOST')
     REDIS_PORT = os.getenv('REDIS_PORT')
     REDIS_DB = os.getenv('REDIS_DB')
-    # REDIS_USER = os.getenv('REDIS_USER')
-    # REDIS_PWD = os.getenv('REDIS_PWD')
-
+    
     RABBIT_HOST=os.getenv('RABBIT_HOST')
     RABBIT_PORT=os.getenv('RABBIT_PORT')
     RABBIT_USER=os.getenv('RABBIT_USER')
     RABBIT_PASSWORD=os.getenv('RABBIT_PASSWORD')
-
+    RABBIT_ENV="stg"
+    
     CONF_REPO_THEMATIC = {
         "TABLE_NAMES": json.loads(os.getenv("CONF_REPO_THEMATIC_TABLE_NAMES")),
         "DEFAULT_PARTITIONING": json.loads(os.getenv("CONF_REPO_THEMATIC_DEFAULT_PARTITIONING")),

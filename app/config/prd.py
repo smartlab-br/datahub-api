@@ -22,13 +22,12 @@ class ProductionConfig():
     REDIS_HOST = os.getenv('REDIS_HOST')
     REDIS_PORT = os.getenv('REDIS_PORT')
     REDIS_DB = os.getenv('REDIS_DB')
-    # REDIS_USER = os.getenv('REDIS_USER')
-    # REDIS_PWD = os.getenv('REDIS_PWD')
-
+    
     RABBIT_HOST=os.getenv('RABBIT_HOST')
     RABBIT_PORT=os.getenv('RABBIT_PORT')
     RABBIT_USER=os.getenv('RABBIT_USER')
     RABBIT_PASSWORD=os.getenv('RABBIT_PASSWORD')
+    RABBIT_ENV="prd"
 
     MAPBIOMAS = {
         "API_BASE_URL": os.getenv('MAPBIOMAS_API_BASE_URL'),

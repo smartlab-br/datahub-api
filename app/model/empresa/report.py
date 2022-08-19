@@ -6,8 +6,8 @@ from repository.empresa.report import ReportRepository
 #pylint: disable=R0903
 class Report(Empresa):
     ''' Definição do model '''
-    REDIS_KEY = 'rmd:{}'
-    REDIS_STATUS_KEY = 'rmd:st:{}:{}'
+    REDIS_KEY = 'compliance:report:{}'
+    REDIS_STATUS_KEY = 'compliance:report:st:{}:{}'
     STATUS = ['FAILED', 'PROCESSING', 'SUCCESS']
     DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 

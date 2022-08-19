@@ -25,8 +25,8 @@ def get_impala_connection():
 
 def get_hbase_kerberos_auth():
     # this is the hbase service principal of HTTP, check with
-    hbaseService=f'HTTP/{current_app.config["HBASE_HOST"]}@MPT.INTRA'
-    __, krb_context = kerberos.authGSSClientInit(hbaseService)
+    hbase_service=f'HTTP/{current_app.config["HBASE_HOST"]}@MPT.INTRA'
+    __, krb_context = kerberos.authGSSClientInit(hbase_service)
     kerberos.authGSSClientStep(krb_context, "")
     negotiate_details = kerberos.authGSSClientResponse(krb_context)
     headers = {'Authorization': 'Negotiate ' + negotiate_details,'Content-Type':'application/binary'}
@@ -34,10 +34,10 @@ def get_hbase_kerberos_auth():
 
 def get_hbase_data(table, key, column_family = "", column = ""):
     ssl._create_default_https_context = ssl._create_unverified_context
-    httpClient = THttpClient.THttpClient(f'https://{current_app.config["HBASE_HOST"]}:{current_app.config["HBASE_PORT"]}/')
-    httpClient.setCustomHeaders(headers=get_hbase_kerberos_auth())
-    protocol = TBinaryProtocol.TBinaryProtocol(httpClient)
-    httpClient.open()
+    http_client = THttpClient.THttpClient(f'https://{current_app.config["HBASE_HOST"]}:{current_app.config["HBASE_PORT"]}/')
+    http_client.setCustomHeaders(headers=get_hbase_kerberos_auth())
+    protocol = TBinaryProtocol.TBinaryProtocol(http_client)
+    http_client.open()
     client = Hbase.Client(protocol)
     if column_family == "":
         result = client.getRow(table, key)
@@ -46,7 +46,7 @@ def get_hbase_data(table, key, column_family = "", column = ""):
             result = client.getRowWithColumns(table, key, [column_family])
         else:
             result = client.getRowWithColumns(table, key, [f'{column_family}:{column}'])
-    httpClient.close()
+    http_client.close()
     return result
 
 def get_redis_pool():
@@ -60,46 +60,46 @@ def get_redis_pool():
     return g.redis_pool
 
 def send_rabbit_message(service, queue, msg):
-    rabbitCredentials = pika.PlainCredentials(current_app.config["RABBIT_USER"], current_app.config["RABBIT_PASSWORD"])
-    rabbitVHost = f'/{service}/{current_app.config["RABBIT_ENV"]}'
-    rabbitParameters = pika.ConnectionParameters(
+    rabbit_credentials = pika.PlainCredentials(current_app.config["RABBIT_USER"], current_app.config["RABBIT_PASSWORD"])
+    rabbit_vHost = f'/{service}/{current_app.config["RABBIT_ENV"]}'
+    rabbit_parameters = pika.ConnectionParameters(
         current_app.config["RABBIT_HOST"],
         current_app.config["RABBIT_PORT"],
-        rabbitVHost,
-        rabbitCredentials
+        rabbit_vHost,
+        rabbit_credentials
     )
-    rabbitConn = pika.BlockingConnection(rabbitParameters)
-    rabbitChannel = rabbitConn.channel()
+    rabbit_conn = pika.BlockingConnection(rabbit_parameters)
+    rabbitChannel = rabbit_conn.channel()
     rabbitChannel.queue_declare(queue=queue, durable=True)
     rabbitChannel.basic_publish(exchange='',
                         routing_key=queue,
                         body=msg)
-    rabbitConn.close()
+    rabbit_conn.close()
 
 def test_hbase_connection():
     ssl._create_default_https_context = ssl._create_unverified_context
-    httpClient = THttpClient.THttpClient(f'https://{current_app.config["HBASE_HOST"]}:{current_app.config["HBASE_PORT"]}/')
+    http_client = THttpClient.THttpClient(f'https://{current_app.config["HBASE_HOST"]}:{current_app.config["HBASE_PORT"]}/')
     try:
-        httpClient.setCustomHeaders(headers=get_hbase_kerberos_auth())
-        protocol = TBinaryProtocol.TBinaryProtocol(httpClient)
-        httpClient.open()
+        http_client.setCustomHeaders(headers=get_hbase_kerberos_auth())
+        protocol = TBinaryProtocol.TBinaryProtocol(http_client)
+        http_client.open()
         Hbase.Client(protocol)
-        httpClient.close()
+        http_client.close()
         return True
     except:
         return False
 
 def test_rabbit_connection():
     try:
-        rabbitCredentials = pika.PlainCredentials(current_app.config["RABBIT_USER"], current_app.config["RABBIT_PASSWORD"])
-        rabbitParameters = pika.ConnectionParameters(
+        rabbit_credentials = pika.PlainCredentials(current_app.config["RABBIT_USER"], current_app.config["RABBIT_PASSWORD"])
+        rabbit_parameters = pika.ConnectionParameters(
             current_app.config["RABBIT_HOST"],
             current_app.config["RABBIT_PORT"],
             '/',
-            rabbitCredentials
+            rabbit_credentials
         )
-        rabbitConn = pika.BlockingConnection(rabbitParameters)
-        rabbitConn.close()
+        rabbit_conn = pika.BlockingConnection(rabbit_parameters)
+        rabbit_conn.close()
         return True
     except:
         return False

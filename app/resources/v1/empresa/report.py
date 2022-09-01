@@ -40,7 +40,7 @@ class ReportResource(EmpresaResource):
         }
     })
     def post(self, cnpj_raiz):
-        ''' Envia para a fila do Kafka '''
+        ''' Envia para a fila do Rabbit '''
         if self.is_invalid_id(cnpj_raiz):
             return 400, 'Cnpj raiz inválido (deve ter 8 caracteres exclusivamente numéricos)'
         try:

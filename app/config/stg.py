@@ -1,35 +1,33 @@
-''' Config loader for production environment '''
+''' Config loader for staging environment '''
 import os
 import yaml
 
 #pylint: disable=R0903
 class StagingConfig():
-    ''' Config loader for production environment '''
+    ''' Config loader for staging environment '''
     CORS_AUTOMATIC_OPTIONS = True
 
     api_context = os.getenv('API_CONTEXT')
 
     IMPALA_HOST = os.getenv('IMPALA_HOST')
     IMPALA_PORT = os.getenv('IMPALA_PORT')
-    IMPALA_USER = os.getenv('IMPALA_USER')
-    IMPALA_PWD = os.getenv('IMPALA_PWD')
 
     GIT_VIEWCONF_BASE_URL = os.getenv('GIT_VIEWCONF_BASE_URL')
     GIT_MLREPO_BASE_URL = os.getenv('GIT_MLREPO_BASE_URL')
 
     HBASE_HOST = os.getenv('HBASE_HOST')
     HBASE_PORT = os.getenv('HBASE_PORT')
+    HBASE_DATABASE = os.getenv('HBASE_DATABASE')
 
     REDIS_HOST = os.getenv('REDIS_HOST')
     REDIS_PORT = os.getenv('REDIS_PORT')
     REDIS_DB = os.getenv('REDIS_DB')
-    # REDIS_USER = os.getenv('REDIS_USER')
-    # REDIS_PWD = os.getenv('REDIS_PWD')
-
-    KAFKA_HOST = os.getenv('KAFKA_HOST')
-    KAFKA_PORT = os.getenv('KAFKA_PORT')
-    KAFKA_SCHEMA = os.getenv('KAFKA_SCHEMA')
-    KAFKA_TOPIC_PREFIX = os.getenv('KAFKA_TOPIC_PREFIX')
+    
+    RABBIT_HOST=os.getenv('RABBIT_HOST')
+    RABBIT_PORT=os.getenv('RABBIT_PORT')
+    RABBIT_USER=os.getenv('RABBIT_USER')
+    RABBIT_PASSWORD=os.getenv('RABBIT_PASSWORD')
+    RABBIT_ENV="stg"
 
     MAPBIOMAS = {
         "API_BASE_URL": os.getenv('MAPBIOMAS_API_BASE_URL'),

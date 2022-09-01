@@ -3,8 +3,8 @@ from datetime import datetime
 import json
 import re
 import requests
-from kafka import KafkaProducer
 from flask import current_app
+from datasources import send_rabbit_message
 from model.thematic import Thematic
 from model.base import BaseModel
 from model.empresa.datasets import DatasetsRepository
@@ -84,9 +84,6 @@ class Empresa(BaseModel):
         return result
 
     def produce(self, cnpj_raiz, column_family, column, dict_datasets):
-        ''' Gera uma entrada na fila para ingestão de dados da empresa '''
-        kafka_server = f'{current_app.config["KAFKA_HOST"]}:{current_app.config["KAFKA_PORT"]}'
-        producer = KafkaProducer(bootstrap_servers=[kafka_server])
         redis_dao = PessoaDatasetsRepository()
         ds_dict = dict_datasets
 
@@ -94,27 +91,24 @@ class Empresa(BaseModel):
             for topic in self.TOPICS:
                 # First, updates status on REDIS
                 redis_dao.store_status(cnpj_raiz, topic, ds_dict[topic].split(','))
-                # Then publishes to Kafka
+                # Then build RabbitMQ message
                 for comp in ds_dict[topic].split(','):
-                    t_name = f'{current_app.config["KAFKA_TOPIC_PREFIX"]}-{topic}'
                     msg = bytes(f'{cnpj_raiz}:{comp}', 'utf-8')
-                    producer.send(t_name, msg)
+                    send_rabbit_message('suetonio',topic, msg)
         else:
             if column is None:
                 # First, updates status on REDIS
                 redis_dao.store_status(cnpj_raiz, column_family, ds_dict[column_family].split(','))
-                # Then publishes to Kafka
+                # Then build RabbitMQ message
                 for comp in ds_dict[column_family].split(','):
-                    t_name = f'{current_app.config["KAFKA_TOPIC_PREFIX"]}-{column_family}'
                     msg = bytes(f'{cnpj_raiz}:{comp}', 'utf-8')
-                    producer.send(t_name, msg)
+                    send_rabbit_message('suetonio',column_family, msg)
             else:
                 # First, updates status on REDIS
                 redis_dao.store_status(cnpj_raiz, column_family, [column])
-                t_name = f'{current_app.config["KAFKA_TOPIC_PREFIX"]}-{column_family}'
+                # Then build RabbitMQ message
                 msg = bytes(f'{cnpj_raiz}:{column}', 'utf-8')
-                producer.send(t_name, msg)
-        producer.close()
+                send_rabbit_message('suetonio',column_family, msg)
 
     def get_loading_entry(self, cnpj_raiz, options=None, dict_datasets=None):
         ''' Verifica se há uma entrada ainda válida para ingestão de dados da empresa '''

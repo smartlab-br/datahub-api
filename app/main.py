@@ -99,8 +99,8 @@ from resources.v1.healthchecks import HCAlive, HCReady
 
 CONFIG = {
     "dev": "config.dev.DevelopmentConfig",
-    "prod": "config.prod.ProductionConfig",
-    "staging": "config.staging.StagingConfig",
+    "prd": "config.prd.ProductionConfig",
+    "stg": "config.stg.StagingConfig",
 }
 
 application = Flask(__name__, static_folder='static', static_url_path='') #pylint: disable=C0103

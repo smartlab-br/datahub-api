@@ -1,5 +1,6 @@
 """ Repository para recuperar informações de uma empresa """
 import json
+from flask import current_app
 from repository.base import HBaseRepository
 
 #pylint: disable=R0903
@@ -17,7 +18,7 @@ class EmpresaRepository(HBaseRepository):
             return None
 
         result = self.find_row(
-            'empresa',
+            f'{current_app.config["HBASE_DATABASE"]}:empresa',
             options['cnpj_raiz'],
             options.get('column_family'),
             options.get('column')

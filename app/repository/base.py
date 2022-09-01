@@ -7,7 +7,7 @@ import requests
 from decimal import Decimal
 from impala.util import as_pandas
 from flask import current_app
-from datasources import get_impala_connection, get_redis_pool
+from datasources import get_hbase_data, get_impala_connection, get_redis_pool
 from service.query_builder import QueryBuilder
 
 #pylint: disable=R0903
@@ -550,40 +550,19 @@ class ImpalaRepository(HadoopRepository):
 
 class HBaseRepository(BaseRepository):
     """ HBase connector class """
-    def load_and_prepare(self): # No DAO - http request
+    def load_and_prepare(self): # No DAO - http client
         """ Prepara o DAO """
 
     @staticmethod
-    def fetch_data(table, key, column_family, column):
-        """ Gets data from HBase instance """
-        url = "http://{}:{}/{}/{}".format(
-            current_app.config["HBASE_HOST"],
-            current_app.config["HBASE_PORT"],
-            table,
-            key
-        )
-        if column_family is not None:
-            url = url + "/" + str(column_family)
-            if column is not None:
-                url = url + ":" + str(column)
-
-        response = requests.get(url, headers={'Accept': 'application/json'})
-        # If the response was successful, no Exception will be raised
-        response.raise_for_status()
-
-        return json.loads(response.content)['Row']
-
-    def find_row(self, table, key, column_family, column):
+    def find_row(table, key, column_family, column):
         """ Obtém dataset de acordo com os parâmetros informados """
         # Makes sure the returning data will be a JSON
         result = {}
-        for row_key in self.fetch_data(table, key, column_family, column):
-            for col in row_key['Cell']:
-                colfam = base64.urlsafe_b64decode(col['column'])
-                column_parts = colfam.decode('UTF-8').split(':')
-
+        for row in get_hbase_data(table, key, column_family, column):
+            for col in row.columns:
+                column_parts = col.split(':')
                 # Decompressing gzip hbase value
-                value = gzip.decompress(base64.urlsafe_b64decode(col['$']))
+                value = gzip.decompress(base64.urlsafe_b64decode(row.columns[col].value))
                 # Replacing double-quotes
                 str_value = value.decode('UTF-8').replace("\\xe2\\x80\\x9", '"')
                 # Turn value to pandas dataset

@@ -92,10 +92,11 @@ def test_hbase_connection():
 def test_rabbit_connection():
     try:
         rabbit_credentials = pika.PlainCredentials(current_app.config["RABBIT_USER"], current_app.config["RABBIT_PASSWORD"])
+        rabbit_vhost = f'/suetonio/{current_app.config["RABBIT_ENV"]}'
         rabbit_parameters = pika.ConnectionParameters(
             current_app.config["RABBIT_HOST"],
             current_app.config["RABBIT_PORT"],
-            '/',
+            rabbit_vhost,
             rabbit_credentials
         )
         rabbit_conn = pika.BlockingConnection(rabbit_parameters)

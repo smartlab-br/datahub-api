@@ -3,6 +3,7 @@ import json
 import base64
 import gzip
 import pandas
+import numpy
 import requests
 from decimal import Decimal
 from impala.util import as_pandas
@@ -566,8 +567,7 @@ class HBaseRepository(BaseRepository):
                 # Replacing double-quotes
                 str_value = value.decode('UTF-8').replace("\\xe2\\x80\\x9", '"')
                 # Turn value to pandas dataset
-                dataset = pandas.json_normalize(json.loads(str_value))
-                dataset = dataset.where(pandas.notnull(dataset), None)
+                dataset = pandas.json_normalize(json.loads(str_value)).replace({numpy.nan:None})
                 dataset['col_compet'] = column_parts[1]
 
                 # Append do existing dataset or create a new one

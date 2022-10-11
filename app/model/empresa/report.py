@@ -6,8 +6,8 @@ from repository.empresa.report import ReportRepository
 #pylint: disable=R0903
 class Report(Empresa):
     ''' Definição do model '''
-    REDIS_KEY = 'rmd:{}'
-    REDIS_STATUS_KEY = 'rmd:st:{}:{}'
+    REDIS_KEY = 'compliance:report:{}'
+    REDIS_STATUS_KEY = 'compliance:report:st:{}:{}'
     STATUS = ['FAILED', 'PROCESSING', 'SUCCESS']
     DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -42,7 +42,7 @@ class Report(Empresa):
             # In any other case, sends to reprocessing
             self.generate(cnpj_raiz)
             if redis_report_status in ['FAILED', 'RENEWING', 'UNLOCKING']:
-                # If failed, produces report item in Kafka an sends back the failed status
+                # If failed, produces report item in Rabbit an sends back the failed status
                 return {'status': redis_report_status}
             # In any other case, responds as not found
             return {'status': "NOTFOUND"}

@@ -99,8 +99,8 @@ from resources.v1.healthchecks import HCAlive, HCReady
 
 CONFIG = {
     "dev": "config.dev.DevelopmentConfig",
-    "prod": "config.prod.ProductionConfig",
-    "staging": "config.staging.StagingConfig",
+    "prd": "config.prd.ProductionConfig",
+    "stg": "config.stg.StagingConfig",
 }
 
 application = Flask(__name__, static_folder='static', static_url_path='') #pylint: disable=C0103
@@ -191,13 +191,6 @@ api.add_resource(CensoAgroBrasilResource, '/ti/censoagronacional')
 # Organizações de Assistência social
 api.add_resource(OrgsAssistenciaSocialResource, '/orgs/assistenciasocial')
 
-## Resources para obter datasets de empresa e estabelecimento
-api.add_resource(DatasetsResource, '/datasets')
-api.add_resource(ReportResource, '/report/<string:cnpj_raiz>')
-api.add_resource(EmpresaResource, '/empresa/<string:cnpj_raiz>')
-api.add_resource(EmpresaStatsResource, '/estatisticas/empresa/<string:cnpj_raiz>')
-api.add_resource(EstabelecimentoResource, '/estabelecimento/<string:cnpj>')
-
 ## Resources para obter a estrutura de dados de um template de card ou gráfico
 api.add_resource(CardTemplateResource, '/cardtemplate/<string:cd_template>')
 api.add_resource(ChartsResource, '/chart')
@@ -211,6 +204,14 @@ api.add_resource(ClassificacaoResource, '/ml/classificacao/<string:model_id>')
 ## Resources for getting public reports and adding data
 api.add_resource(MapbiomasAlertResource, '/filler/mapbiomas/alert/<int:alert_id>')
 api.add_resource(MapbiomasAlertsResource, '/filler/mapbiomas/alerts')
+
+## Resources para obter datasets de empresa e estabelecimento
+## ACESSO RESTRITO - deploy interno/privado
+api.add_resource(DatasetsResource, '/datasets')
+api.add_resource(ReportResource, '/report/<string:cnpj_raiz>')
+api.add_resource(EmpresaResource, '/empresa/<string:cnpj_raiz>')
+api.add_resource(EmpresaStatsResource, '/estatisticas/empresa/<string:cnpj_raiz>')
+api.add_resource(EstabelecimentoResource, '/estabelecimento/<string:cnpj>')
 
 if __name__ == '__main__':
     application.run(request_handler=FLPORequestHandler)

@@ -1,0 +1,110 @@
+name: Promote to production
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate:
+        description: 'Release candidate tag'
+        required: true 
+        type: string
+   
+jobs:
+  build_release_changelog:
+    runs-on: ubuntu-latest
+    outputs:
+      changelog: ${{ steps.assess_changes.outputs.changelog }}
+    steps:
+      - uses: actions/checkout@master
+      - name: Assess changes from previous final version
+        id: assess_changes
+        run: |
+          new_tag=${{ inputs.candidate }}
+          new_tag_final="${new_tag%%-*}"
+          # Get changelog
+          echo "Fetching all versions..."
+          git fetch --all
+          echo "Getting latest final version to compare history"
+          latest_final_version=$(git tag --list | grep -E "^v?[0-9]+\.[0-9]+\.[0-9]+$" | sort -t. -k 1,1n -k 2,2n -k 3,3n | tail -1)
+          echo "Latest final: $latest_final_version"
+          latest_ancestor=$(git merge-base -a "$new_tag" "$latest_final_version")
+          IFS=. read major minor patch <<< $latest_final_version
+          echo "Latest ancestor: $latest_ancestor"
+          git_history=$(git log --full-history "$latest_ancestor".."$new_tag")
+          echo "History: $git_history"
+          echo "::set-output name=changelog::$git_history"
+  promote:
+    runs-on: ubuntu-latest
+    needs:
+      - build_release_changelog
+    outputs:
+      new_tag_final: ${{ steps.bump_tag.outputs.new_tag_final }}
+    steps:
+      - uses: actions/checkout@master
+        with:
+          ref: ${{ inputs.candidate }}
+      - name: Bump version and push tag
+        id: bump_tag
+        run: |
+          new_tag=${{ inputs.candidate }}
+          new_tag_final="${new_tag%%-*}"
+          # Push tag to github
+          echo "::set-output name=new_tag_final::$new_tag_final"
+          git tag "$new_tag_final"
+          git push origin "$new_tag_final"
+      - name: Wait for Dockerhub to build the image
+        run: |
+          token=$(curl --request POST 'https://hub.docker.com/v2/users/login' --header 'Content-Type: application/json' --data-raw '{"username": "smartlab-dev@mpt.mp.br", "password": "${{ secrets.ACTION_DOCKERHUB_SENTINEL }}"}' | jq '.token')
+          until curl --request GET "https://hub.docker.com/v2/repositories/mptrabalho/datahub-api/tags/${{ needs.stage.outputs.new_tag_final }}" --header "Authorization: Bearer $token" | grep -vq "errinfo"; do
+            echo "Aguardando build da imagem com a tag ${{ needs.stage.outputs.new_tag_final }}"
+            sleep 60
+          done
+  bump_helm_production:
+    runs-on: ubuntu-latest
+    needs:
+      - promote
+    steps:
+      - uses: actions/checkout@master
+        with:
+          repository: smartlab-br/charts
+          path: ./charts
+          token: ${{ secrets.SMARTLAB_DEV_TOKEN }}
+      - name: Upgrade helm chart
+        working-directory: charts/ingestores
+        run: |
+          # Change version in helm chart
+          sed -i "s/^appVersion:.*/appVersion: ${{ needs.promote.outputs.new_tag_final }}/g" Chart.yaml
+          sed -i "s/^version:.*/version: ${{ needs.promote.outputs.new_tag_final }}/g" Chart.yaml
+          # Push to chart repo
+          git config --global user.email "smartlab-dev@mpt.mp.br"
+          git config --global user.name "Smartlab Bot Army"
+          git add Chart.yaml
+          git commit -m "Automatic Version Bumping by Smartlab Bot Army"
+          git push
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - promote
+      - build_release_changelog
+      - bump_helm_production
+    outputs:
+      new_tag_final: ${{ steps.bump_tag.outputs.new_tag_final }}
+    steps:        
+      - name: Create a GitHub release
+        uses: actions/create-release@v1
+        if: github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.promote.outputs.new_tag_final }}
+          release_name: Release ${{ needs.promote.outputs.new_tag_final }}
+          body: |
+            Release automático
+            ${{ needs.build_release_changelog.outputs.changelog }}
+          prerelease: false
+      - uses: toko-bifrost/ms-teams-deploy-card@master #  DO NOT set name.
+        with:
+          github-token: ${{ github.token }}
+          webhook-uri: ${{ secrets.ACTIONS_TEAMS_WEBHOOK }}
+          card-layout-exit: cozy
+          show-on-exit: true
+          show-on-start: false

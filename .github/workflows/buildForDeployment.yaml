@@ -1,0 +1,59 @@
+name: Draft Release Candidate
+
+on:
+  workflow_dispatch:
+   
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.bump_tag.outputs.new_tag }}
+    steps:
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: 0
+      - name: Bump version and push tag
+        id: bump_tag
+        run: |
+          latest_version=$(git tag --list | grep -E "^v?[0-9]+\.[0-9]+\.[0-9]+-rc.[0-9]+$" | sort -t. -k 1,1n -k 3,3n -k 4,4n | tail -1)
+          latest_final_version=$(git tag --list | grep -E "^v?[0-9]+\.[0-9]+\.[0-9]+$" | sort -t. -k 1,1n -k 3,3n | tail -1)
+          latest_ancestor=$(git merge-base -a HEAD "$latest_final_version")
+          IFS=. read major minor patch <<< $latest_final_version
+          echo "Latest ancestor: $latest_ancestor"
+          re_major="^(((T|t)ask)|((F|f)eat)|((B|b)uild)|((C|c)hore)|(C|c)(I|i)|((D|d)ocs)|((S|s)tyle)|((R|r)efactor)|((P|p)erf)|((T|t)est)|((F|f)ix))\!\?"
+          re_minor="^(((T|t)ask)|((F|f)eat)|((B|b)uild)|((C|c)hore)|(C|c)(I|i)|((D|d)ocs)|((S|s)tyle)|((R|r)efactor)|((P|p)erf)|((T|t)est))"
+          re_patch="^(((F|f)ix))"
+          git_history=$(git log --full-history "$latest_ancestor"..HEAD)
+          if [[ $(echo "$git_history" | grep -E $re_major --only-matching) ]]; then
+            major=$(($major + 1))
+          elif [[ $(echo "$git_history" | grep -E $re_minor --only-matching) ]]; then
+            minor=$(($minor + 1))
+          else
+            patch=$(($patch + 1))
+          fi
+          echo "Partial candidate: $major.$minor.$patch"
+          if [[ $(echo $latest_version | grep -E "^$major.$minor.$patch-rc") ]]; then 
+            # Se a ultima versao for rc (com o mesmo numero de versao resultante), aplica um bump no -rc.N e gera a tag
+            rc=$((${latest_version##*.} + 1))
+            new_tag="$major.$minor.$patch-rc.$rc"
+          else 
+            # Caso contratio, faz o bump direto e gera a tag
+            new_tag="$major.$minor.$patch-rc.0"
+          fi;
+          # Push changes to staging
+          git config --global user.email "smartlab-dev@mpt.mp.br"
+          git config --global user.name "Smartlab Bot Army - Github Actions"
+          git checkout stage
+          git merge master
+          git push
+          # Push tag to github
+          git tag "$new_tag"
+          git push origin "$new_tag"
+          echo "::set-output name=new_tag::$new_tag"
+      - name: Wait for Dockerhub to build the image
+        run: |
+          token=$(curl --request POST 'https://hub.docker.com/v2/users/login' --header 'Content-Type: application/json' --data-raw '{"username": "smartlab-dev@mpt.mp.br", "password": "${{ secrets.ACTION_DOCKERHUB_SENTINEL }}"}' | jq '.token')
+          until curl --request GET "https://hub.docker.com/v2/repositories/mptrabalho/datahub-api/tags/${{ steps.bump_tag.outputs.new_tag }}" --header "Authorization: Bearer $token" | grep -vq "errinfo"; do
+            echo "Aguardando build da imagem com a tag ${{ steps.bump_tag.outputs.new_tag }}"
+            sleep 60
+          done

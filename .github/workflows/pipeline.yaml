@@ -36,18 +36,7 @@ jobs:
           with: 
             name: unittests 
             path: ./report/test.txt 
-  
-  docker-lint:
-    runs-on: ubuntu-latest
-    name: 'Docker Lint'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Lint
-        uses: hadolint/hadolint-action@v2.1.0
-        with:
-          dockerfile: Dockerfile
-   
+    
   notify:
     name: 'Notify'
     runs-on: ubuntu-latest
@@ -55,7 +44,6 @@ jobs:
     needs:
       - lint-check
       - unit-tests
-      - docker-lint
     steps:
       - uses: toko-bifrost/ms-teams-deploy-card@master #  DO NOT set name.
         with:

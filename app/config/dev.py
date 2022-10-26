@@ -40,6 +40,7 @@ class DevelopmentConfig():
         "COMPET_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_COMPET_COLUMNS")),
         "PF_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_PF_COLUMNS")),
         "PERSP_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_PERSP_COLUMNS")),
+        "PERSP_VALUES": json.loads(os.getenv("CONF_REPO_BASE_PERSP_VALUES")),
         "ON_JOIN": json.loads(os.getenv("CONF_REPO_BASE_ON_JOIN")),
         "JOIN_SUFFIXES": json.loads(os.getenv("CONF_REPO_BASE_JOIN_SUFFIXES"))
     }

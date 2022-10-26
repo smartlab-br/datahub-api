@@ -51,6 +51,7 @@ class ProductionConfig():
         "COMPET_COLUMNS": CONF_REPO.get("base", {}).get("competColumns", {}),
         "PF_COLUMNS": CONF_REPO.get("base", {}).get("pfColumns", {}),
         "PERSP_COLUMNS": CONF_REPO.get("base", {}).get("perspColumns", {}),
+        "PERSP_VALUES": CONF_REPO.get("base", {}).get("perspValues", {}),
         "ON_JOIN": CONF_REPO.get("base", {}).get("onJoin", {}),
         "JOIN_SUFFIXES": CONF_REPO.get("base", {}).get("joinSuffixes", {}),
     }

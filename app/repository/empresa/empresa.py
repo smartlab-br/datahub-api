@@ -57,12 +57,21 @@ class EmpresaRepository(HBaseRepository):
             return result    
         for ds_key in dataframe:
             if not dataframe[ds_key].empty and ds_key in self.PERSP_COLUMNS:
-                for nu_persp_key, nu_persp_val in self.PERSP_VALUES[ds_key].items():
-                    if options.get('perspective', nu_persp_key) == nu_persp_key:
-                        nu_key = ds_key + "_" + nu_persp_key
-                        result[nu_key] = dataframe[ds_key][
-                            dataframe[ds_key][self.PERSP_COLUMNS[ds_key]] == nu_persp_val
-                        ]
+                persp_col = self.PERSP_COLUMNS[ds_key]
+                persp_option = options.get('perspective')
+                nu_key = ds_key + "_" + persp_option
+                table_cols = self.get_column_defs(ds_key)
+                if persp_col in table_cols:
+                    table_persp_cols = table_cols[persp_col][persp_option]
+                    result[nu_key] = dataframe[ds_key][
+                        (dataframe[ds_key][table_persp_cols['column']] == options.get(persp_col)) &
+                        (dataframe[ds_key][table_persp_cols['flag']] == '1')
+                    ]
+                else:
+                    persp_value = self.PERSP_VALUES[ds_key][persp_option]
+                    result[nu_key] = dataframe[ds_key][
+                        dataframe[ds_key][persp_col] == persp_value
+                    ]
         return result
 
     @staticmethod

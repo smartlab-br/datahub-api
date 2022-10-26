@@ -95,6 +95,14 @@ class StubEmpresaRepository(EmpresaRepository):
     PERSP_COLUMNS = {
         'catweb': 'origem_busca'
     }
+    PERSP_VALUES = {
+        'catweb': {
+            'empregador': 'Empregador',
+            'tomador': 'Tomador',
+            'concessao': 'Empregador Concessão',
+            'aeps': 'Empregador AEPS'
+        }
+    }
 
     def __init__(self):
         """ Overrides constructor to avoid application context """

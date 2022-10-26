@@ -4,6 +4,7 @@ on: pull_request
     
 jobs:
   lint-check:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
         - uses: actions/checkout@master 
@@ -19,9 +20,12 @@ jobs:
             path: ./report/lint.txt # ${INPUT_DEST}/lint.txt 
   
   unit-tests:
+    name: Unit tests
     runs-on: ubuntu-latest
     steps:
         - uses: actions/checkout@master 
+        - name: Create output
+          run: mkdir -p report
         - name: Unit testing 
           uses: ./ 
           with: 
@@ -35,7 +39,7 @@ jobs:
   
   docker-lint:
     runs-on: ubuntu-latest
-    name: '[Docker] Lint'
+    name: 'Docker Lint'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -43,47 +47,15 @@ jobs:
         uses: hadolint/hadolint-action@v2.1.0
         with:
           dockerfile: Dockerfile
-      - name: Comment
-        uses: actions/github-script@v6
-        if: github.event_name == 'pull_request'
-        with:
-          script: |
-            const output = `
-            #### Hadolint: \`${{ steps.hadolint.outcome }}\`
-            \`\`\`
-            ${process.env.HADOLINT_RESULTS}
-            \`\`\`
-            `;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
-  
-  # >>>>> Não temos o Sonar <<<<<
-  # staticcodecheck:
-  #   name: Static Code Check
-  #   needs:
-  #     - lint
-  #     - unittesting
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: SonarCloud Scan
-  #       uses: sonarsource/sonarcloud-github-action@master
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  
+   
   notify:
+    name: 'Notify'
+    runs-on: ubuntu-latest
+    if: always()
     needs:
       - lint-check
       - unit-tests
       - docker-lint
-    if: always()
-    runs-on: ubuntu-latest
-    name: '[Teams] Notify'
     steps:
       - uses: toko-bifrost/ms-teams-deploy-card@master #  DO NOT set name.
         with:

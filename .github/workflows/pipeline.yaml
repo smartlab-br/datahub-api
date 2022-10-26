@@ -3,67 +3,30 @@ name: Quality Checks
 on: pull_request
     
 jobs:
-
-  # Go stuff ########################################################################
   lint-check:
-    runs-on: ubuntu-latest
-    name: '[Go] Lint'
-    steps:
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.17
-      - uses: actions/checkout@v3
-      - run: |
-          go mod tidy
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: latest
-          skip-pkg-cache: true
-          skip-build-cache: true
-
-  vet-check:
-    runs-on: ubuntu-latest
-    name: '[Go] Vet Check'
-    steps:
-      - uses: actions/checkout@master
-      - name: LinRunning Go Vet
-        run: |
-          mkdir -p reports/vet
-          go mod tidy
-          offences=$(go vet ./...)
-          if [[ ! -z "$offences" ]]
-          then 
-            echo $offences > reports/vet/offences.out
-            exit 1
-          else
-            echo "No offences found\!"
-          fi
-      - name: Upload vet report to artifacts
-        if: ${{ failure() }} 
-        uses: actions/upload-artifact@v3
-        with:
-          name: vet
-          path: ./reports/vet/offences.out
-          
+    - uses: actions/checkout@master 
+    - name: Linting (pylint) 
+      uses: ./ 
+      with: 
+        check: 'lint' 
+        dest: "report" 
+    - name: Upload lint report to artifacts 
+      uses: actions/upload-artifact@v1 
+      with: 
+        name: lint 
+        path: ./report/lint.txt # ${INPUT_DEST}/lint.txt 
   unit-tests:
-    runs-on: ubuntu-latest
-    name: '[Go] Unit tests'
-    steps:
-      - uses: actions/checkout@master
-      - name: Unit testing
-        run: |
-          mkdir reports && mkdir reports/tests
-          go mod tidy
-          go install github.com/jstemmer/go-junit-report@latest
-          go test -v ./... > reports/tests/run.out | cat
-          go test -v -coverprofile=reports/tests/cover.out ./...
-          go test -v 2>&1 ./... | ~/go/bin/go-junit-report -set-exit-code > reports/tests/junit.out
-      - name: Upload unit tests report to artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: tests
-          path: ./reports/tests/*.out
+    - uses: actions/checkout@master 
+    - name: Unit testing 
+      uses: ./ 
+      with: 
+        check: 'test' 
+        dest: "report" 
+    - name: Upload unit tests report to artifacts 
+      uses: actions/upload-artifact@v1 
+      with: 
+        name: unittests 
+        path: ./report/test.txt 
   
   # Docker stuff ####################################################################
   docker-lint:
@@ -112,7 +75,6 @@ jobs:
   notify:
     needs:
       - lint-check
-      - vet-check
       - unit-tests
       - docker-lint
     if: always()

@@ -4,31 +4,35 @@ on: pull_request
     
 jobs:
   lint-check:
-    - uses: actions/checkout@master 
-    - name: Linting (pylint) 
-      uses: ./ 
-      with: 
-        check: 'lint' 
-        dest: "report" 
-    - name: Upload lint report to artifacts 
-      uses: actions/upload-artifact@v1 
-      with: 
-        name: lint 
-        path: ./report/lint.txt # ${INPUT_DEST}/lint.txt 
-  unit-tests:
-    - uses: actions/checkout@master 
-    - name: Unit testing 
-      uses: ./ 
-      with: 
-        check: 'test' 
-        dest: "report" 
-    - name: Upload unit tests report to artifacts 
-      uses: actions/upload-artifact@v1 
-      with: 
-        name: unittests 
-        path: ./report/test.txt 
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@master 
+        - name: Linting (pylint) 
+          uses: ./ 
+          with: 
+            check: 'lint' 
+            dest: "report" 
+        - name: Upload lint report to artifacts 
+          uses: actions/upload-artifact@v1 
+          with: 
+            name: lint 
+            path: ./report/lint.txt # ${INPUT_DEST}/lint.txt 
   
-  # Docker stuff ####################################################################
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@master 
+        - name: Unit testing 
+          uses: ./ 
+          with: 
+            check: 'test' 
+            dest: "report" 
+        - name: Upload unit tests report to artifacts 
+          uses: actions/upload-artifact@v1 
+          with: 
+            name: unittests 
+            path: ./report/test.txt 
+  
   docker-lint:
     runs-on: ubuntu-latest
     name: '[Docker] Lint'

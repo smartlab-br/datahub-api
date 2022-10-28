@@ -18,14 +18,6 @@ class BaseRepository():
         'QRY_FIND_DATASET': 'SELECT {} FROM {} {} {} {} {} {}',
         'QRY_FIND_JOINED_DATASET': 'SELECT {} FROM {} LEFT JOIN {} ON {} {} {} {}'
     }
-    PERSP_VALUES = {
-        'catweb': {
-            'empregador': 'Empregador',
-            'tomador': 'Tomador',
-            'concessao': 'Empregador Concessão',
-            'aeps': 'Empregador AEPS'
-        }
-    }
     CALCS_DICT = {
         "min_part": 'MIN({val_field}) OVER(PARTITION BY {partition}) AS api_calc_{calc}',
         "max_part": 'MAX({val_field}) OVER(PARTITION BY {partition}) AS api_calc_{calc}',
@@ -93,6 +85,7 @@ class BaseRepository():
         self.COMPET_COLUMNS = current_app.config["CONF_REPO_BASE"].get("COMPET_COLUMNS")
         self.PF_COLUMNS = current_app.config["CONF_REPO_BASE"].get("PF_COLUMNS")
         self.PERSP_COLUMNS = current_app.config["CONF_REPO_BASE"].get("PERSP_COLUMNS")
+        self.PERSP_VALUES = current_app.config["CONF_REPO_BASE"].get("PERSP_VALUES")
         self.ON_JOIN = current_app.config["CONF_REPO_BASE"].get("ON_JOIN")
         self.JOIN_SUFFIXES = current_app.config["CONF_REPO_BASE"].get("JOIN_SUFFIXES")
 

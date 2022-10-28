@@ -20,6 +20,8 @@ Flask for SmartLab developers
 
      > Run terminal to inspect container
        docker run -p 8080:5000 -it -v /path/app:/app smartlab/flask terminal
+       
+       
 
 Note: the main file must be named as main.py
 

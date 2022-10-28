@@ -1,0 +1,60 @@
+name: Quality Checks
+
+on: pull_request
+    
+jobs:
+  lint-check:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@master 
+        - name: Linting (pylint) 
+          uses: ./ 
+          with: 
+            check: 'lint' 
+            dest: "report" 
+        - name: Upload lint report to artifacts 
+          uses: actions/upload-artifact@v1 
+          with: 
+            name: lint 
+            path: ./report/lint.txt # ${INPUT_DEST}/lint.txt 
+  
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@master 
+        - name: Create output
+          run: mkdir -p report
+        - name: Unit testing 
+          uses: ./ 
+          with: 
+            check: 'test' 
+            dest: "report" 
+        - name: Upload unit tests report to artifacts 
+          uses: actions/upload-artifact@v1 
+          with: 
+            name: unittests 
+            path: ./report/test.txt 
+    
+  notify:
+    name: 'Notify'
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - lint-check
+      - unit-tests
+    steps:
+      - uses: toko-bifrost/ms-teams-deploy-card@master #  DO NOT set name.
+        with:
+          github-token: ${{ github.token }}
+          webhook-uri: ${{ secrets.ACTIONS_TEAMS_WEBHOOK }}
+          card-layout-exit: cozy
+          show-on-exit: true
+          show-on-start: false
+      - name: check-failures
+        if: needs.vet-check.result == 'failure' || needs.lint-check.result == 'failure' || needs.unit-tests.result == 'failure'
+        run: exit 1
+      - name: check-success
+        if: needs.vet-check.result == 'success' && needs.lint-check.result == 'success' && needs.unit-tests.result == 'success'
+        run: exit 0

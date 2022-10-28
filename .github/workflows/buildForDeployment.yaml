@@ -50,8 +50,6 @@ jobs:
           git tag "$new_tag"
           git push origin "$new_tag"
           echo "::set-output name=new_tag::$new_tag"
-          with:
-            repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Wait for Dockerhub to build the image
         run: |
           token=$(curl --request POST 'https://hub.docker.com/v2/users/login' --header 'Content-Type: application/json' --data-raw '{"username": "smartlab-dev@mpt.mp.br", "password": "${{ secrets.ACTION_DOCKERHUB_SENTINEL }}"}' | jq '.token')

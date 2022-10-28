@@ -137,7 +137,7 @@ class BaseModelTemplateFilteringTest(unittest.TestCase):
         self.assertEqual(
             BaseModel.filter_pandas_dataset(
                 SAMPLE_DATAFRAME,
-                [['post', 'in', 'col_2', '3', '2']]
+                [['post', 'in', 'col_2', 3, 2]]
             ).to_dict(),
             {
                 'col_1': {0: 'd', 1: 'b'},
@@ -151,7 +151,7 @@ class BaseModelTemplateFilteringTest(unittest.TestCase):
         self.assertEqual(
             BaseModel.filter_pandas_dataset(
                 SAMPLE_DATAFRAME_NA,
-                [['post', 'in', 'col_3', '3', '1'], ['post', 'in', 'col_2', '3', '2']]
+                [['post', 'in', 'col_3', 3, 1], ['post', 'in', 'col_2', 3, 2]]
             ).to_dict(),
             {
                 'col_1': {0: 'd'},

@@ -33,6 +33,7 @@ def get_hbase_kerberos_auth():
     return headers
 
 def get_hbase_data(table, key, column_family = "", column = ""):
+    table = f'{current_app.config["HBASE_DATABASE"]}:{table}'
     ssl._create_default_https_context = ssl._create_unverified_context
     http_client = THttpClient.THttpClient(f'https://{current_app.config["HBASE_HOST"]}:{current_app.config["HBASE_PORT"]}/')
     http_client.setCustomHeaders(headers=get_hbase_kerberos_auth())

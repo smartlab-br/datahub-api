@@ -163,6 +163,14 @@ class StubThematicRepository(ThematicRepository):
         'rais': 'nu_cpf',
         'rfb': 'nu_cpf_responsavel',
     }
+    PERSP_VALUES = {
+        'catweb': {
+            'empregador': 'Empregador',
+            'tomador': 'Tomador',
+            'concessao': 'Empregador Concessão',
+            'aeps': 'Empregador AEPS'
+        }
+    }
 
     def __init__(self):
         """ Overrides constructor to avoid application context """

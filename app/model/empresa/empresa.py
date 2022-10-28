@@ -120,9 +120,10 @@ class Empresa(BaseModel):
             if rev_theme in ["catweb_c", "sisben_c"]:
                 rev_theme = rev_theme[:-2]
             columns_available = self.get_pessoa_dataset_repo().retrieve(cnpj_raiz, rev_theme)
-            theme = options.get('column_family', dataframe)
-            if theme in ["catweb", "sisben"]:
-                theme = f"{theme}_c"
+            if options is not None:
+                theme = options.get('column_family', dataframe)
+                if theme in ["catweb", "sisben"]:
+                    theme = f"{theme}_c"
             if (options is not None and 'column_family' in options and
                     theme == dataframe and
                     'column' in options):
@@ -144,10 +145,12 @@ class Empresa(BaseModel):
     def is_valid_loading_entry(self, cnpj_raiz, options=None, dict_datasets=None):
         ''' Checks if a loading entry is valid '''
         rules = dict_datasets
+        if options is None:
+            raise ValueError('Dataset inválido')
         cf = options.get('column_family')
         if cf in ['catweb', 'sisben']:
             cf = f"{cf}_c"
-        if options is None or not cf or not rules.get(cf):
+        if not cf or not rules.get(cf):
             raise ValueError('Dataset inválido')
         if options.get('column') and options.get('column') not in rules.get((cf)).split(','):
             raise ValueError('Competência inválida para o dataset informado')

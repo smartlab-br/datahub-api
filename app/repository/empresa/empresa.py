@@ -1,6 +1,5 @@
 """ Repository para recuperar informações de uma empresa """
 import json
-from flask import current_app
 from repository.base import HBaseRepository
 
 #pylint: disable=R0903
@@ -18,7 +17,7 @@ class EmpresaRepository(HBaseRepository):
             return None
 
         result = self.find_row(
-            f'{current_app.config["HBASE_DATABASE"]}:empresa',
+            'empresa',
             options['cnpj_raiz'],
             options.get('column_family'),
             options.get('column')
@@ -58,20 +57,21 @@ class EmpresaRepository(HBaseRepository):
         for ds_key in dataframe:
             if not dataframe[ds_key].empty and ds_key in self.PERSP_COLUMNS:
                 persp_col = self.PERSP_COLUMNS[ds_key]
-                persp_option = options.get('perspective')
-                nu_key = ds_key + "_" + persp_option
                 table_cols = self.get_column_defs(ds_key)
-                if persp_col in table_cols:
-                    table_persp_cols = table_cols[persp_col][persp_option]
-                    result[nu_key] = dataframe[ds_key][
-                        (dataframe[ds_key][table_persp_cols['column']] == options.get(persp_col)) &
-                        (dataframe[ds_key][table_persp_cols['flag']] == '1')
-                    ]
-                else:
-                    persp_value = self.PERSP_VALUES[ds_key][persp_option]
-                    result[nu_key] = dataframe[ds_key][
-                        dataframe[ds_key][persp_col] == persp_value
-                    ]
+                for nu_persp_key, nu_persp_val in self.PERSP_VALUES[ds_key].items(): 
+                    persp_option = options.get('perspective', nu_persp_key)
+                    if persp_option == nu_persp_key: 
+                        nu_key = ds_key + "_" + nu_persp_key 
+                        if persp_col in table_cols:
+                            table_persp_cols = table_cols[persp_col][persp_option]
+                            result[nu_key] = dataframe[ds_key][
+                                (dataframe[ds_key][table_persp_cols['column']] == options.get(persp_col)) &
+                                (dataframe[ds_key][table_persp_cols['flag']] == '1')
+                            ]
+                        else:
+                            result[nu_key] = dataframe[ds_key][ 
+                                dataframe[ds_key][persp_col] == nu_persp_val 
+                            ] 
         return result
 
     @staticmethod

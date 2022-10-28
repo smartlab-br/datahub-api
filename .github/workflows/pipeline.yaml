@@ -23,19 +23,21 @@ jobs:
     name: Unit tests
     runs-on: ubuntu-latest
     steps:
-        - uses: actions/checkout@master 
-        - name: Create output
-          run: mkdir -p report
-        - name: Unit testing 
-          uses: ./ 
+        - uses: actions/checkout@v2.5.0 
+        
+        - name: Install nose2
+          run: pip install -r requirements.txt            
+          working-directory: app/test   
+          
+        - name: Run unit tests
+          run: nose2 | tee unit_test.log
+          working-directory: app
+          
+        - name: Save artifacts
+          uses: actions/upload-artifact@v3.1.1
           with: 
-            check: 'test' 
-            dest: "report" 
-        - name: Upload unit tests report to artifacts 
-          uses: actions/upload-artifact@v1 
-          with: 
-            name: unittests 
-            path: ./report/test.txt 
+            name: unit_tests.log 
+            path: app/unit_test.log
     
   notify:
     name: 'Notify'

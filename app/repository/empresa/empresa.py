@@ -1,5 +1,6 @@
 """ Repository para recuperar informações de uma empresa """
 import json
+from pandas.api.types import is_string_dtype
 from repository.base import HBaseRepository
 
 #pylint: disable=R0903
@@ -88,12 +89,18 @@ class EmpresaRepository(HBaseRepository):
         if cnpj is not None and col_cnpj_name is not None:
             if result[col_cnpj_name].dtype == 'int64':
                 cnpj = int(cnpj)
-            result = result[result[col_cnpj_name] == cnpj]
+            if is_string_dtype(result[col_cnpj_name]):
+                result = result[result[col_cnpj_name].str.lstrip("0") == cnpj.lstrip("0")]
+            else:
+                result = result[result[col_cnpj_name] == cnpj]
 
         # Filtrar apenas id_pf nos datasets pandas
         id_pf = options.get('id_pf')
         if id_pf is not None and col_pf_name is not None:
             if result[col_pf_name].dtype == 'int64':
                 id_pf = int(id_pf)
-            result = result[result[col_pf_name] == id_pf]
+            if is_string_dtype(result[col_pf_name]):
+                result = result[result[col_pf_name].str.lstrip("0") == id_pf.lstrip("0")]
+            else:
+                result = result[result[col_pf_name] == id_pf]
         return result

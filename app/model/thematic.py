@@ -5,102 +5,6 @@ from repository.thematic import ThematicRepository
 #pylint: disable=R0903
 class Thematic(BaseModel):
     ''' Definição do repo '''
-    METADATA = {
-        'SMARTLAB': {
-            'datasets': [
-                'sstindicadoresnacionais', 'sstindicadoresmunicipais',
-                'sstindicadoresestaduais', 'sstindicadoresunidadempt',
-                'tiindicadoresnacionais', 'tiindicadoresmunicipais',
-                'tiindicadoresestaduais', 'tiindicadoresunidadempt'
-            ],
-            'source': {
-                'fonte': 'SMARTLAB',
-                'link': 'https://smartlabbr.org/'
-            }
-        },
-        'ibge': {
-            'datasets': [],
-            'source': {'fonte': 'IBGE', 'link': 'https://ibge.gov.br/'}
-        },
-        'ibge_censoagro': {
-            'datasets': [
-                'censoagromunicipal', 'censoagroestadual', 'censoagronacional'
-            ],
-            'source': {
-                'fonte': 'IBGE - Censo Agropecuário, Florestal e Aquícola, 2017',
-                'link': 'https://ibge.gov.br/'
-            }
-        },
-        'trabalho': {
-            'datasets': [
-                'rais', 'cagedtrabalhador', 'caged',
-                'cagedsaldo', 'cagedtrabalhadorano',
-                'incidenciaescravidao', 'migracoesescravos',
-                'operacoesresgate', 'teindicadoresnacionais',
-                'teindicadoresmunicipais', 'teindicadoresestaduais',
-                'teindicadoresunidadempt', 'temlexposicaoresgate',
-                'temlexposicaoresgatefeatures', 'temlexposicaonaturais',
-                'temlexposicaonaturaisfeatures'
-            ],
-            'source': {
-                'fonte': 'Ministério da Economia - Secretaria de Trabalho',
-                'link': 'http://trabalho.gov.br/'
-            }
-        },
-        'denatran': {
-            'datasets': ['renavam', 'aeronaves'],
-            'source': {
-                'fonte': 'Denatran',
-                'link': 'https://infraestrutura.gov.br/denatran'
-            }
-        },
-        'marinha': {
-            'datasets': ['embarcacoes'],
-            'source': {
-                'fonte': 'Ministério da Defesa - Marinha do Brasil',
-                'link': 'https://www.marinha.mil.br/'
-            }
-        },
-        'mpt': {
-            'datasets': ['auto'],
-            'source': {
-                'fonte': 'MPT - Ministério Público do Trabalho',
-                'link': 'https://mpt.mp.br'
-            }
-        },
-        'rfb': {
-            'datasets': ['rfb', 'rfbsocios', 'rfbparticipacaosocietaria'],
-            'source': {
-                'fonte': 'Receita Federal',
-                'link': 'https://receita.economia.gov.br/'
-            }
-        },
-        'assistenciasocial': {
-            'datasets': ['assistenciasocial'],
-            'source': {
-                'fonte': 'Censo SUAS(Sistema Único de Assistência social)',
-                'link': ''
-            }
-        },
-        'seguridade': {
-            'datasets': ['catweb', 'sisben'],
-            'source': {
-                'fonte': 'INSS - Instituto Nacional do Seguro Social',
-                'link': 'https://inss.gov.br/'
-            }
-        },
-        'prf': {
-            'datasets': ['mapear'],
-            'source': {'fonte': 'PRF', 'link': 'https://www.prf.gov.br/'},
-        },
-        'inep': {
-            'datasets': ['provabrasil'],
-            'source': {
-                'fonte': 'INEP, Prova Brasil',
-                'link': 'http://www.inep.gov.br/'
-            }
-        }
-    }
 
     def __init__(self):
         ''' Construtor '''
@@ -119,10 +23,10 @@ class Thematic(BaseModel):
     def fetch_metadata(self, options=None):
         ''' Gets the metadata from thematic datasets' definitions '''
         if options is not None and 'theme' in options:
-            for _key, each_source in self.METADATA.items():
+            for _key, each_source in self.repo.METADATA.items():
                 if options.get('theme') in each_source['datasets']:
                     return each_source['source']
-        return self.METADATA['ibge']['source']
+        return self.repo.METADATA['ibge']['source']
 
     def get_column_defs(self, table_name):
         ''' Get the column name definitions, according to the table '''

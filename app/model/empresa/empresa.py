@@ -60,7 +60,7 @@ class Empresa(BaseModel):
         dict_datasets = self.get_dataset_repo().retrieve()
         loading_entry_is_valid = self.is_valid_loading_entry(options['cnpj_raiz'], options, dict_datasets)
         (loading_entry, column_status) = self.get_loading_entry(options['cnpj_raiz'], options, dict_datasets)
-        result = {'status': loading_entry}
+        result = {}
         try:
             metadata = self.get_statistics(options)
             result['metadata'] = metadata
@@ -79,8 +79,11 @@ class Empresa(BaseModel):
                 options.get('column'),
                 dict_datasets
             )
+            if 'INGESTING' in column_status:
+                (loading_entry, column_status) = self.get_loading_entry(options['cnpj_raiz'], options, dict_datasets)
         if 'column' in options:
             result['status_competencia'] = column_status
+        result['status'] = loading_entry
         return result
 
     def produce(self, cnpj_raiz, column_family, column, dict_datasets):

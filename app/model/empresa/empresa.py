@@ -160,6 +160,7 @@ class Empresa(BaseModel):
                 # Aquela entrada já existe no REDIS (foi carregada)?
                 # A entrada é compatível com o rol de datasources?
                 # A entrada tem menos de 1 mês?
+                # A entrada tem menos de 2 min que está em processo de ingestão?
                 if (columns_available is None or
                         options.get('column') not in columns_available):
                     return False
@@ -170,6 +171,19 @@ class Empresa(BaseModel):
                             (datetime.now() - 
                                 datetime.strptime(col_val.split('|')[1], "%Y-%m-%d")
                             ).days > 30
+                        for
+                        col_key, col_val
+                        in
+                        columns_available.items()
+                    ]):
+                    return False
+                if any(
+                    [
+                        options.get('column', col_key) == col_key and
+                            'INGESTING' in col_val and len(col_val.split('|')) > 1 and
+                            (datetime.now() - 
+                                datetime.strptime(col_val.split('|')[1], "%Y-%m-%d %H:%M:%S")
+                            ).seconds > 120
                         for
                         col_key, col_val
                         in

@@ -13,6 +13,6 @@ class PessoaDatasetsRepository(RedisRepository):
 
     def store_status(self, id_pfpj, dataframe, competencias, pfpj="pj"):
         ''' Armazena um registro de status enviado para o rabbit '''
-        dict_status = {cmp: 'INGESTING' for cmp in competencias}
-        dict_status['when'] = f"{datetime.now():%Y-%m-%d}"
+        status_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        dict_status = {cmp: f"INGESTING|{status_date}" for cmp in competencias}
         self.get_dao().hmset(self.REDIS_BASE.format(pfpj, id_pfpj, dataframe), dict_status)

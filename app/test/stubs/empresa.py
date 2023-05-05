@@ -124,25 +124,21 @@ class StubPessoaDatasetRepository(PessoaDatasetsRepository):
         if dataframe == 'unavailable':
             return {
                 "2017": f"INGESTED|{str_now}",
-                "2099": f"INGESTED|{str_now}",
-                "when": f"{str_now}"
+                "2099": f"INGESTED|{str_now}"
             }
         if dataframe == 'failed_status':
             return {
                 "2017": f"FAILED|{str_now}",
-                "2018": f"INGESTED|{str_now}",
-                "when": f"{str_now}"
+                "2018": f"INGESTED|{str_now}"
             }
         if dataframe == 'expired':
             return {
                 "2017": "INGESTED|2000-01-01",
-                "2018": "INGESTED|2000-01-01",
-                "when": "2000-01-01"
+                "2018": "INGESTED|2000-01-01"
             }
         return { # Valid
             "2017": f"INGESTED|{str_now}",
-            "2018": f"INGESTED|{str_now}",
-            "when": f"{str_now}"
+            "2018": f"INGESTED|{str_now}"
         }
 
 class StubEmpresa(Empresa):

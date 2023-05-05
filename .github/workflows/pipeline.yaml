@@ -22,6 +22,8 @@ jobs:
   unit-tests:
     name: Unit tests
     runs-on: ubuntu-latest
+    container: 
+      image: mptrabalho/datahub-base:1.0.0
     steps:
         - uses: actions/checkout@v2.5.0 
         

@@ -486,8 +486,7 @@ class StubGetLoadingEntryTest(unittest.TestCase):
     ''' Tests the loading entry validation method '''
     EXPECTED = {
         "2017": f'INGESTED|{datetime.strftime(datetime.now(), "%Y-%m-%d")}',
-        "2018": f'INGESTED|{datetime.strftime(datetime.now(), "%Y-%m-%d")}',
-        "when": f'{datetime.strftime(datetime.now(), "%Y-%m-%d")}'
+        "2018": f'INGESTED|{datetime.strftime(datetime.now(), "%Y-%m-%d")}'
     }
 
     def get_expected_status_dict(self):
@@ -496,13 +495,11 @@ class StubGetLoadingEntryTest(unittest.TestCase):
             "another": self.EXPECTED,
             "expired": {
                 "2017": "INGESTED|2000-01-01",
-                "2018": "INGESTED|2000-01-01",
-                "when": "2000-01-01"
+                "2018": "INGESTED|2000-01-01"
             },
             "failed_status": {
                 "2017": f'FAILED|{datetime.strftime(datetime.now(), "%Y-%m-%d")}',
-                "2018": f'INGESTED|{datetime.strftime(datetime.now(), "%Y-%m-%d")}',
-                "when": f'{datetime.strftime(datetime.now(), "%Y-%m-%d")}'
+                "2018": f'INGESTED|{datetime.strftime(datetime.now(), "%Y-%m-%d")}'
             },
             "skip": self.EXPECTED,
             "test": self.EXPECTED

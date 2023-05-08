@@ -1,4 +1,4 @@
-FROM mptrabalho/datahub-base:1.0.0
+FROM mptrabalho/datahub-base:1.0.2
 LABEL maintainer="smartlab-dev@mpt.mp.br"
 
 COPY requirements.txt /app/requirements.txt

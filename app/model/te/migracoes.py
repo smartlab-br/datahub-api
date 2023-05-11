@@ -8,11 +8,6 @@ from repository.thematic import ThematicRepository
 #pylint: disable=R0903
 class MigracoesEscravo(BaseModel):
     ''' Definição do repo '''
-    METADATA = {
-        'fonte': 'Ministério da Economia - Secretaria de Trabalho',
-        'link': 'http://trabalho.gov.br/'
-    }
-
     def __init__(self):
         ''' Construtor '''
         self.repo = ThematicRepository()

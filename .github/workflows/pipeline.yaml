@@ -22,6 +22,8 @@ jobs:
   unit-tests:
     name: Unit tests
     runs-on: ubuntu-latest
+    container: 
+      image: mptrabalho/datahub-base:1.0.0
     steps:
         - uses: actions/checkout@v2.5.0 
         
@@ -30,15 +32,9 @@ jobs:
           working-directory: app/test   
           
         - name: Run unit tests
-          run: nose2 | tee unit_test.log
+          run: nose2
           working-directory: app
-          
-        - name: Save artifacts
-          uses: actions/upload-artifact@v3.1.1
-          with: 
-            name: unit_tests.log 
-            path: app/unit_test.log
-    
+              
   notify:
     name: 'Notify'
     runs-on: ubuntu-latest

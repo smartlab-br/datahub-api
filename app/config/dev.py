@@ -24,7 +24,8 @@ class DevelopmentConfig():
     RABBIT_USER=os.getenv('RABBIT_USER')
     RABBIT_PASSWORD=os.getenv('RABBIT_PASSWORD')
     RABBIT_ENV="stg"
-    
+
+    CONF_REPO_METADATA = json.loads(os.getenv("CONF_REPO_METADATA"))
     CONF_REPO_THEMATIC = {
         "TABLE_NAMES": json.loads(os.getenv("CONF_REPO_THEMATIC_TABLE_NAMES")),
         "DEFAULT_PARTITIONING": json.loads(os.getenv("CONF_REPO_THEMATIC_DEFAULT_PARTITIONING")),

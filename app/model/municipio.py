@@ -5,10 +5,6 @@ from repository.municipio import MunicipioRepository
 #pylint: disable=R0903
 class Municipio(BaseModel):
     ''' Definição do repo '''
-    METADATA = {
-        'fonte': 'IBGE', 'link': 'https://ibge.gov.br/'
-    }
-
     def __init__(self):
         ''' Construtor '''
         self.repo = MunicipioRepository()

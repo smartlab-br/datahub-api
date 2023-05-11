@@ -13,6 +13,7 @@ class ThematicRepository(ImpalaRepository):
 
     def load_repo_configs(self):
         """ Load repository definitions """
+        self.METADATA = current_app.config["CONF_REPO_METADATA"]
         self.TABLE_NAMES = current_app.config["CONF_REPO_THEMATIC"].get("TABLE_NAMES")
         self.DEFAULT_PARTITIONING = current_app.config["CONF_REPO_THEMATIC"].get("DEFAULT_PARTITIONING")
         self.ON_JOIN = current_app.config["CONF_REPO_THEMATIC"].get("ON_JOIN")

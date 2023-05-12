@@ -3,3 +3,5 @@
 # itsdangerous==2.0.1
 
 # gssapi==1.7.3
+
+flask-compress==1.13

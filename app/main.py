@@ -1,6 +1,7 @@
 """API Base """
 import os
 from flask import Flask, g
+from flask_compress import Compress
 from flask_cors import CORS
 from flask_restful_swagger_2 import Api
 
@@ -106,6 +107,7 @@ CONFIG = {
 application = Flask(__name__, static_folder='static', static_url_path='') #pylint: disable=C0103
 CONFIG_NAME = os.getenv('FLASK_CONFIGURATION', 'dev')
 application.config.from_object(CONFIG[CONFIG_NAME])
+Compress(application)
 
 @application.teardown_appcontext
 def close_db_connection(_error):

@@ -4,4 +4,3 @@
 
 # gssapi==1.7.3
 
-flask-compress==1.13

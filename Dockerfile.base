@@ -1,0 +1,23 @@
+FROM mptrabalho/flask:latest
+LABEL maintainer="smartlab-dev@mpt.mp.br"
+
+ENV MPLLOCALFREETYPE 1
+ENV DEBIAN_FRONTEND=noninteractive
+
+COPY requirements-base.txt /app/requirements.txt
+# http://dl.cpp.la/Archive/hbase-thrift-0.20.4.patch.tgz
+COPY hbase-thrift-0.20.4.patch.tgz .
+
+RUN apt-get update -y && \
+    apt-get install -y libsasl2-dev g++ gcc firefox-esr  \
+        gfortran libopenblas-dev liblapack-dev libsasl2-modules-gssapi-mit wget  \
+        krb5-user libkrb5-dev && \
+    pip3 install -r /app/requirements.txt && \
+    webdrivermanager firefox --linkpath /usr/local/bin && \
+    tar -zxvf hbase-thrift-0.20.4.patch.tgz && \
+    cd hbase-thrift-0.20.4.patch && \
+    python3 setup.py install && \
+    apt-get remove -y libsasl2-dev g++ gcc gfortran libopenblas-dev liblapack-dev  wget && \
+    apt-get clean
+
+ENTRYPOINT ["sh", "/start.sh"]

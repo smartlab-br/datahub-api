@@ -87,7 +87,7 @@ class Report(Empresa):
                 pass
             if redis_report_status is None:
                 continue
-            if st == 'PROCESSING' and (datetime.now() - datetime.strptime(redis_report_status, self.DATE_FORMAT)).days > 1:
+            if st == 'PROCESSING' and (datetime.now() - datetime.strptime(redis_report_status, self.DATE_FORMAT)).seconds > 3600:
                 return 'RENEWING'
             elif st == 'SUCCESS' and (datetime.now() - datetime.strptime(redis_report_status, self.DATE_FORMAT)).days > 30:
                 return 'UNLOCKING'

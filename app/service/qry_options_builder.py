@@ -60,6 +60,12 @@ class QueryOptionsBuilder():
             options['only_meta'] = True
         if 'reduzido' in r_args and r_args['reduzido'] == 'S':
             options['reduzido'] = True
+        if 'pagina' in r_args:
+            options['pagina'] = r_args['pagina']
+        if 'por_pagina' in r_args:
+            options['por_pagina'] = r_args['por_pagina']
+        if 'pesquisa' in r_args:
+            options['pesquisa'] = r_args['pesquisa']
 
         if mod == 'estabelecimento':
             options['cnpj_raiz'] = r_args['id_inv'][:-6]

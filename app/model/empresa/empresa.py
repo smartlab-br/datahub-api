@@ -84,6 +84,22 @@ class Empresa(BaseModel):
         if 'column' in options:
             result['status_competencia'] = column_status
         result['status'] = loading_entry
+
+        if result['dataset'] != []:
+            for each_dataset in result['dataset']:               
+                if options.get('pesquisa') is not None:
+                    dataset[each_dataset] = dataset[each_dataset][dataset[each_dataset].values.astype(str).str.contains(options.get('pesquisa'))]
+                if options.get('pagina') is not None:
+                    page = options.get('pagina')
+                    result['pagina'] = page
+                    if options.get('por_pagina') is None:
+                        rows_per_page = 10
+                    else:
+                        rows_per_page = options.get('por_pagina')
+                    firstIndex = page * rows_per_page - rows_per_page
+                    lastIndex = firstIndex + rows_per_page
+                    dataset[each_dataset] = dataset[each_dataset].loc[firstIndex:lastIndex]
+
         return result
 
     def produce(self, cnpj_raiz, column_family, column, dict_datasets):

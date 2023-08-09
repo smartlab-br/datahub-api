@@ -56,8 +56,8 @@ class QueryOptionsBuilder():
             options['id_pf'] = r_args['id_pf']
         if 'perspective' in r_args:
             options['perspective'] = r_args['perspective']
-        if 'only_meta' in r_args and r_args['only_meta'] == 'S':
-            options['only_meta'] = True
+        # if 'only_meta' in r_args and r_args['only_meta'] == 'S':
+        #     options['only_meta'] = True
         if 'reduzido' in r_args and r_args['reduzido'] == 'S':
             options['reduzido'] = True
         if 'pagina' in r_args:

@@ -109,10 +109,10 @@ class Empresa(BaseModel):
                         lastPage = math.ceil( rows / rows_per_page)
                         if page > lastPage:
                             page = lastPage
-                        result['total_linhas'] = rows
                         result['pagina'] = page
                         result['linhas_por_pagina'] = rows_per_page
-                        result['ultima_pagina'] = lastPage
+                        result['total_linhas_' + each_dataset] = rows
+                        result['ultima_pagina_' + each_dataset] = lastPage
                         firstIndex = page * rows_per_page - rows_per_page
                         lastIndex = firstIndex + rows_per_page
                         if lastIndex > rows:

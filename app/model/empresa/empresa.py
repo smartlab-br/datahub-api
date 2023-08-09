@@ -1,8 +1,10 @@
 ''' Repository para recuperar informações da CEE '''
 from datetime import datetime
+import pandas as pd
 import json
 import re
 import requests
+import math
 from flask import current_app
 from datasources import send_rabbit_message
 from model.thematic import Thematic
@@ -61,14 +63,15 @@ class Empresa(BaseModel):
         loading_entry_is_valid = self.is_valid_loading_entry(options['cnpj_raiz'], options, dict_datasets)
         (loading_entry, column_status) = self.get_loading_entry(options['cnpj_raiz'], options, dict_datasets)
         result = {}
+        result['dataset'] = []
         try:
-            metadata = self.get_statistics(options)
-            result['metadata'] = metadata
-            if 'only_meta' in options and options['only_meta']:
-                result['dataset'] = []
-            else:
-                dataset = self.get_repo().find_datasets(options)
-                result['dataset'] = dataset
+            # metadata = self.get_statistics(options)
+            # result['metadata'] = metadata
+            # if 'only_meta' in options and options['only_meta']:
+            #     result['dataset'] = []
+            # else:
+            dataset = self.get_repo().find_datasets(options)
+            result['dataset'] = dataset
         except requests.exceptions.HTTPError:
             loading_entry_is_valid = False
         if not loading_entry_is_valid:
@@ -79,11 +82,44 @@ class Empresa(BaseModel):
                 options.get('column'),
                 dict_datasets
             )
-            if 'INGESTING' in column_status:
+            if column_status is not None and 'INGESTING' in column_status:
                 (loading_entry, column_status) = self.get_loading_entry(options['cnpj_raiz'], options, dict_datasets)
         if 'column' in options:
             result['status_competencia'] = column_status
         result['status'] = loading_entry
+
+        if result['dataset'] is not None and result['dataset'] != []:
+            if options.get('pesquisa') is not None or options.get('pagina') is not None:
+                for each_dataset in result['dataset']:
+                    resDataset = pd.DataFrame.from_dict(result['dataset'][each_dataset])
+                    if options.get('pesquisa') is not None:
+                        mask = resDataset.applymap(lambda x: options.get('pesquisa').lower() in str(x).lower())
+                        # Filter the DataFrame based on the mask
+                        resDataset = resDataset.loc[mask.any(axis=1)]
+                    if options.get('pagina') is not None:
+                        rows = resDataset.shape[0]
+                        if options.get('pagina').isnumeric():
+                            page = int(options.get('pagina'))
+                        else:
+                            page = 1
+                        if options.get('por_pagina') is not None and options.get('por_pagina').isnumeric():
+                            rows_per_page = int(options.get('por_pagina'))
+                        else:
+                            rows_per_page = 10
+                        lastPage = math.ceil( rows / rows_per_page)
+                        if page > lastPage:
+                            page = lastPage
+                        result['pagina'] = page
+                        result['linhas_por_pagina'] = rows_per_page
+                        result['total_linhas_' + each_dataset] = rows
+                        result['ultima_pagina_' + each_dataset] = lastPage
+                        firstIndex = page * rows_per_page - rows_per_page
+                        lastIndex = firstIndex + rows_per_page
+                        if lastIndex > rows:
+                            lastIndex = rows
+                        resDataset = resDataset.iloc[firstIndex:lastIndex]
+                    result['dataset'][each_dataset] = resDataset.to_dict(orient="records")
+
         return result
 
     def produce(self, cnpj_raiz, column_family, column, dict_datasets):

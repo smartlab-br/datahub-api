@@ -56,10 +56,16 @@ class QueryOptionsBuilder():
             options['id_pf'] = r_args['id_pf']
         if 'perspective' in r_args:
             options['perspective'] = r_args['perspective']
-        if 'only_meta' in r_args and r_args['only_meta'] == 'S':
-            options['only_meta'] = True
+        # if 'only_meta' in r_args and r_args['only_meta'] == 'S':
+        #     options['only_meta'] = True
         if 'reduzido' in r_args and r_args['reduzido'] == 'S':
             options['reduzido'] = True
+        if 'pagina' in r_args:
+            options['pagina'] = r_args['pagina']
+        if 'por_pagina' in r_args:
+            options['por_pagina'] = r_args['por_pagina']
+        if 'pesquisa' in r_args:
+            options['pesquisa'] = r_args['pesquisa']
 
         if mod == 'estabelecimento':
             options['cnpj_raiz'] = r_args['id_inv'][:-6]

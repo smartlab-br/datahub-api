@@ -7,13 +7,13 @@ from model.empresa.empresa import Empresa
 class EmpresaResource(BaseResource):
     ''' Classe de múltiplas incidências '''
     CUSTOM_SWAGGER_PARAMS = [
-        {
-            "name": "only_meta",
-            "description": "Sinalizador que indica apenas o retorno dos metadados (S para sim)",
-            "required": False,
-            "type": 'string',
-            "in": "query"
-        }
+        # {
+        #     "name": "only_meta",
+        #     "description": "Sinalizador que indica apenas o retorno dos metadados (S para sim)",
+        #     "required": False,
+        #     "type": 'string',
+        #     "in": "query"
+        # }
     ]
 
     def __init__(self):

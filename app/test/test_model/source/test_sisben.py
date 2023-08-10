@@ -17,6 +17,6 @@ class SisbenGetOptionsEmpresaTest(unittest.TestCase):
             {
                 'categorias': ['col_cnpj_raiz'],
                 'agregacao': ['count'],
-                'where': ["eq-col_cnpj_raiz-'12345678'", "and", "ne-col_cnpj-'0'", "and", "eq-col_compet-2099"],
+                'where': ["eq-col_cnpj_raiz-'12345678'", "and", "ne-col_cnpj-'0'", "and", "eq-tp_empregador-1", "and", "eq-col_compet-2099"],
                 'theme': 'sisben_c'}
         )

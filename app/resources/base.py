@@ -109,6 +109,34 @@ class BaseResource(Resource):
         {
             "name": "cnpj_raiz", "required": True, "type": 'string', "in": "path",
             "description": "CNPJ Raiz da empresa consultada"
+        },
+        {
+            "name": "only_status",
+            "description": "Sinalizador que indica apenas o retorno do status (S para sim)",
+            "required": False,
+            "type": 'string',
+            "in": "query"
+        },
+        {
+            "name": "pagina",
+            "description": "Indica o número da página que deve ser retornada",
+            "required": False,
+            "type": 'string',
+            "in": "query"
+        },
+        {
+            "name": "por_pagina",
+            "description": "Indica o tamanho da página, número de linhas por página",
+            "required": False,
+            "type": 'string',
+            "in": "query"
+        },
+        {
+            "name": "pesquisa",
+            "description": "Indica um texto ou valor que será usado para filtrar as linhas",
+            "required": False,
+            "type": 'string',
+            "in": "query"
         }
     ]
 

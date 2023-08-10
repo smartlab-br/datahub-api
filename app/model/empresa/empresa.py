@@ -63,15 +63,14 @@ class Empresa(BaseModel):
         loading_entry_is_valid = self.is_valid_loading_entry(options['cnpj_raiz'], options, dict_datasets)
         (loading_entry, column_status) = self.get_loading_entry(options['cnpj_raiz'], options, dict_datasets)
         result = {}
-        result['dataset'] = []
         try:
             # metadata = self.get_statistics(options)
             # result['metadata'] = metadata
-            # if 'only_meta' in options and options['only_meta']:
-            #     result['dataset'] = []
-            # else:
-            dataset = self.get_repo().find_datasets(options)
-            result['dataset'] = dataset
+            if 'only_status' in options and options['only_status']:
+                result['dataset'] = {}
+            else:
+                dataset = self.get_repo().find_datasets(options)
+                result['dataset'] = dataset
         except requests.exceptions.HTTPError:
             loading_entry_is_valid = False
         if not loading_entry_is_valid:
@@ -88,7 +87,7 @@ class Empresa(BaseModel):
             result['status_competencia'] = column_status
         result['status'] = loading_entry
 
-        if result['dataset'] is not None and result['dataset'] != []:
+        if result['dataset'] is not None and result['dataset'] != {}:
             if options.get('pesquisa') is not None or options.get('pagina') is not None:
                 for each_dataset in result['dataset']:
                     resDataset = pd.DataFrame.from_dict(result['dataset'][each_dataset])

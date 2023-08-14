@@ -57,7 +57,7 @@ class RfbParticipacaoSocietariaGetOptionsEmpresaTest(unittest.TestCase):
             {
                 'categorias': ['\'1\'-pos'],
                 'agregacao': ['count'],
-                'where': ["eqlponstr-col_cnpj_raiz-12345678-14-0-1-8"],
+                'where': ["eqlponstr-col_cnpj_raiz-12345678-14-0-1-8", "and", "ne-nu_cnpj_cpf_socio-0", "and", "eq-id_tp_socio-1"],
                 'theme': 'rfbparticipacaosocietaria'
             }
         )

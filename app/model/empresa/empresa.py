@@ -17,11 +17,6 @@ from factory.source import SourceFactory
 #pylint: disable=R0903
 class Empresa(BaseModel):
     ''' Definição do repo '''
-    TOPICS = [
-        'rais', 'rfb', 'sisben', 'catweb', 'auto', 'caged', 'rfbsocios',
-        'rfbparticipacaosocietaria', 'aeronaves', 'renavam', 'cagedsaldo',
-        'cagedtrabalhador', 'cagedtrabalhadorano', 'embarcacoes'
-    ]
 
     def __init__(self):
         ''' Construtor '''
@@ -29,6 +24,7 @@ class Empresa(BaseModel):
         self.dataset_repo = None
         self.pessoa_dataset_repo = None
         self.thematic_handler = None
+        self.TOPICS = current_app.config["CONF_REPO_EMPRESA_TOPICS"]
         self.__set_repo()
 
     def get_repo(self):

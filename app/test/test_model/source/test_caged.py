@@ -18,7 +18,7 @@ class BaseCagedGetOptionsEmpresaTest(unittest.TestCase):
                 'categorias': ['col_cnpj_raiz'],
                 'agregacao': ['count'],
                 'where': [
-                    "eq-col_cnpj_raiz-12345678",
+                    "eq-cast(col_cnpj_raiz as INT)-12345678",
                     "and", "eq-tipo_estab-1",
                     "and", "eq-cast(col_compet as INT)-2099"
                 ],

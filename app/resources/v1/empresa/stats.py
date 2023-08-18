@@ -31,9 +31,8 @@ class EmpresaStatsResource(BaseResource):
             "in": "query"
         },
         {
-            "name": "perspectiva",
-            "description": "Valor que filtra uma perspectiva predefinida de um dataset \
-                (ex. No catweb, 'Empregador'). Nem todos os datasets tem essa opção.",
+            "name": "completa",
+            "description": "Sinalizador que indica se retorna todas as estatísticas (S para sim)",
             "required": False,
             "type": 'string',
             "in": "query"
@@ -48,7 +47,7 @@ class EmpresaStatsResource(BaseResource):
     @swagger.doc({
         'tags':['empresa'],
         'description':'Obtém estatísticas de uma única empresa',
-        'parameters': BaseResource.EMPRESA_DEFAULT_SWAGGER_PARAMS,
+        'parameters': DEFAULT_SWAGGER_PARAMS,
         'responses': {
             '200': {
                 'description': 'Estatísticas da empresa'

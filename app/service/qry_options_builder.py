@@ -66,6 +66,8 @@ class QueryOptionsBuilder():
             options['por_pagina'] = r_args['por_pagina']
         if 'pesquisa' in r_args:
             options['pesquisa'] = r_args['pesquisa']
+        if 'completa' in r_args and r_args['completa'] == 'S':
+            options['completa'] = True
 
         if mod == 'estabelecimento':
             options['cnpj_raiz'] = r_args['id_inv'][:-6]

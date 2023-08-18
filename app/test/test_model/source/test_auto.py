@@ -19,7 +19,7 @@ class AutoGetOptionsEmpresaTest(unittest.TestCase):
                     "eq-col_cnpj-'12345678'",
                     'and', "eq-tpinscricao-'1'",
                     'and', 'nl-dtcancelamento',
-                    'and', "eq-cast(col_compet as INT)-'2099'"
+                    'and', "eq-cast(col_compet as INT)-2099"
                 ],
                 'theme': 'auto'}
         )
@@ -31,6 +31,6 @@ class AutoGetOptionsEmpresaTest(unittest.TestCase):
             [
                 'and', "eq-tpinscricao-'1'",
                 'and', 'nl-dtcancelamento',
-                'and', "eq-cast(col_compet as INT)-'2099'"
+                'and', "eq-cast(col_compet as INT)-2099"
             ]
         )

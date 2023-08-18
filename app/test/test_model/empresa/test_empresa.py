@@ -31,6 +31,7 @@ class EmpresaModelBaseTest(unittest.TestCase):
                 'agregacao': ['count'],
                 'where': [
                     "eq-col_cnpj_raiz-12345678",
+                    "and", "eq-cast(col_compet as INT)-2099",
                     "and", "eq-flag-'1'",
                     "and", "eq-cnpj_col-12345678000101",
                     "and", "eq-flag_2-'1'",
@@ -131,7 +132,7 @@ class StubGetGroupedStatsTest(unittest.TestCase):
             StubEmpresa().get_grouped_stats(
                 {},
                 {'theme': 'mytheme'},
-                {'compet': 'compet'}
+                {'compet': 'compet', "completa": True}
             ),
             {
                 'stats_estab': {
@@ -174,7 +175,7 @@ class StubGetStatisticsFromPerspectiveTest(unittest.TestCase):
             StubEmpresa().get_statistics_from_perspective(
                 'mytheme', None, {}, 
                 {"categorias": ['cnpj']},
-                {"categorias": ['cnpj']}
+                {"categorias": ['cnpj'], "completa": True}
             ),
             {
                 **{
@@ -191,7 +192,7 @@ class StubGetStatisticsFromPerspectiveTest(unittest.TestCase):
             StubEmpresa().get_statistics_from_perspective(
                 'mytheme', 'mypersp', {}, 
                 {"categorias": ['cnpj'], 'where': []},
-                {"categorias": ['cnpj']}
+                {"categorias": ['cnpj'], "completa": True}
             ),
             {
                 **{

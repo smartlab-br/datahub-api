@@ -20,7 +20,7 @@ class BaseCagedGetOptionsEmpresaTest(unittest.TestCase):
                 'where': [
                     "eq-col_cnpj_raiz-12345678",
                     "and", "eq-tipo_estab-1",
-                    "and", "eq-col_compet-2099"
+                    "and", "eq-cast(col_compet as INT)-2099"
                 ],
                 'theme': 'cagedtrabalhador'
             }

@@ -19,8 +19,7 @@ class AutoGetOptionsEmpresaTest(unittest.TestCase):
                     "eq-col_cnpj-'12345678'",
                     'and', "eq-tpinscricao-'1'",
                     'and', 'nl-dtcancelamento',
-                    'and', "gestr-col_compet-'2099\\-01\\-01'-1-10",
-                    'and', "lestr-col_compet-'2099\\-12\\-31'-1-10"
+                    'and', "eq-cast(col_compet as INT)-'2099'"
                 ],
                 'theme': 'auto'}
         )
@@ -32,7 +31,6 @@ class AutoGetOptionsEmpresaTest(unittest.TestCase):
             [
                 'and', "eq-tpinscricao-'1'",
                 'and', 'nl-dtcancelamento',
-                'and', "gestr-col_compet-'2099\\-01\\-01'-1-10",
-                'and', "lestr-col_compet-'2099\\-12\\-31'-1-10"
+                'and', "eq-cast(col_compet as INT)-'2099'"
             ]
         )

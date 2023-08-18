@@ -25,6 +25,7 @@ class Empresa(BaseModel):
         self.pessoa_dataset_repo = None
         self.thematic_handler = None
         self.TOPICS = current_app.config["CONF_REPO_EMPRESA_TOPICS"]
+        self.COMPET_COLUMNS = current_app.config["CONF_REPO_BASE"].get("COMPET_COLUMNS")
         self.__set_repo()
 
     def get_repo(self):
@@ -258,11 +259,6 @@ class Empresa(BaseModel):
         else:
             dataframes = self.TOPICS
 
-        # Autos and Catweb need a timeframe to filter
-        if ('column' not in options and 
-                any([dataframe in ['auto', 'catweb'] for dataframe in dataframes])):
-            raise AttributeError(f'Fontes de dados demandam uma competência')
-
         result = {}
         for dataframe in dataframes:
             # Get statistics for dataset
@@ -319,8 +315,7 @@ class Empresa(BaseModel):
         })
 
         result = {}
-        if each_persp_value is None:
-            result = base_stats.get('metadata')
+        result = base_stats.get('metadata')
         if base_stats.get('dataset', []):
             result["stats"] = base_stats.get('dataset')[0]
         else:
@@ -329,11 +324,15 @@ class Empresa(BaseModel):
                 local_cols,
                 options
             )
-
-        return {
-            **result,
-            **self.get_grouped_stats(options, local_options, local_cols)
-        }
+        if 'completa' in options and options['completa']:
+            return {
+                **result,
+                **self.get_grouped_stats(options, local_options, local_cols)
+            }
+        else:
+            return {
+               **result
+            }
 
     @staticmethod
     def get_stats_local_options(options, local_cols, dataframe, persp):
@@ -363,17 +362,15 @@ class Empresa(BaseModel):
                 cols.get('cnpj', 'cnpj')).to_dict(orient="index")
 
         # Get statistics partitioning by timeframe
-        ds_no_compet = [
-            'sisben', 'sisben_c', 'auto', 'rfb', 'rfbsocios',
-            'rfbparticipacaosocietaria', 'aeronaves', 'renavam', 'embarcacoes'
-        ]
-        ds_displaced_compet = ['catweb', 'catweb_c']
+        # Only datasources with timeframe definition
+        ds_compet = [ key for key, _ in self.COMPET_COLUMNS.items()]
+        theme = options.get('theme') if not options.get('theme').endswith('_c') else options.get('theme')[:-2]
+        
+        if theme in ds_compet:
 
-        # Ignores datasources with no timeframe definition
-        if options.get('theme') not in ds_no_compet:
             # Get statistics partitioning by timeframe
             compet_attrib = 'compet' # Single timeframe, no need to group
-            if 'compet' in cols and options.get('theme') not in ds_displaced_compet:
+            if 'compet' in cols: 
                 # Changes lookup for tables with timeframe values
                 compet_attrib = cols.get('compet')
                 current_df = self.get_thematic_handler().find_dataset({
@@ -398,18 +395,23 @@ class Empresa(BaseModel):
             result["stats_compet"] = current_df.set_index(compet_attrib).to_dict(orient="index")
 
             # Get statistics partitioning by timeframe and units
-            if 'compet' in cols and options.get('theme') not in ds_displaced_compet:
+            if 'compet' in cols:
                 # Changes lookup for tables with timeframe values
                 df_local_result = self.get_thematic_handler().find_dataset({
                     **options,
-                    **{"categorias": [cols.get('cnpj'), compet_attrib]}
+                    **{
+                        "categorias": [cols.get('cnpj'), compet_attrib],
+                        "ordenacao":[cols.get('cnpj'), f"-{compet_attrib}",]
+                    }
+                    
                 })
             else:
                 df_local_result = self.get_thematic_handler().find_dataset({
                     **options,
                     **{
                         "categorias": [cols.get('cnpj'),
-                        f"\'{original_options.get('column')}\'-compet"]
+                        f"\'{original_options.get('column')}\'-compet"],
+                        "ordenacao":[cols.get('cnpj'), f"-{compet_attrib}",]
                     }
                 })
 

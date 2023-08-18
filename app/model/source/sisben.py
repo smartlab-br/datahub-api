@@ -8,9 +8,12 @@ class Sisben(BaseSource):
         subset_rules = [
             f"eq-{local_cols.get('cnpj_raiz')}-'{options.get('cnpj_raiz')}'",
             "and", f"ne-{local_cols.get('cnpj')}-'0'",
-            "and", "eq-tp_empregador-1",
-            "and", f"eq-{local_cols.get('compet')}-{options.get('column')}"
+            "and", "eq-tp_empregador-1"
         ]
+        if options.get('column'):
+            subset_rules.extend([
+                "and", f"eq-cast({local_cols.get('compet')} as INT)-{options.get('column')}"
+            ])
         subset_rules.extend(self.get_options_rules_empresa(options, local_cols, df, persp))
         return {
             "categorias": [local_cols.get('cnpj_raiz')],

@@ -6,10 +6,12 @@ class Auto(BaseSource):
     def get_options_rules_empresa(self, options, local_cols, df, persp):
         subset_rules = [
             "and", f"eq-tpinscricao-'1'",
-            "and", f"nl-dtcancelamento",
-            "and", f"gestr-{local_cols.get('compet')}-\'{options.get('column')}\-01\-01\'-1-10",
-            "and", f"lestr-{local_cols.get('compet')}-\'{options.get('column')}\-12\-31\'-1-10"
+            "and", f"nl-dtcancelamento"
         ]
+        if options.get('column'):
+            subset_rules.extend([
+                "and", f"eq-cast({local_cols.get('compet')} as INT)-{options.get('column')}"
+            ])
         subset_rules.extend(
             self.get_context_options_empresa(options, local_cols, persp)
         )

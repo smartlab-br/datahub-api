@@ -5,11 +5,6 @@ class BaseCaged(BaseSource):
     ''' Base Option builder class for Caged datasources '''
     def get_options_rules_empresa(self, options, local_cols, df, persp):
         subset_rules = ["and", "eq-tipo_estab-1"]
-        if options.get('column'):
-            subset_rules.extend([
-                "and", f"eq-{local_cols.get('compet')}-{options.get('column')}"
-            ])
-
         subset_rules.extend(
             self.get_context_options_empresa(options, local_cols, persp)
         )
@@ -22,7 +17,13 @@ class CagedSaldo(BaseCaged):
         subset_rules = [
             f"eqlpint-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-14-0-1-8"
         ]
-        subset_rules.extend(self.get_options_rules_empresa(options, local_cols, df, persp))
+        if options.get('column'):
+            subset_rules.extend([
+                "and", f"eq-{local_cols.get('compet')}-{options.get('column')}"
+            ])
+        subset_rules.extend(
+            self.get_options_rules_empresa(options, local_cols, df, persp)
+        )
         return {
             "categorias": ['\'1\'-pos'],
             "valor": ['qtd_admissoes', 'qtd_desligamentos', 'saldo_mov'],

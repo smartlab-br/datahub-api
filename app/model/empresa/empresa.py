@@ -25,7 +25,6 @@ class Empresa(BaseModel):
         self.pessoa_dataset_repo = None
         self.thematic_handler = None
         self.TOPICS = current_app.config["CONF_REPO_EMPRESA_TOPICS"]
-        self.COMPET_COLUMNS = current_app.config["CONF_REPO_BASE"].get("COMPET_COLUMNS")
         self.__set_repo()
 
     def get_repo(self):
@@ -362,65 +361,58 @@ class Empresa(BaseModel):
                 cols.get('cnpj', 'cnpj')).to_dict(orient="index")
 
         # Get statistics partitioning by timeframe
-        # Only datasources with timeframe definition
-        ds_compet = [ key for key, _ in self.COMPET_COLUMNS.items()]
-        theme = options.get('theme') if not options.get('theme').endswith('_c') else options.get('theme')[:-2]
-        
-        if theme in ds_compet:
-
-            # Get statistics partitioning by timeframe
-            compet_attrib = 'compet' # Single timeframe, no need to group
-            if 'compet' in cols: 
-                # Changes lookup for tables with timeframe values
-                compet_attrib = cols.get('compet')
-                current_df = self.get_thematic_handler().find_dataset({
-                    **options,
-                    **{
-                        "categorias": [compet_attrib],
-                        "ordenacao":[f"-{compet_attrib}"]
-                    }
-                })
-            else:
-                current_df = self.get_thematic_handler().find_dataset({
-                    **options,
-                    **{
-                        "categorias": [f"\'{original_options.get('column')}\'-compet"],
-                        "ordenacao": ["-compet"]
-                    }
-                })
+        # compet_attrib = 'compet' # Single timeframe, no need to group
+        if cols.get('compet'): 
+            # Changes lookup for tables with timeframe values
+            compet_attrib = cols.get('compet')
+            current_df = self.get_thematic_handler().find_dataset({
+                **options,
+                **{
+                    "categorias": [compet_attrib],
+                    "ordenacao":[f"-{compet_attrib}"]
+                }
+            })
+            # else:
+            #     current_df = self.get_thematic_handler().find_dataset({
+            #         **options,
+            #         **{
+            #             "categorias": [f"\'{original_options.get('column')}\'-compet"],
+            #             "ordenacao": ["-compet"]
+            #         }
+            #     })
 
             current_df[compet_attrib] = current_df[compet_attrib].apply(str).replace(
                 {'\.0': ''}, regex=True
             )
             result["stats_compet"] = current_df.set_index(compet_attrib).to_dict(orient="index")
 
-            # Get statistics partitioning by timeframe and units
-            if 'compet' in cols:
-                # Changes lookup for tables with timeframe values
-                df_local_result = self.get_thematic_handler().find_dataset({
-                    **options,
-                    **{
-                        "categorias": [cols.get('cnpj'), compet_attrib],
-                        "ordenacao":[cols.get('cnpj'), f"-{compet_attrib}",]
-                    }
-                    
-                })
-            else:
-                df_local_result = self.get_thematic_handler().find_dataset({
-                    **options,
-                    **{
-                        "categorias": [cols.get('cnpj'),
-                        f"\'{original_options.get('column')}\'-compet"],
-                        "ordenacao":[cols.get('cnpj'), f"-{compet_attrib}",]
-                    }
-                })
+        # Get statistics partitioning by timeframe and units
+        # if 'compet' in cols:
+            # Changes lookup for tables with timeframe values
+            df_local_result = self.get_thematic_handler().find_dataset({
+                **options,
+                **{
+                    "categorias": [cols.get('cnpj'), compet_attrib],
+                    "ordenacao":[cols.get('cnpj'), f"-{compet_attrib}",]
+                }
+                
+            })
+            # else:
+            #     df_local_result = self.get_thematic_handler().find_dataset({
+            #         **options,
+            #         **{
+            #             "categorias": [cols.get('cnpj'),
+            #             f"\'{original_options.get('column')}\'-compet"],
+            #             "ordenacao":[cols.get('cnpj'), f"-{compet_attrib}",]
+            #         }
+            #     })
 
             df_local_result['idx'] = df_local_result[compet_attrib].apply(str).replace(
                 {'\.0': ''}, regex=True) + '_' + \
                 df_local_result[cols.get('cnpj', 'cnpj')].apply(str).replace({'\.0': ''}, regex=True)
             result["stats_estab_compet"] = df_local_result.set_index('idx').to_dict(orient="index")
 
-        ## RETIRADO pois a granularidade torna imviável a performance
+        ## RETIRADO pois a granularidade torna inviável a performance
         # metadata['stats_pf'] = dataframe[
         #     [col_pf_name, 'col_compet']
         # ].groupby(col_pf_name).describe(include='all')

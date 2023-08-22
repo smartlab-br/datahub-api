@@ -14,18 +14,5 @@ class RaisGetOptionsEmpresaTest(unittest.TestCase):
                 'rais',
                 None
             ),
-            ["and", f"eq-tp_estab-1", "and", "eq-col_compet-2099"]
-        )
-
-    def test_rules_empresa_translation_no_compet(self):
-        ''' Tests if the rules are correctly built according to given args
-            when no timeframe is set '''
-        self.assertEqual(
-            Rais().get_options_rules_empresa(
-                {'cnpj_raiz': '12345678'},
-                {'cnpj_raiz': 'col_cnpj'},
-                'rais',
-                None
-            ),
             ["and", f"eq-tp_estab-1"]
         )

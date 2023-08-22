@@ -19,8 +19,8 @@ class BaseCagedGetOptionsEmpresaTest(unittest.TestCase):
                 'agregacao': ['count'],
                 'where': [
                     "eq-cast(col_cnpj_raiz as INT)-12345678",
-                    "and", "eq-tipo_estab-1",
-                    "and", "eq-cast(col_compet as INT)-2099"
+                    "and", "eq-cast(col_compet as INT)-2099",
+                    "and", "eq-tipo_estab-1"
                 ],
                 'theme': 'cagedtrabalhador'
             }
@@ -32,19 +32,6 @@ class BaseCagedGetOptionsEmpresaTest(unittest.TestCase):
             BaseCaged().get_options_rules_empresa(
                 {'column': 2099, 'cnpj_raiz': '12345678'},
                 {'compet': 'col_compet', 'cnpj_raiz': 'col_cnpj_raiz'},
-                'caged',
-                None
-            ),
-            ["and", "eq-tipo_estab-1", "and", "eq-col_compet-2099"]
-        )
-
-    def test_rules_empresa_translation_no_compet(self):
-        ''' Tests if the options are correctly built according to given args
-            when no timeframe is set '''
-        self.assertEqual(
-            BaseCaged().get_options_rules_empresa(
-                {'cnpj_raiz': '12345678'},
-                {'cnpj_raiz': 'col_cnpj_raiz'},
                 'caged',
                 None
             ),

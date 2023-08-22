@@ -161,18 +161,6 @@ class StubEmpresa(Empresa):
             }
         }
     }
-    COMPET_COLUMNS = {
-        "auto":"ano",
-        "caged":"competencia_declarada",
-        "cagedsaldo":"competencia_mov",
-        "cagedtrabalhador":"competencia_declarada",
-        "cagedtrabalhadorano":"ano_declarado",
-        "rais":"nu_ano_rais",
-        "catweb":"ano",
-        "sisben":"nu_ano_compet",
-        "esocialvinculo":"nu_ano_competencia"
-    }
-
     def __init__(self):
         ''' Construtor '''
         self.repo = None

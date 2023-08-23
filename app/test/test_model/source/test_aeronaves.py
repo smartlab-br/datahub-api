@@ -10,14 +10,17 @@ class AeronavesGetOptionsEmpresaTest(unittest.TestCase):
         self.assertEqual(
             Aeronaves().get_options_empresa(
                 {'cnpj_raiz': '12345678'},
-                {'cnpj': 'col_cnpj', 'cnpj_raiz': 'col_cnpj'},
+                {'cnpj': 'col_cnpj', 'cnpj_raiz': 'col_cnpj_raiz'},
                 'aeronaves',
                 None
             ),
             {
-                'categorias': ['col_cnpj'],
+                'categorias': ['col_cnpj_raiz'],
                 'agregacao': ['count'],
-                'where': ["eq-col_cnpj-12345678", "and", "ne-col_cnpj-'00000000000000'"],
+                'where': [
+                    "eq-cast(col_cnpj_raiz as INT)-12345678", 
+                    "and", "ne-cast(col_cnpj as INT)-0"
+                ],
                 'theme': 'aeronaves'
             }
         )

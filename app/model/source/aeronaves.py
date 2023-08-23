@@ -3,18 +3,11 @@ from model.source.base import BaseSource
 
 class Aeronaves(BaseSource):
     ''' Base Option builder class for Aeronaves datasources '''
-    def get_options_empresa(self, options, local_cols, df, persp):
-        ''' Create options according to tables and query conditions '''
+    def get_options_rules_empresa(self, options, local_cols, df, persp):
         subset_rules = [
-            f"eq-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}",
-            "and",
-            f"ne-{local_cols.get('cnpj')}-'00000000000000'"
+            "and", f"ne-cast({local_cols.get('cnpj')} as INT)-0"
         ]
-        subset_rules.extend(self.get_options_rules_empresa(options, local_cols, df, persp))
-
-        return {
-            "categorias": [local_cols.get('cnpj_raiz')],
-            "agregacao": ['count'],
-            "where": subset_rules,
-            "theme": df
-        }
+        subset_rules.extend(
+            self.get_context_options_empresa(options, local_cols, persp)
+        )
+        return subset_rules

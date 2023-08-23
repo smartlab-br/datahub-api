@@ -31,9 +31,8 @@ class EmpresaStatsResource(BaseResource):
             "in": "query"
         },
         {
-            "name": "perspectiva",
-            "description": "Valor que filtra uma perspectiva predefinida de um dataset \
-                (ex. No catweb, 'Empregador'). Nem todos os datasets tem essa opção.",
+            "name": "completa",
+            "description": "Sinalizador que indica se retorna todas as estatísticas (S para sim)",
             "required": False,
             "type": 'string',
             "in": "query"
@@ -48,7 +47,7 @@ class EmpresaStatsResource(BaseResource):
     @swagger.doc({
         'tags':['empresa'],
         'description':'Obtém estatísticas de uma única empresa',
-        'parameters': BaseResource.EMPRESA_DEFAULT_SWAGGER_PARAMS,
+        'parameters': DEFAULT_SWAGGER_PARAMS,
         'responses': {
             '200': {
                 'description': 'Estatísticas da empresa'
@@ -63,14 +62,14 @@ class EmpresaStatsResource(BaseResource):
         options['id_inv'] = cnpj_raiz
         options = self.build_person_options(options)
 
-        # try:
-        result = self.get_domain().get_statistics(options)
-        if 'invalid' in result:
-            del result['invalid']
-            return result, 202
-        return result
-        # except (AttributeError, KeyError, ValueError) as err:
-        #     return str(err), 400
+        try:
+            result = self.get_domain().get_statistics(options)
+            if 'invalid' in result:
+                del result['invalid']
+                return result, 202
+            return result
+        except (AttributeError, KeyError, ValueError) as err:
+            return str(err), 400
 
     def get_domain(self):
         ''' Carrega o modelo de domínio, se não o encontrar '''

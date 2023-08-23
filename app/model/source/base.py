@@ -31,8 +31,14 @@ class BaseSource():
 
     def get_options_empresa(self, options, local_cols, df, persp):
         ''' Create options according to tables and query conditions '''
-        subset_rules = [f"eq-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}"]
-        subset_rules.extend(self.get_options_rules_empresa(options, local_cols, df, persp))
+        subset_rules = [f"eq-cast({local_cols.get('cnpj_raiz')} as INT)-{options.get('cnpj_raiz')}"]
+        if options.get('column') and local_cols.get('compet'):
+            subset_rules.extend([
+                "and", f"eq-cast({local_cols.get('compet')} as INT)-{options.get('column')}"
+            ])    
+        subset_rules.extend(
+            self.get_options_rules_empresa(options, local_cols, df, persp)
+        )
         return {
             "categorias": [local_cols.get('cnpj_raiz')],
             "agregacao": ['count'],

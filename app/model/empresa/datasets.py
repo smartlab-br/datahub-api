@@ -2,6 +2,7 @@
 from model.base import BaseModel
 from repository.empresa.datasets import DatasetsRepository
 from model.thematic import Thematic
+from flask import current_app
 
 
 #pylint: disable=R0903
@@ -11,6 +12,7 @@ class Datasets(BaseModel):
     def __init__(self):
         ''' Construtor '''
         self.repo = DatasetsRepository()
+        self.DATASETS_COMPETENCIA = current_app.config["CONF_REPO_DATASETS_COMPETENCIA"]
 
     def get_repo(self):
         ''' Garantia de que o repo estará carregado '''
@@ -27,7 +29,7 @@ class Datasets(BaseModel):
         model = Thematic()
 
         result = {}
-        for key, value in self.get_repo().DATASETS_COMPETENCIA.items():
+        for key, value in self.DATASETS_COMPETENCIA.items():
             agregacao, coluna = value.split(" ")
             coluna_resultado = coluna
             options = {

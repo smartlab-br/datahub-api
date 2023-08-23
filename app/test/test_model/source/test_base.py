@@ -40,7 +40,8 @@ class BaseSourceGetOptionsEmpresaTest(unittest.TestCase):
                 'categorias': ['col_cnpj_raiz'],
                 'agregacao': ['count'],
                 'where': [
-                    "eq-col_cnpj_raiz-12345678",
+                    "eq-cast(col_cnpj_raiz as INT)-12345678",
+                    "and", "eq-cast(col_compet as INT)-2099",
                     "and", "eq-flag-'1'",
                     "and", "eq-cnpj_col-12345678000101",
                     "and", "eq-flag_2-'1'",

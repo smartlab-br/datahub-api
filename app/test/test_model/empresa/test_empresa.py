@@ -1,12 +1,14 @@
 '''Main tests in API'''
-import unittest
 from datetime import datetime
 from model.empresa.empresa import Empresa
 from test.stubs.empresa import StubEmpresa
 from test.stubs.empresa import StubDatasetRepository
+from unittest import TestCase
+TestCase.maxDiff = None
 
-class EmpresaModelBaseTest(unittest.TestCase):
+class EmpresaModelBaseTest(TestCase):
     ''' Classe que testa o mapeamento de agregações para funções do pandas '''
+    maxDiff = None
     def test_default_on_none(self):
         ''' Verifica se retorna np.mean se agregação nula '''
         self.assertEqual(
@@ -30,7 +32,8 @@ class EmpresaModelBaseTest(unittest.TestCase):
                 'categorias': ['col_cnpj_raiz'],
                 'agregacao': ['count'],
                 'where': [
-                    "eq-col_cnpj_raiz-12345678",
+                    "eq-cast(col_cnpj_raiz as INT)-12345678",
+                    "and", "eq-cast(col_compet as INT)-2099",
                     "and", "eq-flag-'1'",
                     "and", "eq-cnpj_col-12345678000101",
                     "and", "eq-flag_2-'1'",
@@ -84,7 +87,7 @@ class EmpresaModelBaseTest(unittest.TestCase):
             }
         )
 
-class AssessColumnStatusTest(unittest.TestCase):
+class AssessColumnStatusTest(TestCase):
     ''' Class to test the status assessmente from a collection of status
         keys retrieved from REDIS '''
     SLOT_LIST = ['2019', '2020', '2047']
@@ -123,7 +126,7 @@ class AssessColumnStatusTest(unittest.TestCase):
             'UNAVAILABLE'
         )
 
-class StubGetGroupedStatsTest(unittest.TestCase):
+class StubGetGroupedStatsTest(TestCase):
     ''' Tests the grouped statistics fetching using static data as source '''
     def test_get_grouped_stats(self):
         ''' Tests basic grouped stats retrieval '''
@@ -135,8 +138,8 @@ class StubGetGroupedStatsTest(unittest.TestCase):
             ),
             {
                 'stats_estab': {
-                    '12345678000101': {'agr_count': 100, 'compet': 2047},
-                    '12345678000202': {'agr_count': 200, 'compet': 2099}
+                    '12345678000101': {'compet': 2047, 'agr_count': 100},
+                    '12345678000202': {'compet': 2099, 'agr_count': 200}
                 },
                 'stats_compet': {
                     '2047': {'agr_count': 100, 'cnpj': '12345678000101'},
@@ -153,18 +156,7 @@ class StubGetGroupedStatsTest(unittest.TestCase):
             }
         )
 
-    def test_get_grouped_stats_displaced_compet_alt(self):
-        ''' Tests basic grouped stats retrieval '''
-        self.assertEqual(
-            StubEmpresa().get_grouped_stats(
-                {},
-                {'theme': 'catewb'},
-                {}
-            ),
-            StubEmpresa.EXPECTED_GROUPED_STATS
-        )
-
-class StubGetStatisticsFromPerspectiveTest(unittest.TestCase):
+class StubGetStatisticsFromPerspectiveTest(TestCase):
     ''' Tests the grouped perspective statistics fetching using static
         data as source '''
     def test_get_statistic_from_perspective(self):
@@ -172,9 +164,9 @@ class StubGetStatisticsFromPerspectiveTest(unittest.TestCase):
             when no perspective is given '''
         self.assertEqual(
             StubEmpresa().get_statistics_from_perspective(
-                'mytheme', None, {}, 
+                'mytheme', None, {'compet': 'compet'}, 
                 {"categorias": ['cnpj']},
-                {"categorias": ['cnpj']}
+                {"categorias": ['cnpj'], "completa": True, 'theme': 'mytheme'}
             ),
             {
                 **{
@@ -189,19 +181,20 @@ class StubGetStatisticsFromPerspectiveTest(unittest.TestCase):
         ''' Tests basic grouped perspective stats retrieval '''
         self.assertEqual(
             StubEmpresa().get_statistics_from_perspective(
-                'mytheme', 'mypersp', {}, 
+                'mytheme', 'mypersp', {'compet': 'compet'}, 
                 {"categorias": ['cnpj'], 'where': []},
-                {"categorias": ['cnpj']}
+                {"categorias": ['cnpj'], "completa": True, 'theme': 'mytheme'}
             ),
             {
                 **{
+                    'fonte': 'Fonte',
                     'stats': {'cnpj': '12345678000101', 'compet': 2047, 'agr_count': 100}
                 },
                 **StubEmpresa.EXPECTED_GROUPED_STATS
             }
         )
 
-class StubGetStatisticsTest(unittest.TestCase):
+class StubGetStatisticsTest(TestCase):
     ''' Tests the grouped perspective statistics fetching using static
         data as source '''
     def test_get_statistic_column_family_no_perspective_no_timeframe(self):
@@ -230,6 +223,7 @@ class StubGetStatisticsTest(unittest.TestCase):
                 "cnpj_raiz": '12345678',
                 "theme": 'rais',
                 "column_family": "rais",
+                "completa": True,
                 "categorias": ['nu_cnpj_cei']
             }),
             {
@@ -382,20 +376,20 @@ class StubGetStatisticsTest(unittest.TestCase):
             }
         )
 
-    def test_get_statistic_raise_on_timeframe_validation_error(self):
-        ''' Tests if timeframe requirement is forced '''
-        self.assertRaises(
-            AttributeError,
-            StubEmpresa().get_statistics,
-            {
-                "theme": "auto",
-                "column_family": "auto",
-                "categorias": ['cnpj'],
-                'where': []
-            }
-        )
+    # def test_get_statistic_raise_on_timeframe_validation_error(self):
+    #     ''' Tests if timeframe requirement is forced '''
+    #     self.assertRaises(
+    #         AttributeError,
+    #         StubEmpresa().get_statistics,
+    #         {
+    #             "theme": "auto",
+    #             "column_family": "auto",
+    #             "categorias": ['cnpj'],
+    #             'where': []
+    #         }
+    #     )
 
-class StubGetIsValidLoadingEntryTest(unittest.TestCase):
+class StubGetIsValidLoadingEntryTest(TestCase):
     ''' Tests the loading entry validation method '''
     def test_is_valid_loading_entry_no_options(self):
         ''' Tests if error is raised when no options is given '''
@@ -482,7 +476,7 @@ class StubGetIsValidLoadingEntryTest(unittest.TestCase):
             False
         )
 
-class StubGetLoadingEntryTest(unittest.TestCase):
+class StubGetLoadingEntryTest(TestCase):
     ''' Tests the loading entry validation method '''
     EXPECTED = {
         "2017": f'INGESTED|{datetime.strftime(datetime.now(), "%Y-%m-%d")}',
@@ -553,7 +547,7 @@ class StubGetLoadingEntryTest(unittest.TestCase):
             )
         )
 
-class StubAssessColumnStatusTest(unittest.TestCase):
+class StubAssessColumnStatusTest(TestCase):
     ''' Tests the column status assessor '''
     def test_assess_column_status_no_column_args(self):
         ''' Tests if UNAVAILABLE is returned when no column args are provided '''

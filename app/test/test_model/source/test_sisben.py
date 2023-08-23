@@ -17,6 +17,11 @@ class SisbenGetOptionsEmpresaTest(unittest.TestCase):
             {
                 'categorias': ['col_cnpj_raiz'],
                 'agregacao': ['count'],
-                'where': ["eq-col_cnpj_raiz-'12345678'", "and", "ne-col_cnpj-'0'", "and", "eq-tp_empregador-1", "and", "eq-col_compet-2099"],
+                'where': [
+                    "eq-col_cnpj_raiz-'12345678'", 
+                    "and", "eq-cast(col_compet as INT)-2099",
+                    "and", "ne-cast(col_cnpj as INT)-0", 
+                    "and", "eq-tp_empregador-1"
+                ],
                 'theme': 'sisben_c'}
         )

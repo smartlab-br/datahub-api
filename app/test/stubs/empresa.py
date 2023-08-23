@@ -161,7 +161,6 @@ class StubEmpresa(Empresa):
             }
         }
     }
-
     def __init__(self):
         ''' Construtor '''
         self.repo = None

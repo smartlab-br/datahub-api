@@ -17,18 +17,7 @@ class CatwebGetOptionsEmpresaTest(unittest.TestCase):
                 'agregacao': ['count'],
                 'where': [
                     "eq-col_cnpj-'12345678'",
-                    "and", "ge-col_compet-\'20990101\'",
-                    "and", "le-col_compet-\'20991231\'"
+                    "and", "eq-cast(col_compet as INT)-2099"
                 ],
                 'theme': 'catweb_c'}
-        )
-
-    def test_rules_empresa_translation(self):
-        ''' Tests if the rules are correctly built according to given args '''
-        self.assertEqual(
-            Catweb().get_options_rules_empresa(self.OPTIONS, self.LOCAL_COLS, 'catweb', None),
-            [
-                "and", f"ge-col_compet-\'20990101\'",
-                "and", f"le-col_compet-\'20991231\'"
-            ]
         )

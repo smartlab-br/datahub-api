@@ -16,11 +16,10 @@ class AutoGetOptionsEmpresaTest(unittest.TestCase):
                 'categorias': ['col_cnpj'],
                 'agregacao': ['count'],
                 'where': [
-                    "eq-col_cnpj-'12345678'",
+                    "eq-cast(col_cnpj as INT)-12345678",
+                    'and', "eq-cast(col_compet as INT)-2099",
                     'and', "eq-tpinscricao-'1'",
-                    'and', 'nl-dtcancelamento',
-                    'and', "gestr-col_compet-'2099\\-01\\-01'-1-10",
-                    'and', "lestr-col_compet-'2099\\-12\\-31'-1-10"
+                    'and', 'nl-dtcancelamento'
                 ],
                 'theme': 'auto'}
         )
@@ -31,8 +30,6 @@ class AutoGetOptionsEmpresaTest(unittest.TestCase):
             Auto().get_options_rules_empresa(self.OPTIONS, self.LOCAL_COLS, 'auto', None),
             [
                 'and', "eq-tpinscricao-'1'",
-                'and', 'nl-dtcancelamento',
-                'and', "gestr-col_compet-'2099\\-01\\-01'-1-10",
-                'and', "lestr-col_compet-'2099\\-12\\-31'-1-10"
+                'and', 'nl-dtcancelamento'
             ]
         )

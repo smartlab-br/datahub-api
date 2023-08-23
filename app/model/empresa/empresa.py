@@ -24,7 +24,7 @@ class Empresa(BaseModel):
         self.dataset_repo = None
         self.pessoa_dataset_repo = None
         self.thematic_handler = None
-        self.TOPICS = current_app.config["CONF_REPO_EMPRESA_TOPICS"]
+        self.TOPICS = [ key for key, _ in current_app.config["CONF_REPO_DATASETS_COMPETENCIA"].items() if not key.endswith('_c')] 
         self.__set_repo()
 
     def get_repo(self):

@@ -26,7 +26,6 @@ class DevelopmentConfig():
     RABBIT_ENV="stg"
 
     CONF_REPO_METADATA = json.loads(os.getenv("CONF_REPO_METADATA"))
-    CONF_REPO_EMPRESA_TOPICS = (os.getenv("CONF_REPO_EMPRESA_TOPICS")).split(",")
     CONF_REPO_DATASETS_COMPETENCIA = json.loads(os.getenv("CONF_REPO_DATASETS_COMPETENCIA"))
     CONF_REPO_THEMATIC = {
         "TABLE_NAMES": json.loads(os.getenv("CONF_REPO_THEMATIC_TABLE_NAMES")),

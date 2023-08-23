@@ -37,7 +37,6 @@ class StagingConfig():
 
     CONF_REPO = yaml.safe_load(os.getenv("CONF_REPO"))
     CONF_REPO_METADATA = CONF_REPO.get("metadata", {})
-    CONF_REPO_EMPRESA_TOPICS = CONF_REPO.get("empresa_topics", [])
     CONF_REPO_DATASETS_COMPETENCIA = CONF_REPO.get("datasets_competencia", {})
     CONF_REPO_THEMATIC = {
         "TABLE_NAMES": CONF_REPO.get("thematic", {}).get("tableNames",{}),

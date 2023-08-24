@@ -19,7 +19,7 @@ class AeronavesGetOptionsEmpresaTest(unittest.TestCase):
                 'agregacao': ['count'],
                 'where': [
                     "eq-cast(col_cnpj_raiz as INT)-12345678", 
-                    "and", "ne-cast(col_cnpj as INT)-0"
+                    "and", "ne-cast(col_cnpj as BIGINT)-0"
                 ],
                 'theme': 'aeronaves'
             }

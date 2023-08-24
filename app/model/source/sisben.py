@@ -5,7 +5,7 @@ class Sisben(BaseSource):
     ''' Base Option builder class for Sisben datasources '''
     def get_options_rules_empresa(self, options, local_cols, df, persp):
         subset_rules = [
-            "and", f"ne-cast({local_cols.get('cnpj')} as INT)-0",
+            "and", f"ne-cast({local_cols.get('cnpj')} as BIGINT)-0",
             "and", "eq-tp_empregador-1"
         ]
         subset_rules.extend(

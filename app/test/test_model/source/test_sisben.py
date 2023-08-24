@@ -20,7 +20,7 @@ class SisbenGetOptionsEmpresaTest(unittest.TestCase):
                 'where': [
                     "eq-col_cnpj_raiz-'12345678'", 
                     "and", "eq-cast(col_compet as INT)-2099",
-                    "and", "ne-cast(col_cnpj as INT)-0", 
+                    "and", "ne-cast(col_cnpj as BIGINT)-0", 
                     "and", "eq-tp_empregador-1"
                 ],
                 'theme': 'sisben_c'}

@@ -23,12 +23,6 @@ class StubEmpresaRepository(EmpresaRepository):
             'nu_cpf': '12345678900',
             'col_compet': 2099,
             'origem_busca': 'Empregador Concessão'
-        },
-        {
-            "nu_cnpj_cei": '12345678000404',
-            'nu_cpf': '12345678900',
-            'col_compet': 2099,
-            'origem_busca': 'Empregador AEPS'
         }
     ]
     EXPECTED_RESULT = {
@@ -55,14 +49,6 @@ class StubEmpresaRepository(EmpresaRepository):
                 'col_compet': 2099,
                 'origem_busca': 'Empregador Concessão'
                 }
-        ],
-        'catweb_aeps': [
-            {
-                'nu_cnpj_cei': '12345678000404',
-                'nu_cpf': '12345678900',
-                'col_compet': 2099,
-                'origem_busca': 'Empregador AEPS'
-            }
         ]
     }
     DEFAULT_GROUPING = 'nu_competencia, cd_indicador'
@@ -89,8 +75,7 @@ class StubEmpresaRepository(EmpresaRepository):
         'catweb': {
             'empregador': 'Empregador',
             'tomador': 'Tomador',
-            'concessao': 'Empregador Concessão',
-            'aeps': 'Empregador AEPS'
+            'concessao': 'Empregador Concessão'
         }
     }
 
@@ -221,11 +206,6 @@ class EmpresaRepositoryFindDatasetTest(unittest.TestCase):
                         'nu_cnpj_cei': '12345678000303', 
                         'nu_cpf': '12345678900',
                         'col_compet': 2099
-                    },
-                    {
-                        'nu_cnpj_cei': '12345678000404',
-                        'nu_cpf': '12345678900',
-                        'col_compet': 2099
                     }
                 ],
                 'catweb_empregador': [
@@ -245,13 +225,6 @@ class EmpresaRepositoryFindDatasetTest(unittest.TestCase):
                 'catweb_concessao': [
                     {
                         'nu_cnpj_cei': '12345678000303', 
-                        'nu_cpf': '12345678900',
-                        'col_compet': 2099
-                    }
-                ],
-                'catweb_aeps': [
-                    {
-                        'nu_cnpj_cei': '12345678000404',
                         'nu_cpf': '12345678900',
                         'col_compet': 2099
                     }

@@ -167,8 +167,7 @@ class StubThematicRepository(ThematicRepository):
         'catweb': {
             'empregador': 'Empregador',
             'tomador': 'Tomador',
-            'concessao': 'Empregador Concessão',
-            'aeps': 'Empregador AEPS'
+            'concessao': 'Empregador Concessão'
         }
     }
 

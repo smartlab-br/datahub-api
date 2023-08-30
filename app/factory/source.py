@@ -5,10 +5,10 @@ from model.source.aeronaves import Aeronaves
 from model.source.auto import Auto
 from model.source.catweb import Catweb
 from model.source.rais import Rais
-# from model.source.renavam import Renavam
+from model.source.renavam import Renavam
 from model.source.sisben import Sisben
 from model.source.rfb import BaseRfb, RfbSocios, RfbParticipacaoSocietaria
-# from model.source.embarcacoes import Embarcacoes
+from model.source.embarcacoes import Embarcacoes
 
 class SourceFactory():
     ''' Factory for instantiating specific models depending on the source
@@ -24,8 +24,8 @@ class SourceFactory():
             return Catweb()
         if dataframe == 'rais':
             return Rais()
-        # if dataframe == 'renavam':
-        #     return Renavam()
+        if dataframe == 'renavam':
+            return Renavam()
         if dataframe in ['sisben', 'sisben_c']:
             return Sisben()
         # RFB
@@ -40,7 +40,7 @@ class SourceFactory():
             if dataframe == 'cagedsaldo':
                 return CagedSaldo()
             return BaseCaged()
-        # if dataframe == 'embarcacoes':
-        #     return Embarcacoes()
+        if dataframe == 'embarcacoes':
+            return Embarcacoes()
         # Default
         return BaseSource()

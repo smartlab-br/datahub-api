@@ -15,7 +15,7 @@ class CagedSaldo(BaseCaged):
     def get_options_empresa(self, options, local_cols, df, persp):
         ''' Create options according to tables and query conditions '''
         subset_rules = [
-            f"eqlpint-{local_cols.get('cnpj_raiz')}-{options.get('cnpj_raiz')}-14-0-1-8"
+            f"eqlpint-{local_cols.get('cnpj')}-{options.get('cnpj_raiz')}-14-0-1-8"
         ]
         if options.get('column'):
             subset_rules.extend([

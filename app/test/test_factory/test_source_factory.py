@@ -3,15 +3,6 @@ import unittest
 from factory.source import SourceFactory
 from model.source.base import BaseSource
 from model.source.caged import CagedSaldo
-# from model.source.caged import BaseCaged, CagedSaldo
-# from model.source.aeronaves import Aeronaves
-# from model.source.auto import Auto
-# from model.source.catweb import Catweb
-# from model.source.rais import Rais
-# from model.source.renavam import Renavam
-# from model.source.sisben import Sisben
-# from model.source.rfb import BaseRfb, RfbSocios, RfbParticipacaoSocietaria
-# from model.source.embarcacoes import Embarcacoes
 
 class SourceModelCreateTest(unittest.TestCase):
     ''' Test behaviours linked to "empresa" dataset-specific model instantiation '''

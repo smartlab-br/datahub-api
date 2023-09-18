@@ -46,7 +46,7 @@ class CagedSaldoGetOptionsEmpresaTest(unittest.TestCase):
         self.assertEqual(
             CagedSaldo().get_options_empresa(
                 {'cnpj_raiz': '12345678'},
-                {'cnpj_raiz': 'col_cnpj_raiz'},
+                {'cnpj': 'col_cnpj'},
                 'cagedsaldo',
                 None
             ),
@@ -55,7 +55,7 @@ class CagedSaldoGetOptionsEmpresaTest(unittest.TestCase):
                 "valor": ['qtd_admissoes', 'qtd_desligamentos', 'saldo_mov'],
                 'agregacao': ['sum'],
                 'where': [
-                    "eqlpint-col_cnpj_raiz-12345678-14-0-1-8",
+                    "eqlpint-col_cnpj-12345678-14-0-1-8",
                     "and", "eq-tipo_estab-1"
                 ],
                 'theme': 'cagedsaldo'

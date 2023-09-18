@@ -40,6 +40,7 @@ class DevelopmentConfig():
         "CNPJ_RAIZ_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_CNPJ_RAIZ_COLUMNS")),
         "CNPJ_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_CNPJ_COLUMNS")),
         "COMPET_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_COMPET_COLUMNS")),
+        "FILTER_RULES": json.loads(os.getenv("CONF_REPO_BASE_FILTER_RULES").replace("\\","")),
         "PF_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_PF_COLUMNS")),
         "PERSP_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_PERSP_COLUMNS")),
         "PERSP_VALUES": json.loads(os.getenv("CONF_REPO_BASE_PERSP_VALUES")),

@@ -50,6 +50,7 @@ class ProductionConfig():
         "DEFAULT_PARTITIONING": CONF_REPO.get("base", {}).get("defaultPartitioning", {}),
         "CNPJ_RAIZ_COLUMNS": CONF_REPO.get("base", {}).get("cnpjRaizColumns", {}),
         "CNPJ_COLUMNS": CONF_REPO.get("base", {}).get("cnpjColumns", {}),
+        "FILTER_RULES": CONF_REPO.get("base", {}).get("filterRules", {}),
         "COMPET_COLUMNS": CONF_REPO.get("base", {}).get("competColumns", {}),
         "PF_COLUMNS": CONF_REPO.get("base", {}).get("pfColumns", {}),
         "PERSP_COLUMNS": CONF_REPO.get("base", {}).get("perspColumns", {}),

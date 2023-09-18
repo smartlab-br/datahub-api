@@ -83,6 +83,7 @@ class BaseRepository():
         self.CNPJ_RAIZ_COLUMNS = current_app.config["CONF_REPO_BASE"].get("CNPJ_RAIZ_COLUMNS")
         self.CNPJ_COLUMNS = current_app.config["CONF_REPO_BASE"].get("CNPJ_COLUMNS")
         self.COMPET_COLUMNS = current_app.config["CONF_REPO_BASE"].get("COMPET_COLUMNS")
+        self.FILTER_RULES = current_app.config["CONF_REPO_BASE"].get("FILTER_RULES")
         self.PF_COLUMNS = current_app.config["CONF_REPO_BASE"].get("PF_COLUMNS")
         self.PERSP_COLUMNS = current_app.config["CONF_REPO_BASE"].get("PERSP_COLUMNS")
         self.PERSP_VALUES = current_app.config["CONF_REPO_BASE"].get("PERSP_VALUES")
@@ -102,12 +103,13 @@ class BaseRepository():
     def get_column_defs(self, table_name):
         """ Get the column definitions from a dataframe """
         return {
-            'cnpj_raiz': getattr(self, 'CNPJ_RAIZ_COLUMNS', {}).get(table_name, 'cnpj_raiz'),
-            'cnpj': getattr(self, 'CNPJ_COLUMNS', {}).get(table_name, 'cnpj'),
+            'cnpj_raiz': getattr(self, 'CNPJ_RAIZ_COLUMNS', {}).get(table_name),
+            'cnpj': getattr(self, 'CNPJ_COLUMNS', {}).get(table_name),
             'pf': getattr(self, 'PF_COLUMNS', {}).get(table_name, 'cpf'),
             'persp': getattr(self, 'PERSP_COLUMNS', {}).get(table_name),
             'persp_options': getattr(self, 'PERSP_VALUES', {}).get(table_name),
-            'compet': getattr(self, 'COMPET_COLUMNS', {}).get(table_name)
+            'compet': getattr(self, 'COMPET_COLUMNS', {}).get(table_name),
+            'filter_rules': getattr(self, 'FILTER_RULES', {}).get(table_name)
         }
 
     @staticmethod

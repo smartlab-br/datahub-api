@@ -51,6 +51,7 @@ class StagingConfig():
         "CNPJ_RAIZ_COLUMNS": CONF_REPO.get("base", {}).get("cnpjRaizColumns",{}),
         "CNPJ_COLUMNS": CONF_REPO.get("base", {}).get("cnpjColumns",{}),
         "COMPET_COLUMNS": CONF_REPO.get("base", {}).get("competColumns",{}),
+        "FILTER_RULES": CONF_REPO.get("base", {}).get("filterRules", {}),
         "PF_COLUMNS": CONF_REPO.get("base", {}).get("pfColumns",{}),
         "PERSP_COLUMNS": CONF_REPO.get("base", {}).get("perspColumns",{}),
         "PERSP_VALUES": CONF_REPO.get("base", {}).get("perspValues", {}),

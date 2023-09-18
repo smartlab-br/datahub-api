@@ -35,9 +35,9 @@ class EmpresaModelBaseTest(TestCase):
                     "eq-cast(col_cnpj_raiz as INT)-12345678",
                     "and", "eq-cast(col_compet as INT)-2099",
                     "and", "eq-flag-'1'",
-                    "and", "eq-cnpj_col-12345678000101",
+                    "and", "eq-cast(cnpj_col as BIGINT)-12345678000101",
                     "and", "eq-flag_2-'1'",
-                    "and", "eq-pf_col-12345678900"
+                    "and", "eq-cast(pf_col as INT)-12345678900"
                 ],
                 'theme': 'theme'
             }

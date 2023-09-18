@@ -12,9 +12,9 @@ class BaseSourceGetOptionsEmpresaTest(unittest.TestCase):
     }
     EXPECTED = [
         "and", "eq-flag-'1'",
-        "and", "eq-cnpj_col-12345678000101",
+        "and", "eq-cast(cnpj_col as BIGINT)-12345678000101",
         "and", "eq-flag_2-'1'",
-        "and", "eq-pf_col-12345678900"
+        "and", "eq-cast(pf_col as INT)-12345678900"
     ]
 
     def test_translation(self):
@@ -43,9 +43,9 @@ class BaseSourceGetOptionsEmpresaTest(unittest.TestCase):
                     "eq-cast(col_cnpj_raiz as INT)-12345678",
                     "and", "eq-cast(col_compet as INT)-2099",
                     "and", "eq-flag-'1'",
-                    "and", "eq-cnpj_col-12345678000101",
+                    "and", "eq-cast(cnpj_col as BIGINT)-12345678000101",
                     "and", "eq-flag_2-'1'",
-                    "and", "eq-pf_col-12345678900"
+                    "and", "eq-cast(pf_col as INT)-12345678900"
                 ],
                 'theme': 'theme'
             }
@@ -79,4 +79,32 @@ class BaseSourceGetOptionsEmpresaTest(unittest.TestCase):
                 None
             ),
             self.EXPECTED
+        )
+
+    def test_filter_rules(self):
+        ''' Tests if the filter_rules are correctly built according to given args '''
+        self.assertEqual(
+            BaseSource().get_options_empresa(
+                {
+                    'column': 2099,
+                    'cnpj_raiz': '12345678',
+                },
+                {
+                    'compet': 'col_compet',
+                    'cnpj_raiz': 'col_cnpj_raiz',
+                    'filter_rules': 'ne-col_filter-0'
+                },
+                'theme',
+                None
+            ),
+            {
+                'categorias': ['col_cnpj_raiz'],
+                'agregacao': ['count'],
+                'where': [
+                    "eq-cast(col_cnpj_raiz as INT)-12345678",
+                    "and", "eq-cast(col_compet as INT)-2099",
+                    "and", "ne-col_filter-0"
+                ],
+                'theme': 'theme'
+            }
         )

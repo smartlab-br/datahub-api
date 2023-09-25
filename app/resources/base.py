@@ -13,7 +13,7 @@ class BaseResource(Resource):
             agregacao)."},
         {"name": "agregacao", "required": False, "type": 'string', "in": "query",
          "description": "Função de agregação a ser usada. As funções \
-            disponíveis são DISTINCT, COUNT, SUM, MAX, MIN, PCT_COUNT, \
+            disponíveis são DISTINCT, COUNT, SUM, MAX, MIN, COUNT_DISTINCT, PCT_COUNT, \
             PCT_SUM, RANK_COUNT, RANK_SUM, RANK_DENSE_COUNT e \
             RANK_DESNE_SUM. \
             Os atributos retornados terão nome formado pelo nome da \

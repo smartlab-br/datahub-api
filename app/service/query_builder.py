@@ -22,6 +22,9 @@ class QueryBuilder():
         if agregacao.upper() in as_is:
             result = (f'{agregacao}({valor}) AS agr_{agregacao}'
                       f'{("_" +valor) if valor != "*" else ""}')
+        elif agregacao.upper() == 'COUNT_DISTINCT':
+            result = (f'COUNT(DISTINCT {valor}) AS '
+                      f'agr_{agregacao}{("_" +valor) if valor != "*" else ""}')
         elif agregacao.upper() == 'PCT_COUNT':
             result = (f'COUNT({valor}) * 100 / SUM(COUNT({valor})) OVER() AS '
                       f'agr_{agregacao}{("_" +valor) if valor != "*" else ""}')

@@ -1,4 +1,6 @@
 ''' Services for query building and validation '''
+import re
+
 class QueryBuilder():
     ''' Generic class for repositories '''
     @staticmethod
@@ -153,6 +155,8 @@ class QueryBuilder():
             ]
             if option is not None and key not in check_exclusions:
                 checked_words = ','.join(option).upper()
+                # remove quoted strings from verification
+                checked_words = re.sub("'.*?'", '', checked_words)
                 if key in ['limit', 'offset']:
                     checked_words = option.upper()
                 if any(blk in checked_words for blk in blocked_words):

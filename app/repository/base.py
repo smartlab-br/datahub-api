@@ -144,7 +144,7 @@ class HadoopRepository(BaseRepository):
                     if len(lst_objs) > 0 and isinstance(lst_objs.iloc[0], Decimal):
                         dataframe[col] = dataframe[col].astype(float)
                 if dataframe[col].dtype.name == 'datetime64[ns]':
-                    dataframe[col] = pandas.to_numeric(dataframe[col])/1000000
+                    dataframe[col] = dataframe[col].dt.strftime('%Y-%m-%d %H:%M:%S')
         return dataframe
 
     @staticmethod

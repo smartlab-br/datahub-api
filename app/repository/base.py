@@ -5,6 +5,7 @@ import gzip
 import pandas
 import numpy
 import requests
+import chardet
 from decimal import Decimal
 from impala.util import as_pandas
 from flask import current_app
@@ -143,6 +144,8 @@ class HadoopRepository(BaseRepository):
                     lst_objs = dataframe[col].dropna()
                     if len(lst_objs) > 0 and isinstance(lst_objs.iloc[0], Decimal):
                         dataframe[col] = dataframe[col].astype(float)
+                    if len(lst_objs) > 0 and isinstance(lst_objs.iloc[0], bytes):
+                        dataframe[col][0] = dataframe[col][0].decode(chardet.detect(dataframe[col][0])["encoding"])
                 if dataframe[col].dtype.name == 'datetime64[ns]':
                     dataframe[col] = dataframe[col].dt.strftime('%Y-%m-%d %H:%M:%S')
         return dataframe

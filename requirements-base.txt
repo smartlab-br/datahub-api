@@ -9,7 +9,7 @@ branca==0.4.0
 brewer2mpl==1.4.1
 
 pika==1.2.1
-redis==3.0.1
+redis==4.4.4
 impyla==0.18.0
 pykerberos==1.2.4
 gssapi==1.7.3

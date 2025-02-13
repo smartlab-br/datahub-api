@@ -1,0 +1,34 @@
+FROM mptrabalho/datahub-api:base
+LABEL maintainer="smartlab-dev@mpt.mp.br"
+
+# Run this before starting to get the kerberos ticket:
+#    kinit -Vkt /etc/kerberos/krb5.keytab $KERBEROS_USER
+
+# COPY requirements.txt /app/requirements.txt
+
+# RUN apt-get install -y g++ gcc gfortran libopenblas-dev liblapack-dev --no-install-recommends \
+#  && pip3 install --no-cache-dir -r /app/requirements.txt \
+#  && apt-get remove -y g++ gcc gfortran libopenblas-dev liblapack-dev \
+#  && apt-get clean
+
+ARG KERBEROS_USER
+
+ENV KRB5_CONFIG=/etc/kerberos/krb5.conf
+ENV KERBEROS_USER=${KERBEROS_USER}
+ENV KERBEROS_PATH=/etc/kerberos
+ENV KRB5CCNAME=/etc/krb5_tgt/krb5_tgt
+
+COPY app /app/
+COPY krb5.conf /etc/kerberos/krb5.conf
+COPY krb5.keytab /etc/kerberos/krb5.keytab
+COPY krb5_tgt /etc/krb5_tgt/krb5_tgt
+
+ENV TZ America/Sao_Paulo
+
+RUN apt update && apt install -y tzdata libkrb5-dev libkrb5-3 libgssapi-krb5-2
+
+RUN ls -la /etc/kerberos
+RUN klist
+# RUN kinit -k -t /etc/kerberos/krb5.keytab $KERBEROS_USER
+
+# ENTRYPOINT ["sh", "/start.sh"]

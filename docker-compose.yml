@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  datahub-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+      platforms:
+        - linux/arm64
+      args:
+        - KERBEROS_USER=rodrigo.mfagundes@MPT.INTRA
+    platform: linux/arm64
+    ports:
+      - "5001:5000"  # Assuming the API runs on port 5000, adjust if needed
+    env_file:
+      - .env.local
+    volumes:
+      - ./app:/app
+      - ./cacert.pem:/etc/cacerts/cacert.pem
+    networks:
+      - datahub-network
+
+networks:
+  datahub-network:
+    driver: bridge 

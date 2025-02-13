@@ -30,6 +30,7 @@ Note: the main file must be named as main.py
 Make sure you have the following files in place:
 - An .env.local with at least the values as shown in .env.template
 - Valid cacert.pem
+- A conf_repo.yaml
 - Kerberos resources: krb5.conf, krb5.keytab, krb5_tgt
 
 ## Run

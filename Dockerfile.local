@@ -12,11 +12,13 @@ LABEL maintainer="smartlab-dev@mpt.mp.br"
 #  && apt-get clean
 
 ARG KERBEROS_USER
+ARG CONF_REPO_CONTENT
 
 ENV KRB5_CONFIG=/etc/kerberos/krb5.conf
 ENV KERBEROS_USER=${KERBEROS_USER}
 ENV KERBEROS_PATH=/etc/kerberos
 ENV KRB5CCNAME=/etc/krb5_tgt/krb5_tgt
+ENV CONF_REPO=${CONF_REPO_CONTENT}
 
 COPY app /app/
 COPY krb5.conf /etc/kerberos/krb5.conf
@@ -27,8 +29,6 @@ ENV TZ America/Sao_Paulo
 
 RUN apt update && apt install -y tzdata libkrb5-dev libkrb5-3 libgssapi-krb5-2
 
-RUN ls -la /etc/kerberos
-RUN klist
 # RUN kinit -k -t /etc/kerberos/krb5.keytab $KERBEROS_USER
 
 # ENTRYPOINT ["sh", "/start.sh"]

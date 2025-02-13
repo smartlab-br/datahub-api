@@ -17,4 +17,7 @@ wkt ./krb5.keytab
 quit
 EOF
 
+# Use base64 encoding to safely handle the YAML content
+export CONF_REPO_CONTENT=$(cat conf_repo.yaml | base64)
+
 docker-compose up --build --remove-orphans

@@ -9,6 +9,7 @@ services:
         - linux/arm64
       args:
         - KERBEROS_USER=rodrigo.mfagundes@MPT.INTRA
+        - CONF_REPO_CONTENT=${CONF_REPO_CONTENT} 
     platform: linux/arm64
     ports:
       - "5001:5000"  # Assuming the API runs on port 5000, adjust if needed

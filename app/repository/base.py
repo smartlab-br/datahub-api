@@ -127,7 +127,7 @@ class BaseRepository():
         """ Obtém o nome de uma tabela do cloudera """
         tbl_name = self.TABLE_NAMES.get(theme)
         if tbl_name is None:
-            raise KeyError("Invalid theme")
+            raise KeyError(f"""Invalid theme {theme}""")
         return tbl_name
 
 

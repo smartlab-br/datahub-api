@@ -123,6 +123,9 @@ class BaseModel():
                 struct['api_obj_collection'],
                 options
             )
+            # Removes data_collection definition from yaml
+            del struct['api_obj_collection']
+            
         # Adds query params as fixed data in the collection
         if 'coefficient' in options:
             data_collection = {**data_collection, **TemplateHelper.get_coefficients(
@@ -130,8 +133,6 @@ class BaseModel():
             )}
         if 'term' in options:
             data_collection = {**data_collection, **TemplateHelper.get_terms(options['term'])}
-        # Removes data_collection definition from yaml
-        del struct['api_obj_collection']
 
         # Interpolate the structure with data
         final_struct = self.templates_to_fixed(struct, data_collection, any_nodata)

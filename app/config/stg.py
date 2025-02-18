@@ -1,5 +1,6 @@
 ''' Config loader for staging environment '''
 import os
+import json
 import yaml
 
 #pylint: disable=R0903
@@ -36,7 +37,12 @@ class StagingConfig():
     }
 
     CONF_REPO = yaml.safe_load(os.getenv("CONF_REPO"))
-    CONF_REPO_METADATA = CONF_REPO.get("metadata", {})
+    try:
+        CONF_REPO_METADATA = CONF_REPO.get("metadata", {})
+    except AttributeError:
+        decoded_conf_repo = json.loads(os.getenv("CONF_REPO"))
+        CONF_REPO = yaml.safe_load(decoded_conf_repo)
+        CONF_REPO_METADATA = CONF_REPO.get("metadata", {})
     CONF_REPO_DATASETS_COMPETENCIA = CONF_REPO.get("datasets_competencia", {})
     CONF_REPO_THEMATIC = {
         "TABLE_NAMES": CONF_REPO.get("thematic", {}).get("tableNames",{}),

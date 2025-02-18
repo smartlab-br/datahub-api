@@ -23,6 +23,28 @@ Flask for SmartLab developers
 
 Note: the main file must be named as main.py
 
+# Running with docker-compose
+
+## Before you start
+
+Install Kerberos dependencies
+
+- Ubuntu: `sudo apt get install krb5-user`
+- MacOS: `brew install kerb5`
+
+## Dependencies
+
+Make sure you have the following files in place:
+- An `.env.local` with at least the values as shown in `.env.template`
+- Valid `cacert.pem`
+- A `conf_repo.yaml` with the content that should fill the CONF_REPO env variable
+- Kerberos resources: `krb5.conf`, `krb5.keytab`, `krb5_tgt`
+
+## Run
+`source local_compose_start.sh <YOUR_USERNAME>`
+
+You will be prompted for password.
+
 # Third-party components used in our platform
 
 **[Flask](https://github.com/pallets/flask)**\

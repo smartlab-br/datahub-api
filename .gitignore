@@ -12,3 +12,7 @@ setenv.sh
 app/.coverage
 report/*
 venv
+.env.local
+cacert.pem
+krb5*
+conf_repo.yaml

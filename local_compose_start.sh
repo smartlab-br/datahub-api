@@ -17,7 +17,7 @@ wkt ./krb5.keytab
 quit
 EOF
 
-# Use base64 encoding to safely handle the YAML content
-export CONF_REPO_CONTENT=$(cat conf_repo.yaml | base64)
+# Read and escape the YAML content
+export CONF_REPO_CONTENT=$(cat conf_repo.yaml | python3 -c 'import sys, json; print(json.dumps(sys.stdin.read()))')
 
 docker-compose up --build --remove-orphans

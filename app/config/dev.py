@@ -1,10 +1,15 @@
 ''' Config loader for dev environment '''
 import os
 import json
+import yaml
 
 #pylint: disable=R0903
 class DevelopmentConfig():
     ''' Config loader for dev environment '''
+    CORS_AUTOMATIC_OPTIONS = True
+    
+    api_context = os.getenv('API_CONTEXT')
+
     IMPALA_HOST = os.getenv('IMPALA_HOST')
     IMPALA_PORT = os.getenv('IMPALA_PORT')
 
@@ -25,34 +30,40 @@ class DevelopmentConfig():
     RABBIT_PASSWORD=os.getenv('RABBIT_PASSWORD')
     RABBIT_ENV="stg"
 
-    CONF_REPO_METADATA = json.loads(os.getenv("CONF_REPO_METADATA"))
-    CONF_REPO_DATASETS_COMPETENCIA = json.loads(os.getenv("CONF_REPO_DATASETS_COMPETENCIA"))
-    CONF_REPO_THEMATIC = {
-        "TABLE_NAMES": json.loads(os.getenv("CONF_REPO_THEMATIC_TABLE_NAMES")),
-        "DEFAULT_PARTITIONING": json.loads(os.getenv("CONF_REPO_THEMATIC_DEFAULT_PARTITIONING")),
-        "ON_JOIN": json.loads(os.getenv("CONF_REPO_THEMATIC_ON_JOIN")),
-        "JOIN_SUFFIXES": json.loads(os.getenv("CONF_REPO_THEMATIC_JOIN_SUFFIXES"))
-    }
-    CONF_REPO_BASE = {
-        "VAL_FIELD": os.getenv("CONF_REPO_BASE_VAL_FIELD"),
-        "DEFAULT_GROUPING": os.getenv("CONF_REPO_BASE_DEFAULT_GROUPING"),
-        "DEFAULT_PARTITIONING": os.getenv("CONF_REPO_BASE_DEFAULT_PARTITIONING"),
-        "CNPJ_RAIZ_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_CNPJ_RAIZ_COLUMNS")),
-        "CNPJ_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_CNPJ_COLUMNS")),
-        "COMPET_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_COMPET_COLUMNS")),
-        "FILTER_RULES": json.loads(os.getenv("CONF_REPO_BASE_FILTER_RULES").replace("\\","")),
-        "PF_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_PF_COLUMNS")),
-        "PERSP_COLUMNS": json.loads(os.getenv("CONF_REPO_BASE_PERSP_COLUMNS")),
-        "PERSP_VALUES": json.loads(os.getenv("CONF_REPO_BASE_PERSP_VALUES")),
-        "ON_JOIN": json.loads(os.getenv("CONF_REPO_BASE_ON_JOIN")),
-        "JOIN_SUFFIXES": json.loads(os.getenv("CONF_REPO_BASE_JOIN_SUFFIXES"))
-    }
-
     MAPBIOMAS = {
         "API_BASE_URL": os.getenv('MAPBIOMAS_API_BASE_URL'),
         "USER": os.getenv('MAPBIOMAS_USER'),
         "PASSWORD": os.getenv('MAPBIOMAS_PASSWORD')
     }
 
-    AUTH_GATEWAYS = json.loads(os.getenv("AUTH_GATEWAYS"))
-    EVENT_TRACKERS = json.loads(os.getenv("EVENT_TRACKERS"))
+    CONF_REPO = yaml.safe_load(os.getenv("CONF_REPO"))
+    try:
+        CONF_REPO_METADATA = CONF_REPO.get("metadata", {})
+    except AttributeError:
+        decoded_conf_repo = json.loads(os.getenv("CONF_REPO"))
+        CONF_REPO = yaml.safe_load(decoded_conf_repo)
+        CONF_REPO_METADATA = CONF_REPO.get("metadata", {})
+    CONF_REPO_DATASETS_COMPETENCIA = CONF_REPO.get("datasets_competencia", {})
+    CONF_REPO_THEMATIC = {
+        "TABLE_NAMES": CONF_REPO.get("thematic", {}).get("tableNames",{}),
+        "DEFAULT_PARTITIONING": CONF_REPO.get("thematic", {}).get("defaultPartitioning",{}),
+        "ON_JOIN": CONF_REPO.get("thematic", {}).get("onJoin",{}),
+        "JOIN_SUFFIXES": CONF_REPO.get("thematic", {}).get("joinSuffixes",{}),
+    }
+    CONF_REPO_BASE = {
+        "VAL_FIELD": CONF_REPO.get("base", {}).get("valField",{}),
+        "DEFAULT_GROUPING": CONF_REPO.get("base", {}).get("defaultGrouping",{}),
+        "DEFAULT_PARTITIONING": CONF_REPO.get("base", {}).get("defaultPartitioning",{}),
+        "CNPJ_RAIZ_COLUMNS": CONF_REPO.get("base", {}).get("cnpjRaizColumns",{}),
+        "CNPJ_COLUMNS": CONF_REPO.get("base", {}).get("cnpjColumns",{}),
+        "COMPET_COLUMNS": CONF_REPO.get("base", {}).get("competColumns",{}),
+        "FILTER_RULES": CONF_REPO.get("base", {}).get("filterRules", {}),
+        "PF_COLUMNS": CONF_REPO.get("base", {}).get("pfColumns",{}),
+        "PERSP_COLUMNS": CONF_REPO.get("base", {}).get("perspColumns",{}),
+        "PERSP_VALUES": CONF_REPO.get("base", {}).get("perspValues", {}),
+        "ON_JOIN": CONF_REPO.get("base", {}).get("onJoin",{}),
+        "JOIN_SUFFIXES": CONF_REPO.get("base", {}).get("joinSuffixes",{}),
+    }
+
+    AUTH_GATEWAYS = yaml.safe_load(os.getenv("AUTH_GATEWAYS"))
+    EVENT_TRACKERS = yaml.safe_load(os.getenv("EVENT_TRACKERS"))

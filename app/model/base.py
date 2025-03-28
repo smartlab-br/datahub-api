@@ -146,6 +146,18 @@ class BaseModel():
             else:
                 final_struct['chart_data'] = data_collection[struct['chart_data']]
 
+        if 'charts' in struct:
+            for each_chart in struct['charts']:
+                chart_index = 0
+                if 'chart_data' in each_chart:
+                    if isinstance(each_chart['chart_data'], list):
+                        final_struct['charts'][chart_index]['chart_data'] = []
+                        for each_dataset in each_chart['chart_data']:
+                            final_struct['charts'][chart_index]['chart_data'].append(data_collection[each_dataset])
+                    else:
+                        final_struct['charts'][chart_index]['chart_data'] = data_collection[each_chart['chart_data']]
+                chart_index = chart_index + 1
+
         # Returns the filled structure
         return final_struct
 

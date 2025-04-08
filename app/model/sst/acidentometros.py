@@ -49,8 +49,9 @@ class AcidentometrosSST(Thematic):
         # HC - 120.604.942.559,81 (Esse valor substitui qualquer valor vindo do dataset) - 2021
         # HC - 120.604.942.559,81 (Esse valor substitui qualquer valor vindo do dataset) - 2021
         # HC - 136.741.183.393,09 (Esse valor substitui qualquer valor vindo do dataset) - 2022
+        # HC - 173.924.927.001,82 (Esse valor substitui qualquer valor vindo do dataset) - 2024
         
-        dataframe.loc[dataframe['cd_indicador'] == 'sst_bene_despesa', ['vl_indicador']] = 136741183393.09
+        dataframe.loc[dataframe['cd_indicador'] == 'sst_bene_despesa', ['vl_indicador']] = 173924927001.82
         # Momento atual, em milissegundos
         dataframe['momento_ms'] = int(round(datetime.now().timestamp() * 1000))
         # Início e final do período medido, em milissegundos

@@ -14,6 +14,6 @@ impyla==0.18.0
 pykerberos==1.2.4
 gssapi==1.7.3
 scikit-learn==0.24.2
-scipy==1.7.1
+scipy==1.10.0
 thriftpy2==0.4.14
 
